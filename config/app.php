@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Administración'),
 
     /*
     |--------------------------------------------------------------------------
@@ -66,6 +66,8 @@ return [
     */
 
     'timezone' => env('APP_TIMEZONE', 'UTC'),
+    'date_format' => 'm/d/Y',
+    'date_format_javascript' => 'MM/DD/YYYY',
 
     /*
     |--------------------------------------------------------------------------

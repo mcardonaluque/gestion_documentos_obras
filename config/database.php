@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => env('DB_CONNECTION_OB', 'Obras'),
 
     /*
     |--------------------------------------------------------------------------
@@ -42,24 +42,24 @@ return [
             'synchronous' => null,
         ],
 
-        'mysql' => [
+        'Planes' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
+            'host' => env('DB_HOST_PL', '127.0.0.1'),
+            'port' => env('DB_PORT_PL', '3306'),
+            'database' => env('DB_DATABASE_PL', 'laravel'),
+            'username' => env('DB_USERNAME_PL', 'root'),
+            'password' => env('DB_PASSWORD_PL', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'strict' => true,
+            'strict' => false,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            ]) : []
         ],
 
         'mariadb' => [
@@ -97,21 +97,36 @@ return [
             'sslmode' => 'prefer',
         ],
 
-        'sqlsrv' => [
+        'Obras' => [
             'driver' => 'sqlsrv',
             'url' => env('DB_URL'),
-            'host' => env('DB_HOST', 'localhost'),
-            'port' => env('DB_PORT', '1433'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
+            'host' => env('DB_HOST_OB', 'NAYADE.DIPUTACION.LOCAL'),
+            'port' => env('DB_PORT_OB', '1433'),
+            'database' => env('DB_DATABASE_OB', 'Obras_test'),
+            'username' => env('DB_USERNAME_OB', 'usuplanesprov'),
+            'password' => env('DB_PASSWORD_OB', 'Marsupial.314'),
+            'schema' =>'Obras_test',
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
+             'encrypt' => env('DB_ENCRYPT', 'No'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
-
+         'Tablas' => [
+          'driver' => 'sqlsrv',
+            'url' => env('DB_URL'),
+           'host' => env('DB_HOST_TB', 'NAYADE.DIPUTACION.LOCAL'),
+          'port' => env('DB_PORT_TB', '1433'),
+           'database' => env('DB_DATABASE_TB', 'Tablas_test2'),
+            'username' => env('DB_USERNAME_TB', 'usuplanesprov'),
+            'password' => env('DB_PASSWORD_TB', 'Marsupial.314'),
+            'schema' =>'Tablas_test2',
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+             'encrypt' => env('DB_ENCRYPT', 'No'),
+            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+        ],
     ],
 
     /*

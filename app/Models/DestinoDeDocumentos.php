@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class DestinoDeDocumentos extends Model
 {
     //
-    protected $connection='Tablas';
+    protected $connection='Obras';
     protected $table='DestinosDeDocumentos';
     protected $primaryKey='id';
     use HasFactory;

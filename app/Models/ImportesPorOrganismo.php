@@ -13,9 +13,12 @@ class ImportesPorOrganismo extends Model
     use HasFactory;
     protected $connection='Obras';
     protected $table='ImportesPorOrganismo';
+    protected $primaryKey='Expediente';
+    public $incrementing=false;
+    protected $keyType='string';
     public function obra()
     {
-        return $this->belongsTo(DatosDeInicioDeObras::class, ['codigo_plan', 'numero_obra', 'ao_ejecucion'], ['codigo_plan', 'numero_obra', 'ao_ejecucion']);
+        return $this->belongsTo(DatosDeInicioDeObras::class, 'Expediente', 'Expediente');
     }
     public function teams(): BelongsTo
     {

@@ -12,6 +12,6 @@ class UsuarioAyto extends Model
         return $this->morphOne(User::class,'userable');
     }
     public function Municipio(){
-        return $this->belongsTo(TablaDeMunicpio::class);
+        return $this->belongsTo(TablaDeMunicipio::class);
     }    
 }

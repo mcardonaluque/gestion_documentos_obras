@@ -33,8 +33,12 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->brandName('Nombre de tu aplicación')
             ->login()
-            
+            ->plugins([
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+                
+            ])
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -60,9 +64,9 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            
            ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->topNavigation();
     }
 }

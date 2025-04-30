@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
@@ -16,9 +17,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
 //use \BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 
-class User extends Authenticatable//implements FilamentUser, HasTenants
+class User extends Authenticatable implements FilamentUser //, HasTenants
 {
-    use HasFactory, Notifiable; //HasRoles, HasPanelShield, HasPermissions;
+    use HasFactory, Notifiable, HasRoles, HasPanelShield, HasPermissions;
     protected $connection = 'Obras';
 
     
@@ -69,14 +70,16 @@ class User extends Authenticatable//implements FilamentUser, HasTenants
     {
         return $this->teams()->whereKey($tenant)->exists();
     }
-    //public function canAccessPanel(Panel $panel): bool
-    //{
-    //    if ($panel->getId() === 'admin') {
-    //        return $this->hasRole('super_admin');
-    //    }
-    
-    //    return false;
-   // }
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($panel->getId() === 'admin') {
+            return $this->hasRole('super_admin');
+        }
+        if ($panel->getId() === 'obras') {
+            return true;
+        }
+       return false;
+    }
     protected static function booted(): void
     {
         static::created(function (User $user) {

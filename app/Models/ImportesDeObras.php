@@ -4,21 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ImportesDeObras extends Model
 {
-    /** @use HasFactory<\Database\Factories\ImportesDeObrasFactory> */
+    
     use HasFactory;
     protected $connection='Obras';
     protected $table='ImportesDeObras';
-    protected $primaryKey='n_exp';
+    protected $primaryKey='Expediente';
     public function obra()
     {
-        return $this->belongsTo(DatosDeInicioDeObras::class, ['codigo_plan', 'numero_obra', 'ao_ejecucion'], ['codigo_plan', 'numero_obra', 'ao_ejecucion']);
+        return $this->belongsTo(DatosDeInicioDeObras::class, 'Expediente','Expediente');
     }
-    public function teams(): BelongsToMany
+    public function teams(): BelongsTo
     {
-        return $this->belongsToMany(Team::class);
+        return $this->belongsTo(Team::class);
     }
 }

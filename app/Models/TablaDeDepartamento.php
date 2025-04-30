@@ -10,11 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class TablaDeDepartamento extends Model
 {
     use HasFactory;
-    protected $connection='Tablas';
+    protected $connection='Obras';
     protected $table='TablaDeDepartamentos';
     protected $primaryKey='CODIGO_DPTO';
-    public function teams(): BelongsTo 
-    {
-        return $this->belongsTo(Team::class);
-    }
+    
 }

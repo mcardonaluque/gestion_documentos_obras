@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('alertas', function (Blueprint $table) {
-            //
-            $table->integer('plazo');
-            $table->char('unidad_plazo',1); // Y,M,D
-            
+        Schema::create('_certificaciones_de_obras', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
         });
     }
 
@@ -24,8 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('alertas', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('_certificaciones_de_obras');
     }
 };

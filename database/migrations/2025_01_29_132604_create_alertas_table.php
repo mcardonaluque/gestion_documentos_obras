@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    protected $connection='Tablas';
+    protected $connection='Obras';
     public function up(): void
     {
         Schema::create('alertas', function (Blueprint $table) {

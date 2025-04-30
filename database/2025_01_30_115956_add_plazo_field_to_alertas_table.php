@@ -9,11 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
+    protected $connection='Obras';
     public function up(): void
     {
         Schema::table('alertas', function (Blueprint $table) {
             //
-
+            $table->integer('plazo');
+            $table->char('unidad_plazo',1); // Y,M,D
+            
         });
     }
 
@@ -24,7 +27,6 @@ return new class extends Migration
     {
         Schema::table('alertas', function (Blueprint $table) {
             //
-            $table->foreign('estado')->references('cod_estado')->on('TablaDeEstados');
         });
     }
 };

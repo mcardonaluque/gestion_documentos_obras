@@ -1,0 +1,8 @@
+.filament-table {
+    width: 100%; /* Ocupa el 100% del ancho disponible */
+    max-width: none; /* Elimina el límite máximo de ancho */
+}
+.custom-select-class {
+    width: 300px; /* Cambia el ancho del select */
+    height: 50px; /* Cambia la altura del select */
+}

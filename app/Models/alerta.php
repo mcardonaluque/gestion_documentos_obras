@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class alerta extends Model
 {
     //
-    protected $connection='Tablas';
+    protected $connection='Obras';
     
     protected $foreingKey = ['fase','estado'];
     public function estadoRelacionado()

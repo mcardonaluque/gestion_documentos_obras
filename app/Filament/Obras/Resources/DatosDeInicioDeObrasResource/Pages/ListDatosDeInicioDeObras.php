@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\DatosDeInicioDeObrasResource\Pages;
+namespace App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\Pages;
 
-use App\Filament\Resources\DatosDeInicioDeObrasResource;
+use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -13,7 +13,7 @@ class ListDatosDeInicioDeObras extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            //Actions\CreateAction::make(),
         ];
     }
 }

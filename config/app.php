@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Administración'),
+    'name' => env('APP_NAME', 'Planes de Obras'),
 
     /*
     |--------------------------------------------------------------------------

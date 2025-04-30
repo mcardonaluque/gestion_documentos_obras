@@ -30,6 +30,7 @@ class ExpedienteResource extends Resource
                     ->required()
                     ->maxLength(510),
                 Forms\Components\TextInput::make('ao_ejecucion')
+                    ->label('Año de ejecución')
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('referencia')

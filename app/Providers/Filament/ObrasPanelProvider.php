@@ -34,8 +34,12 @@ class ObrasPanelProvider extends PanelProvider
                 \App\Filament\Obras\Resources\ImportesporOrganismoResource::class,
             ])
             ->login()
+            ->plugins([
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+            ])
             ->colors([
-                'primary' => Color::Amber,
+                //'primary' => Color::Amber,
+                'custom-blue'=>'rgb(28, 20, 99)',
             ])
            
             ->discoverResources(in: app_path('Filament/Obras/Resources'), for: 'App\\Filament\\Obras\\Resources')
@@ -62,6 +66,7 @@ class ObrasPanelProvider extends PanelProvider
             
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->topNavigation();
     }
 }

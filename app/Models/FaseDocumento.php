@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class FaseDocumento extends Model
 {
     use HasFactory;
-    protected $connection='Tablas';
+    protected $connection='Obras';
     protected $table='fase_documentos';
     protected $primaryKey='cod_fase';
     public $incrementing = false;

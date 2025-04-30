@@ -13,10 +13,13 @@ class DocumentoExpediente extends Model
     protected $connection='Obras';
     //protected $table='documentacionexpediente';
     protected $table='dbo.documentacionexpedientes';
-    protected $primaryKey='numero_doc';
+    protected $primaryKey='Expediente';
 
     function expediente(){
         return $this->belongsTo(Expediente::class);
+    }
+    function obra(){
+        return $this->belongsTo(DatosDeInicioDeObras::class);
     }
     function documento(){
         return $this->belongsTo(DocumentoGenerico::class);

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Aviso extends Model
 {
     //
-    protected $connection='Tablas';
+    protected $connection='Obras';
     public $incrementing = false;
     protected $keyType = 'string';
 

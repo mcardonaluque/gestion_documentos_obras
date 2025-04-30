@@ -15,8 +15,5 @@ class TiposAviso extends Model
     public function aviso(){
         return $this->Hasmany(Aviso::class);
     }
-    public function teams(): BelongsToMany
-    {
-        return $this->belongsToMany(Team::class);
-    }
+    
 }

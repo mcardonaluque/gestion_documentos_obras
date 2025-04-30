@@ -13,7 +13,7 @@ class Expediente extends Model
     protected $connection='Obras';
     protected $table='Expedientes';
 
-    protected $primarykey='numExpediente';
+    protected $primarykey='nummero_Exp';
     
     protected $keyType = 'string';
    

@@ -11,7 +11,7 @@ class DocumentoGenerico extends Model
 {
     use HasFactory;
   
-    protected $connection='Tablas';
+    protected $connection='Obras';
     protected $table='documento_genericos';
     protected $primaryKey='id';
     public $incrementing = false;
@@ -28,9 +28,7 @@ class DocumentoGenerico extends Model
     public function fasedocsig(){
         return $this->belongsTo(FaseDocumento::class,'cod_fase','fase_siguiente');
     }
-    //function tipodoc(){
-    //    return $this->belongsTo(TipoDocumento::class,'idTipo','cod_tipo_doc');
-   // }
+   
    public function teams(): BelongsTo
     {
         return $this->belongsTo(Team::class);

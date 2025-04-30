@@ -3,47 +3,53 @@
 namespace App\Filament\Obras\Resources;
 
 use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\Pages;
-use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\RelationManagers;
 use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\RelationManagers\ImportesPorOrganismoRelationManager;
 use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\RelationManagers\AyudaRelationManager;
-use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\RelationManagers\DocumentosRelationManager;
 use App\Models\DatosDeInicioDeObras;
 use App\Models\TablaDeDepartamento;
 use App\Models\TablaDeMunicipio;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use Filament\Resources\Resource as BaseResource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Carbon;
-
-class DatosDeInicioDeObrasResource extends Resource
+use Filament\Forms\Components\Actions\Action;
+use PhpOffice\PhpWord\TemplateProcessor;
+use Dompdf\Dompdf;
+use Illuminate\Support\Facades\DB;
+use Filament\Notifications\Notification;
+class DatosDeInicioDeObrasResource extends BaseResource
 {
     protected static ?string $model = DatosDeInicioDeObras::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationColor = 'custom-blue';
+    protected static ?string $navigationLabel ='Inicio de Obras';
     protected static array $searchableAttributes = [
         'carretera',
         'municipios.nombre',
         'Codigo_Plan',
         'ao_ejecuciion',
+        'Expediente',
     ];
     public static function getEloquentQuery(): Builder
 {
     $añoActual = now()->year;
-    
+
     $añoAnterior2 = now()->subYear(2)->year;
-    //dd($añoAnterior2);
-    
+   
+
         return parent::getEloquentQuery()
         ->select('DatosInicioDeObras.*') // Selecciona todas las columnas de la tabla "obras"
             ->leftJoin('TablaDeMunicipios', 'DatosInicioDeObras.municipio', '=', 'codigo_municipio') // Join con la tabla "municipios"
-            ->addSelect('TablaDeMunicipios.nombre_municipio')  //->with('municipios');
+            ->addSelect('TablaDeMunicipios.nombre_municipio')
+           // ->WhereNotNull('carretera');  //->with('municipios');
             ->where('ao_ejecucion', '>=', $añoAnterior2)
-            ->where('ao_ejecucion', '<=', $añoActual);
+           ->where('ao_ejecucion', '<=', $añoActual);
+            
+      
 }
     public static function form(Form $form): Form
     {
@@ -67,7 +73,7 @@ class DatosDeInicioDeObrasResource extends Resource
                 //->hidden()
                 ->visible(fn ($get) => $get('carretera'))
                 ->reactive(), // Hace que el campo sea reactivo
-          
+
             Forms\Components\Section::make('Referencia de Obra')
                 ->columns(2)
                 ->schema([
@@ -84,14 +90,16 @@ class DatosDeInicioDeObrasResource extends Resource
             Forms\Components\TextInput::make('subreferencia')
                     //->required()
                     ->hidden()
-                    ->disabled(),    
+                    ->disabled(),
             Forms\Components\TextInput::make('ao_ejecucion')
                     ->label('año de ejecución')
                     ->hidden()
                     //->required()
                     ->disabled(),
             Forms\Components\PlaceHolder::make('Obra')
+                    ->id('obra')
                     ->label('Obra')
+                    ->hiddenLabel()
                     ->content(function ($get, $record) {
                         return $record->Codigo_Plan . '-' . $record->numero_obra . '-' . $record->subreferecnia . '-' . $record->ao_ejecucion;
                     })
@@ -104,19 +112,26 @@ class DatosDeInicioDeObrasResource extends Resource
                     ->dehydrated(false)
                     ->disabled()
                     ->extraAttributes(['class' => 'custom-select-class']),
-                                        
+
                 ]),
             Forms\Components\Section::make('Datos de la Obra')
                     ->columns(5)
                     ->schema([
                           // Campo virtual "Ubicación"
             Forms\Components\TextInput::make('Ubicacion')
+                    ->id('Ubicacion')
                     ->label('Ubicación')
+                    //->searchable()
+                    ->formatStateUsing(function ($record) {
+                        // dd($record->municipios);
+       
+                           return $record->municipios->nombre_municipio ?? $record->carretera;
+                       })
                     ->disabled() // Hace que el campo sea de solo lectura
                     ->dehydrated(false) // Evita que el campo se guarde en la base de datos
-                    ->visible(fn ($get) => $get('municipio') || $get('carretera')) // Solo visible si hay un municipio o carretera
-                    ,
+                    ->visible(fn ($get) => $get('municipio') || $get('carretera')), // Solo visible si hay un municipio o carretera,
             Forms\Components\PlaceHolder::make('zona')
+                    ->id('zona')
                     ->label('Zona')
                     ->content(function ($get, $record) {
                         // Obtener el municipio y su zona
@@ -133,26 +148,42 @@ class DatosDeInicioDeObrasResource extends Resource
                     ->columnSpan(2)
                     ->required()
                     ->disabled(),
-                
+
             Forms\Components\TextInput::make('forma_ejecucion')
                     ->label('Forma ejecución')
-                    ->columnSpan(2)
+                    ->columnSpan(1)
                     //->required()
                     ->disabled(),
             Forms\Components\PlaceHolder::make('ejecucion')
+                    ->id('ejecucion')
+                    ->columnSpan(2)
                     ->label('Forma de Ejecución')
                     ->content(function ($get, $record) {
-                        // Obtener el municipio y su zona
+                        
                         $ejecucion = $record?->ejecucion;
                         if ($ejecucion ) {
-                            return $ejecucion->DEN_CONTRATA; // Asegúrate de que `ZONA` sea el nombre correcto del campo
+                            return ucwords($ejecucion->DEN_CONTRATA); 
                         }
                         return 'No disponible';
                     })
                     ->dehydrated(false)
                     ->disabled(),
-                
-                ]),   
+            Forms\Components\PlaceHolder::make('Estado')
+                    ->label('Estado')
+                    ->content(function ($get, $record) {
+                            
+                        $estado = $record?->estados;
+                        if ($estado ) {
+                            return ucwords($estado->estado); 
+                        }   
+                        return 'No disponible';
+                    })
+                    //->columnSpan(2)
+                    //->required()
+                    ->disabled(),
+
+                ]),
+               
             Forms\Components\Section::make('Referencia de Obra')
                 ->columns(7)
                 ->schema([
@@ -160,13 +191,13 @@ class DatosDeInicioDeObrasResource extends Resource
                     ->label('Tipo de Actuación')
                     ->relationship('tipoactuacion', 'descripcion_actuacion')
                     //->dehydrated(false)
-                   
+
                     ->extraAttributes(['class' => 'custom-select-class']),
                 Forms\Components\TextInput::make('TipoObra')
                     ->nullable()
                     ->label('Tipo de Obra'),
                     //->required()
-                    
+
                 Forms\Components\TextInput::make('LicenciaObra')
                     ->label('Licencia de Obra')
                     ->maxlength(2)
@@ -182,13 +213,16 @@ class DatosDeInicioDeObrasResource extends Resource
                 Forms\Components\TextInput::make('PartidaPresupuesto')
                     ->nullable()
                     ->label('Partida Presupuestaria'),
+                Forms\Components\TextInput::make('peticion_ayuda_tec')
+                    ->nullable()
+                    ->label('Petición Ayuda técnica'),
                 Forms\Components\TextArea::make('EstadoServicioTecnico')
                     ->label('Estado Servicio Tecnico')
                     ->nullable()
                     ->extraAttributes(['class' => 'custom-textinput-class']),
 
                 Forms\Components\TextArea::make('EstadoServicioAdministrativo')
-                    ->label('Estado Servicio Admnistrativo')
+                    ->label('Estado Servicio Admvo.')
                     ->nullable()
                     ->extraAttributes(['class' => 'custom-textinput-class']),
                 Forms\Components\TextArea::make('comentario')
@@ -200,44 +234,50 @@ class DatosDeInicioDeObrasResource extends Resource
                     ->options([
                         'Concertado' => 'Concertado',
                         'No-Concertado ' => 'NO_Concertado',
-                        
-                    ])
-                    ->extraAttributes(['class' => 'custom-select-class']),
+
+                    ]),
+               
+
                 Forms\Components\radio::make('Aportacion')
                     ->label('Aportación del Ayto.')
+                    ->default('NO')
                     ->reactive()
                     ->dehydrated(false)
                     ->afterStateUpdated(function ($state, callable $set){
-                       // dd($state);
-                        $set('CompApAyto',  $state == 'SI' ? 'visible' : 'hidden');
+                        //dd($state);
+                        //$set('CompApAyto',  $state === 'SI' ? 'visible' : 'hidden');
+                        $set('CompApAyto', null);
+                        $set('CompApAyto',  $state === 'SI' ? 'visible' : 'hidden');
+        // Ocultar Patronato y campos relacionados
+                        $set('Patronato', 'hidden');
                     })
                     ->options([
                         'SI' => 'SI',
                         'NO' => 'NO',
                     ]),
-                
+
                 Forms\Components\radio::make('CompApAyto')
                         ->label('Forma de Aportación')
                         ->reactive()
                         ->visible(fn ($get) => $get('Aportacion')==='SI')
-                        ->dehydrateStateUsing(function ($state, $get) {
+                        //->dehydrateStateUsing(function ($state, $get) {
                             // Si el campo "forma" está vacío, guarda el valor del campo radio
-                          
-                            return empty($state) ? $get('Aportacion') : $state;
-                        })
+                           // dd($get('Aportacion'));
+                        //    return empty($state) ? $get('Aportacion') : $state;
+                        //})
                         ->afterStateUpdated(function ($state, callable $set){
                             // dd($state);
-                            $set('Patronato',  $state == 'RE' ? 'visible' : 'hidden');
-                            $set('FechaComPatronato',  $state == 'RE' ? 'visible' : 'hidden');
-                            $set('FechaIngresoAyto',  $state == 'RE' ? 'visible' : 'hidden');
-                            $set('Aceptacion',  $state == 'RE' ? 'visible' : 'hidden');
-                    
+                            $set('Patronato',  $state === 'RE' ? 'visible' : 'hidden');
+                            $set('FechaComPatronato',  $state === 'RE' ? 'visible' : 'hidden');
+                            $set('FechaIngresoAyto',  $state === 'RE' ? 'visible' : 'hidden');
+                            $set('Aceptacion',  $state === 'RE' ? 'visible' : 'hidden');
+
                          })
                         ->options([
                             'RE' => 'Retraer de Recaudación',
                             'IN' => 'Ingreso del Ayto.',
                             'EF' => 'Entidad financiera',
-    
+
                     ]),
                     Forms\Components\Select::make('Clasificacion')
                     ->label('Clasificación.')
@@ -247,8 +287,8 @@ class DatosDeInicioDeObrasResource extends Resource
                         'SI' => 'SI',
                         'NO' => 'NO',
                         'NR' => 'NR'                    ]),
-               
-                        Forms\Components\FieldSet::make('Patronato')
+
+                    Forms\Components\FieldSet::make('Patronato')
                         ->label('Patronato')
                         ->columns(3)
                         ->visible(fn ($get) => $get('CompApAyto') ==='RE')
@@ -258,46 +298,139 @@ class DatosDeInicioDeObrasResource extends Resource
                                     ->nullable(),
                                 Forms\Components\Select::make('Aceptacion')
                                     ->label('Aceptación')
+                                    ->extraAttributes(['class' => 'compact-select'])
                                     ->options([
                                         'SI' => 'SI',
                                         'NO ' => 'NO'
                                     ]),
                                 Forms\Components\DatePicker::make('FechaIngresoAyto')
                                     ->label('Fecha Ingreso Ayto.')
-                                    ->nullable(), 
-        
+                                    ->nullable(),
+
                             ]),
-                       
+                        Forms\Components\TextInput::make('importes.importe_aprobado')
+                            ->label('Importe Aprobado')
+                            ->nullable()
+                            ->numeric()
+                            ->prefix('€')
+                            ->extraInputAttributes(['class' => '!h-9 !py-1 !text-sm !leading-none']),
+                            
 
                 ]),
-               
-              
-            Forms\Components\Section::make('Ayuda Téncica')
+                Forms\Components\Section::make('Fechas')
                 ->columns(4)
+                //->id('ayuda')
+                //->relationship('ayuda')
+                ->schema([
+                    Forms\Components\DatePicker::make('fecha_notificacion_ayto')
+                    ->nullable()
+                    ->label('Notifif. Ayuntamiento'),
+                    Forms\Components\DatePicker::make('fecha_pet_acta_replanteo')
+                    ->label('Petición Repl. Previo')
+                    ->reactive()
+                    ->suffixAction(
+                        Action::make('Imprimir Notificación')
+                            ->icon('heroicon-m-envelope')
+                            ->visible(fn ($get) => !empty($get('fecha_pet_acta_replanteo')))
+                            ->action(function ($record, $get)
+                            {
+                                // 1. Obtener datos del procedimiento almacenado
+                                //dd($record);
+                                if (empty($get('fecha_pet_acta_replanteo'))) {
+                                    Notification::make()
+                                        ->title('Error de validación')
+                                        ->body('Debe completar la fecha de notificación primero')
+                                        ->danger()
+                                        ->send();
+                                    return;
+                                }
+                                $datos =  DB::select('EXECUTE dbo.PA_R_DatosListados @Plan=?,@Num=?,@SubRef=?,@AoEje=?', [(string)$record->Codigo_Plan, $record->numero_obra,$record->subreferencia,$record->ao_ejecucion])[0];
+                                                   
+                                //dd($datos);
+                                // 2. Procesar plantilla Word
+                                $templatePath = storage_path('app\Modelos_Doc\Petición Ayuda Técnica.dotx');
+                               
+                                $template = new TemplateProcessor($templatePath);
+                               
+                                // Reemplazar variables
+                                $template->setValue('WD_DEFIPLAN', $datos->denominacion_plan);
+                                $template->setValue('WD_LOCALIDAD', $datos->nombre_municipio);
+                                $template->setValue('WD_IMPORTEAPROBADO', $datos->importe_aprobado);
+                                $template->setValue('WD_FORMAEJE', $datos->DEN_CONTRATA);
+                                
+                                // 3. Guardar Word temporal
+                                $tempWord = tempnam('C:\\', 'word_') . '.docx';
+                                
+                                $template->saveAs($tempWord);
+                                
+                                // 4. Convertir a PDF usando LibreOffice
+                                
+                                $tempPdf = tempnam('C:\\', 'pdf_') . '.pdf';
+                                
+                                $command = '"C:\Program Files\LibreOffice\program\soffice.exe" --headless --convert-to pdf --outdir ' . dirname($tempPdf) . " " . $tempWord;
+                               // dd($command);
+                               $pdfFile = str_replace('.docx', '.pdf', $tempWord);
+                                shell_exec($command);
+                                //dd($tempPdf);
+                                // 5. Descargar y limpiar
+                                return response()->download($pdfFile, 'documento_final.pdf')
+                                    ->deleteFileAfterSend(true);
+                            })
+                            ->requiresConfirmation())
+                    ->required(),
+                Forms\Components\DatePicker::make('fecha_acta_replanteo_previo')
+                    ->nullable()
+                    ->label('Acta de Repl. Previo'),
+                Forms\Components\DatePicker::make('fecha_rem_pet_ayuda')
+                    ->nullable()
+                    ->label('Petición de ayuda técnica'),
+                Forms\Components\DatePicker::make('fecha_envio_fiscalizacion')
+                    ->nullable()
+                    ->label('Envio a Fiscalizar'),
+                Forms\Components\DatePicker::make('fecha_fiscalizacion')
+                    ->nullable()
+                    ->label('Fecha Fiscalización'),
+                Forms\Components\DatePicker::make('fecha_prev_comienzo_obra')
+                    ->nullable()
+                    ->label('Prevista Comienzo'),
+                Forms\Components\DatePicker::make('fecha_prev_term_obra')
+                    ->nullable()
+                    ->label('Prevista Terminación'),
+                Forms\Components\DatePicker::make('FechaMediosMatAyto')
+                    ->nullable()
+                    ->label('Medios Materiales Ayto.'),
+                ]),
+
+            Forms\Components\Section::make('Ayuda Técnica')
+                ->columns(4)
+                //->id('ayuda')
+                //->relationship('ayuda')
                 ->schema([
                 Forms\Components\TextInput::make('ayuda.Expediente')
                     ->label('Expediente')
                     ->dehydrateStateUsing(function ($state, $get) {
-                       
+
                        dd($state);
-                        return empty($state) ? $get('ayuda.Expediente') : $state;
+                        return empty($state) ? $get('Expediente') : $state;
                     })
                     ->disabled(),
 
                 Forms\Components\Select::make('ayuda.dpto_redactor')
                     ->label('Departamento Redactor')
-                    ->relationship('ayuda.ayudaR', 'DENOMINACION'),
-                    
+                    ->relationship('ayuda.ayudaR', 'DENOMINACION')
+                    ->extraInputAttributes(['class' => '!h-9 !py-1 !text-sm !leading-none']),
+
                 Forms\Components\Select::make('ayuda.departamento_direccion')
                     ->label('Departamento Dirección')
                     ->relationship('ayuda.ayudaD', 'DENOMINACION'),
 
                 Forms\Components\TextInput::make('ayuda.AyuTecRed')
-                    ->label('Ayuda Técnica a la Redacción'),               
+                    ->label('Ayuda Técnica a la Redacción')
+                    ->extraInputAttributes(['class' => '!h-9 !py-1 !text-sm !leading-none']),
 
                 Forms\Components\TextInput::make('ayuda.AyuTecDir')
-                ->label('Ayuda Técnica a la Dirección'),               
-                    
+                ->label('Ayuda Técnica a la Dirección'),
+
                 Forms\Components\TextInput::make('ayuda.SubvencionEconomicaR')
                     ->label('Subvención en Redacción'),
 
@@ -308,16 +441,18 @@ class DatosDeInicioDeObrasResource extends Resource
                     ->relationship('ayuda.municipio','nombre_municipio'),
 
                 ]),
-           
+
             ]);
     }
 
     public static function table(Table $table): Table
     {
+        
         return $table
+
             ->columns([
                 //
-        
+
             Tables\Columns\TextColumn:: make('Codigo_Plan')
                 ->sortable()
                 ->hidden()
@@ -332,12 +467,12 @@ class DatosDeInicioDeObrasResource extends Resource
             Tables\Columns\TextColumn::make('ao_ejecucion')
                 ->sortable()
                 ->searchable()
-                ->hidden(), 
+                ->hidden(),
             Tables\Columns\TextColumn::make('Obra')
                     ->label('Obra')
                     ->sortable()
                    // ->searchable()
-                   // ->grow()  
+                   // ->grow()
                     ->extraHeaderAttributes(['class' => 'px-8'])
                     ->extraCellAttributes(['class' => 'px-8'])
                     ->getStateUsing(function ($record) {
@@ -362,12 +497,14 @@ class DatosDeInicioDeObrasResource extends Resource
             Tables\Columns\TextColumn::make('Ubicacion')
                 ->label('Ubicación')
                 ->getStateUsing(function ($record) {
-                //    dd($record->municipio->nombre_municipio ?? $record->carretera);
+                 // dd($record->municipios);
+                 return ($record->municipio !== null && $record->municipio !== 0)
+                 ? $record->municipios->nombre_municipio
+                 : $record->carretera;
+                    //return $record->municipios->nombre_municipio ?: $record->carretera;
+                }),
+                //->searchable(),
 
-                    return $record->municipio->nombre_municipio ?? $record->carretera;
-                })
-                ->searchable(),
-                           
             Tables\Columns\TextColumn::make('municipios.nombre_municipio')
                 ->sortable()
                 ->searchable()
@@ -412,41 +549,44 @@ class DatosDeInicioDeObrasResource extends Resource
                 ->grow()
                 ->extraHeaderAttributes(['class' => 'px-8'])
                 ->extraCellAttributes(['class' => 'px-8'])
-                ->toggleable(isToggledHiddenByDefault: false)    
+                ->toggleable(isToggledHiddenByDefault: false)
             ])
-           
+
             ->filters([
                 //
             ])
             ->actions([
               //  Tables\Actions\EditAction::make()   ,
             ])
-            
+
             ->bulkActions([
                // Tables\Actions\BulkActionGroup::make([
                // Tables\Actions\DeleteBulkAction::make(),
              ]);
-            
+
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
             ImportesPorOrganismoRelationManager::class,
             AyudaRelationManager::class,
-            DocumentosRelationManager::class
+            //DocumentosRelationManager::class
         ];
     }
+
     protected function applySearchToTableQuery(Builder $query, string $search): Builder
     {
-        dd($search);
+        //dd($search);
         return $query
             ->where('carretera', 'like', "%{$search}%")
             ->orWhere('Codigo_Plan', 'like', "%{$search}")
-            ->orWhere('ao_ejecucion', 'like', "%{$search}")  // Busca en el campo "carretera"
-            /*->orWhereHas('municipios', function (Builder $query) use ($search) {
-                $query->where('nombre_municipio', 'like', "%{$search}%"); // Busca en el campo "nombre" de la relación "municipio"*/
+            ->orWhere('ao_ejecucion', 'like', "%{$search}")
+            ->orWhere('Expediente','like',"%{$search}")  // Busca en el campo "carretera"
+            ->orWhereHas('municipios', function (Builder $query) use ($search) {
+                $query->where('nombre_municipio', 'like', "%{$search}%");
+            }) // Busca en el campo "nombre" de la relación "municipio"*/
             ;
     }
     public static function getPages(): array
@@ -461,6 +601,7 @@ class DatosDeInicioDeObrasResource extends Resource
     {
         // Obtener el modelo actual
         $record = $this->getRecord();
+        dd('mutateFormDataBeforeFill ejecutado', $data);
         if ($record && $record->ayuda) {
             // Carga los datos de "ayuda" en el formulario
             $data['ayuda'] = [
@@ -474,7 +615,7 @@ class DatosDeInicioDeObrasResource extends Resource
                 'codigo_municipio' => $record->ayuda->codigo_municipio,
             ];
         }
-        dd($record);
+        //dd($record);
         // Calcular el valor de `ubicacion`
         if ($record) {
             $data['Ubicacion'] = $record->municipios ? $record->municipios->nombre_municipio : $record->carretera;
@@ -488,7 +629,7 @@ class DatosDeInicioDeObrasResource extends Resource
     {
         // Si necesitas manipular los datos antes de guardarlos, hazlo aquí
         $data['peticion_ayuda_tec']= $data['ayuda.AyuTecRed'] ==='SI' || $data['AyuTecDir']==='SI' ? 'SI':'NO';
-        dd($data);
+       // dd($data);
         if (isset($data['ayuda']) && is_array($data['ayuda'])) {
             foreach ($data['ayuda'] as $key => $value) {
                 if (is_array($value)) {
@@ -498,6 +639,6 @@ class DatosDeInicioDeObrasResource extends Resource
         }
         return $data;
     }
-    
+
 }
 

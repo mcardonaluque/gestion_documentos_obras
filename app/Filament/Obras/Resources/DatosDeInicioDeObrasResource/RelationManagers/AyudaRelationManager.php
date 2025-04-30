@@ -22,31 +22,31 @@ class AyudaRelationManager extends RelationManager
                     //->required()
                     ->disabled()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('dpto_redactor')
-                    //->required()
-                    ->disabled()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('departamento_direccion')
-                    //->required()
-                    ->disabled()
-                    ->maxLength(255),
+                Forms\Components\Select::make('dpto_redactor')
+                    ->label('Departamento Redactor')
+                    ->relationship('ayudaR', 'DENOMINACION'),
+
+                Forms\Components\Select::make('departamento_direccion')
+                    ->label('Departamento Dirección')
+                    ->relationship('ayudaD', 'DENOMINACION'),
+
                 Forms\Components\TextInput::make('AyuTecRed')
-                    //->required()
-                    ->disabled()
+                    ->required()
+                    //->disabled()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('AyuTecDir')
-                    //->required()
-                    ->disabled()
+                    ->required()
+                    //->disabled()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('SubvencionEconomicaR')
                     //->required()
-                    ->disabled()
+                    //->disabled()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('SubvencionEconomicaD')
                     //->required()
-                    ->disabled()
+                    //->disabled()
                     ->maxLength(255),
-                
+
             ]);
     }
 

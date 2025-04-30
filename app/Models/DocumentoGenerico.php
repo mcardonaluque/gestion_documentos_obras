@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Filament\Actions\Concerns\BelongsToGroup;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,9 +30,9 @@ class DocumentoGenerico extends Model
         return $this->belongsTo(FaseDocumento::class,'cod_fase','fase_siguiente');
     }
    
-   public function teams(): BelongsTo
+   public function destino(): BelongsTo
     {
-        return $this->belongsTo(Team::class);
+        return $this->belongsTo(DestinoDeDocumentos::class);
     }
 }
 

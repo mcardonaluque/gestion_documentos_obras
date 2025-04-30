@@ -1,0 +1,23 @@
+<?php
+namespace App\Helpers;
+use App\Models\DocumentoGenerico;
+use App\Models\DestinoDeDocumentos;
+use App\Models\TablaDeEstados;
+use App\Moldes\FaseDocumento;
+use App\Models\TablaDeDepartamento;
+use App\Models\TablaDeCarretera;
+use App\Models\TablaDeMunicipio;
+use App\Models\Planes;
+
+class GetDatosGenerales{
+
+    public static $Gl_Area;
+    public static $Gl_Depto;
+    public static $Gl_Diputado;
+    public static $Gl_JefeServicio;
+    public function getDatos( string $tabla, string $dato){
+        
+
+
+    }
+}

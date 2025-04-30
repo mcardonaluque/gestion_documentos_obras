@@ -17,6 +17,8 @@ class TiposAvisoResource extends Resource
 {
     protected static ?string $model = TiposAviso::class;
     protected static bool $isScopedToTenant = false;
+    protected static ?string $navigationGroup="Notificaciones";
+    protected static ?string $navigationLabel = 'Tipos de Avisos';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form

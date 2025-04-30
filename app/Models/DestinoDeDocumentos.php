@@ -13,8 +13,8 @@ class DestinoDeDocumentos extends Model
     protected $table='DestinosDeDocumentos';
     protected $primaryKey='id';
     use HasFactory;
-    public function teams(): BelongsToMany
+    public function docuemntosgenericos()
     {
-        return $this->belongsToMany(Team::class);
+        return $this->hasMany(DocumentoGenerico::class);
     }
 }

@@ -5,7 +5,7 @@ namespace App\Providers\Filament;
 //use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 //use Althinect\FilamentSpatieRolesPermissions\Resources\RoleResource;
 //use Althinect\FilamentSpatieRolesPermissions\Resources\UserResource;
-use App\Filament\Resources\UserResource as ResourcesUserResource;
+use App\Filament\Resources\UserResource;
 use App\Models\Team;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -24,6 +24,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 //use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Navigation\MenuItem;
+use Filament\Support\Enums\MaxWidth;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -33,8 +34,13 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->brandName('Nombre de tu aplicación')
+            ->brandName('Planes-Administración')
+            
             ->login()
+            ->favicon(asset('img/favicon.ico'))
+            ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))
+            ->brandLogoHeight('2rem')
+            ->maxContentWidth(MaxWidth::Full)
             ->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
                 
@@ -42,9 +48,9 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
-           ->resources([ResourcesUserResource::class])
+           ->resources([UserResource::class])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->discoverPages(in: app_path('Filament/Resources/Pages'), for: 'App\\Filament\\Resources\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])

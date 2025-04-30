@@ -83,11 +83,11 @@ class DatosDeInicioDeObras extends Model
     }
     public function getUbicacionAttribute()
     {
-        return $this->municipios ? $this->municipios->nombre_municipio : $this->carreteras;
+        return  $this->municipio ? $this->municipios->nombre_municipio : $this->carretera;
     }
     public function getObraAttribute()
     {
-        //return $this->municipios ? $this->municipios->nombre_municipio : $this->carreteras;
+        //return $this->municipios ? $this->municipios->nombre_municipio : $this->carretera;
         return $this->Codigo_Plan . '-' . $this->numero_obra . '-' . $this->subreferecnia . '-' . $this->ao_ejecucion;
     }
     public function getPlanAttribute()

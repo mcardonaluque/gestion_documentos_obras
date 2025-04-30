@@ -13,7 +13,7 @@ class EditDatosDeInicioDeObras extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            //Actions\DeleteAction::make(),
+           // Actions\DeleteAction::make(),
         ];
     }
     protected function mutateFormDataBeforeFill(array $data): array
@@ -48,35 +48,5 @@ class EditDatosDeInicioDeObras extends EditRecord
             ];
         }
         return $data;
-    }
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        // Si necesitas manipular los datos antes de guardarlos, hazlo aquí
-       
-        //dd($data['peticion_ayuda_tec']);
-              
-        if (isset($data['ayuda']) && is_array($data['ayuda'])) {
-            $ayudaData = $data['ayuda'];
-            unset($data['ayuda']);
-            $this->guardarAyudaTecnica($ayudaData);
-        }
-        $data['peticion_ayuda_tec']= $ayudaData['AyuTecRed'] ==='SI' || $ayudaData['AyuTecDir']==='SI' ? 'SI':'NO';
-       
-        return $data;
-
-    }
-    private function guardarAyudaTecnica(array $ayudaData): void
-    {
-        // Obtén el registro actual
-        $record = $this->getRecord();
-
-        // Si el registro ya tiene una relación "ayuda", actualízala
-        if ($record->ayuda) {
-            $record->ayuda->update($ayudaData);
-            //dd($ayudaData);
-        } else {
-            // Si no existe la relación, créala
-            $record->ayuda()->create($ayudaData);
-        }
     }
 }

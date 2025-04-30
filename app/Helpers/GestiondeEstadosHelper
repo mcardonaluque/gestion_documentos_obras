@@ -1,0 +1,29 @@
+<?php
+namespace App\Helpers;
+use App\Models\DocumentoGenerico;
+use App\Models\DestinoDeDocumentos;
+use App\Models\TablaDeEstados;
+use App\Moldes\FaseDocumento;
+
+Class GestiondeEstadosHelper
+{
+    public static function getEstadoActual(?int $docuemnto_id){
+
+    }
+    public static function getEstadoSiguiente(?int $documento_id){
+
+    }
+    public static function getFaseActual(?int $documento_id){
+
+    }
+    public static function getFaseSiguiente(?int $documento_id){
+    
+        
+    }
+    public static function getDocumentoActual(?int $documento_id){
+        
+    }
+    public static function getDocumentoSiguiente(?int $documento_id){
+        
+    }
+}

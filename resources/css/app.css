@@ -3,3 +3,24 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+.filament-resource-header{
+    font-size: 1.5rem; /* Cambia el tamaño de la letra del encabezado */
+}
+.filament-table td {
+    width: 100%; /* Ocupa el 100% del ancho disponible */
+    max-width: none; /* Elimina el límite máximo de ancho */
+}
+.custom-select-class {
+    width: 300px; /* Cambia el ancho del select */
+    height: 20px; /* Cambia la altura del select */
+}
+.compact-select {
+    height: 1.5rem; /* h-8 equivalente */
+    padding-top: 0.25rem; /* py-1 equivalente */
+    padding-bottom: 0.25rem;
+    font-size: 0.875rem; /* text-sm equivalente */
+}
+.custom-textinput-class {
+    width: 20px; /* Cambia el ancho del select */
+    height: 20px; /* Cambia la altura del select */
+}

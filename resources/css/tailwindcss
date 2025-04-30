@@ -4,9 +4,9 @@
 }
 .custom-select-class {
     width: 300px; /* Cambia el ancho del select */
-    height: 50px; /* Cambia la altura del select */
+    height: 20px; /* Cambia la altura del select */
 }
 .custom-textinput-class {
     width: 20px; /* Cambia el ancho del select */
-    height: 50px; /* Cambia la altura del select */
+    height: 20px; /* Cambia la altura del select */
 }

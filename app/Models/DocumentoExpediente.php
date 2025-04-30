@@ -15,8 +15,10 @@ class DocumentoExpediente extends Model
     protected $table='dbo.documentacionexpedientes';
     protected $primaryKey='Expediente';
 
+    protected $fillable =[];
+
     function expediente(){
-        return $this->belongsTo(Expediente::class);
+        return $this->belongsTo(Expediente::class,'Expediente','Expediente',);
     }
     function obra(){
         return $this->belongsTo(DatosDeInicioDeObras::class);

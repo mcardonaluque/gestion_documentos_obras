@@ -4,13 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use PHPUnit\Framework\Constraint\IsTrue;
 
 class Aviso extends Model
 {
     //
     protected $connection='Obras';
-    public $incrementing = false;
-    protected $keyType = 'string';
+    public $incrementing = true;
+    protected $primaryKey='Id';
+    protected $foreignKey = 'TipoAviso';
+    //protected $keyType = 'string';
 
     protected $fillable = [
         'Referencia',

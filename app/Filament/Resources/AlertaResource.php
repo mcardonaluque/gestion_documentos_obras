@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class AlertaResource extends Resource
 {
     protected static ?string $model = Alerta::class;
-    
+    protected static ?string $navigationGroup="Notificaciones";
     protected static ?string $navigationIcon = 'heroicon-o-bell';
     public static function getPermissionPrefixes(): array
     {

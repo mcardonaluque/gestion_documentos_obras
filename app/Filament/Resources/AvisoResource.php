@@ -24,7 +24,7 @@ class AvisoResource extends Resource
 {
     protected static ?string $model = Aviso::class;
     protected static bool $isScopedToTenant = false;
-
+    protected static ?string $navigationGroup="Notificaciones";
     protected static ?string $navigationIcon = 'heroicon-o-bell';
 
     public static function form(Form $form): Form

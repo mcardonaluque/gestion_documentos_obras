@@ -31,6 +31,17 @@
       0 => 'BladeUI\\Icons\\BladeIconsServiceProvider',
     ),
   ),
+  'eightynine/filament-advanced-widgets' => 
+  array (
+    'aliases' => 
+    array (
+      'FilamentAdvancedWidget' => 'EightyNine\\FilamentAdvancedWidget\\Facades\\FilamentAdvancedWidget',
+    ),
+    'providers' => 
+    array (
+      0 => 'EightyNine\\FilamentAdvancedWidget\\FilamentAdvancedWidgetServiceProvider',
+    ),
+  ),
   'filament/actions' => 
   array (
     'providers' => 
@@ -106,6 +117,17 @@
     'providers' => 
     array (
       0 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    ),
+  ),
+  'leandrocfe/filament-apex-charts' => 
+  array (
+    'aliases' => 
+    array (
+      'FilamentApexCharts' => 'Leandrocfe\\FilamentApexCharts\\Facades\\FilamentApexCharts',
+    ),
+    'providers' => 
+    array (
+      0 => 'Leandrocfe\\FilamentApexCharts\\FilamentApexChartsServiceProvider',
     ),
   ),
   'livewire/livewire' => 

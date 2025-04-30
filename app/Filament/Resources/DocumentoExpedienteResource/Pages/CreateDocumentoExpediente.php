@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Filament\Resources\DocumentoExpedienteResource\Pages;
+namespace App\Filament\Resources\DocumentoexpedienteResource\Pages;
 
-use App\Filament\Resources\DocumentoExpedienteResource;
+use App\Filament\Resources\DocumentoexpedienteResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
-class CreateDocumentoExpediente extends CreateRecord
+class CreateDocumentoexpediente extends CreateRecord
 {
-    protected static string $resource = DocumentoExpedienteResource::class;
+    protected static string $resource = DocumentoexpedienteResource::class;
 }

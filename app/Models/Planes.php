@@ -12,4 +12,7 @@ class Planes extends Model
     protected $primaryKey = 'codigo_plan';
     protected $keyType = 'string';
     public $incrementing = false;
+    public function obras(){
+        return $this->hasMany (DatosDeInicioDeObras::class,'municipio','codigo_municipio');
+    }
 }

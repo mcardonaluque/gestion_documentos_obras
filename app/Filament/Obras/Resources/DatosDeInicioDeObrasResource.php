@@ -5,6 +5,7 @@ namespace App\Filament\Obras\Resources;
 use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\Pages;
 use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\RelationManagers\ImportesPorOrganismoRelationManager;
 use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\RelationManagers\AyudaRelationManager;
+use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\RelationManagers\DocumentoExpedienteRelationManager;
 use App\Models\DatosDeInicioDeObras;
 use App\Models\TablaDeDepartamento;
 use App\Models\TablaDeMunicipio;
@@ -23,7 +24,7 @@ use Filament\Notifications\Notification;
 class DatosDeInicioDeObrasResource extends BaseResource
 {
     protected static ?string $model = DatosDeInicioDeObras::class;
-
+    protected static ?string $tenantOwnershipRelationshipName = 'team';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationColor = 'custom-blue';
     protected static ?string $navigationLabel ='Inicio de Obras';
@@ -35,29 +36,29 @@ class DatosDeInicioDeObrasResource extends BaseResource
         'Expediente',
     ];
     public static function getEloquentQuery(): Builder
-{
-    $añoActual = now()->year;
+    {
+        $añoActual = now()->year;
 
-    $añoAnterior2 = now()->subYear(2)->year;
+        $añoAnterior2 = now()->subYear(2)->year;
    
 
         return parent::getEloquentQuery()
         ->select('DatosInicioDeObras.*') // Selecciona todas las columnas de la tabla "obras"
             ->leftJoin('TablaDeMunicipios', 'DatosInicioDeObras.municipio', '=', 'codigo_municipio') // Join con la tabla "municipios"
-            ->addSelect('TablaDeMunicipios.nombre_municipio')
+            ->addSelect(trim('TablaDeMunicipios.nombre_municipio'))
            // ->WhereNotNull('carretera');  //->with('municipios');
             ->where('ao_ejecucion', '>=', $añoAnterior2)
-           ->where('ao_ejecucion', '<=', $añoActual);
-            
+            ->where('ao_ejecucion', '<=', $añoActual);
+            //->where('codigo_municipio','=', )
       
-}
+    }
     public static function form(Form $form): Form
     {
         //dd($form->getRecord());
         return $form
             ->schema([
                 //
-            Forms\Components\Select::make('municipio')
+           /* Forms\Components\Select::make('municipio')
                 ->label('Municipio')
                 ->relationship('municipios', 'nombre_municipio')
                 ->disabled()
@@ -65,62 +66,67 @@ class DatosDeInicioDeObrasResource extends BaseResource
                 ->extraAttributes(['class' => 'custom-select-class'])
                 ->visible(fn ($get) => $get('municipio'))
                 ->reactive()    , // Hace que el campo sea reactivo
-
-            // Campo para carretera
-            Forms\Components\TextInput::make('carretera')
-                ->label('Carretera')
-                ->disabled()
-                //->hidden()
-                ->visible(fn ($get) => $get('carretera'))
-                ->reactive(), // Hace que el campo sea reactivo
-
-            Forms\Components\Section::make('Referencia de Obra')
-                ->columns(2)
-                ->schema([
-            Forms\Components\TextInput::make('Codigo_Plan')
-                    ->label('Plan')
-                    //->required()
-                    ->hidden()
-                    ->disabled(),
-            Forms\Components\TextInput::make('numero_obra')
-                    ->label('número de obra')
-                    //->required()
-                    ->hidden()
-                    ->disabled(),
-            Forms\Components\TextInput::make('subreferencia')
-                    //->required()
-                    ->hidden()
-                    ->disabled(),
-            Forms\Components\TextInput::make('ao_ejecucion')
-                    ->label('año de ejecución')
-                    ->hidden()
-                    //->required()
-                    ->disabled(),
-            Forms\Components\PlaceHolder::make('Obra')
-                    ->id('obra')
-                    ->label('Obra')
-                    ->hiddenLabel()
-                    ->content(function ($get, $record) {
-                        return $record->Codigo_Plan . '-' . $record->numero_obra . '-' . $record->subreferecnia . '-' . $record->ao_ejecucion;
-                    })
-                    ->disabled() // Hace que el campo sea de solo lectura
-                    ->dehydrated(false),
-
-            Forms\Components\Select::make('Plan')
-                    ->label('Plan')
-                    ->relationship('planes', 'denominacion_plan')
-                    ->dehydrated(false)
-                    ->disabled()
-                    ->extraAttributes(['class' => 'custom-select-class']),
-
-                ]),
+                */
             Forms\Components\Section::make('Datos de la Obra')
-                    ->columns(5)
-                    ->schema([
-                          // Campo virtual "Ubicación"
-            Forms\Components\TextInput::make('Ubicacion')
+                ->columns(5)
+                ->schema([
+                      // Campo virtual "Ubicación"*/
+            // Campo para carretera
+                Forms\Components\TextInput::make('carretera')
+                    ->label('Carretera')
+                    ->disabled()
+                    //->hidden()
+                    ->visible(fn ($get) => $get('carretera'))
+                    ->reactive(), // Hace que el campo sea reactivo
+
+                /*Forms\Components\Section::make('Referencia de Obra')
+                    ->columns(4)
+                    ->schema([*/
+                Forms\Components\TextInput::make('Codigo_Plan')
+                        ->label('Plan')
+                        //->required()
+                        ->hidden()
+                        ->disabled(),
+                Forms\Components\TextInput::make('numero_obra')
+                        ->label('número de obra')
+                        //->required()
+                        ->hidden()
+                        ->disabled(),
+                Forms\Components\TextInput::make('subreferencia')
+                        //->required()
+                        ->hidden()
+                        ->disabled(),
+                Forms\Components\TextInput::make('ao_ejecucion')
+                        ->label('año de ejecución')
+                        ->hidden()
+                        //->required()
+                        ->disabled(),
+                Forms\Components\PlaceHolder::make('Obra')
+                        ->id('obra')
+                        ->label('Obra')
+                        ->hiddenLabel()
+                        ->content(function ($get, $record) {
+                            return $record->Codigo_Plan . '-' . $record->numero_obra . '-' . $record->subreferecnia . '-' . $record->ao_ejecucion;
+                        })
+                        ->disabled() // Hace que el campo sea de solo lectura
+                        ->dehydrated(false),
+
+                Forms\Components\PlaceHolder::make('Plan')
+                        ->label('Plan')
+                        ->columnSpan(2)
+                        ->content(function ($record) {
+                            // dd($record->municipios);
+           
+                               return $record->planes->denominacion_plan;
+                           })
+                        ->dehydrated(false)
+                        ->disabled(),
+                        //->extraAttributes(['class' => 'custom-textinput-class']),
+                      
+                Forms\Components\TextInput::make('Ubicacion')
                     ->id('Ubicacion')
                     ->label('Ubicación')
+                    ->extraAttributes(['class' => 'custom-textinput-class'])
                     //->searchable()
                     ->formatStateUsing(function ($record) {
                         // dd($record->municipios);
@@ -130,7 +136,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
                     ->disabled() // Hace que el campo sea de solo lectura
                     ->dehydrated(false) // Evita que el campo se guarde en la base de datos
                     ->visible(fn ($get) => $get('municipio') || $get('carretera')), // Solo visible si hay un municipio o carretera,
-            Forms\Components\PlaceHolder::make('zona')
+                Forms\Components\PlaceHolder::make('zona')
                     ->id('zona')
                     ->label('Zona')
                     ->content(function ($get, $record) {
@@ -143,79 +149,92 @@ class DatosDeInicioDeObrasResource extends BaseResource
                     })
                     ->dehydrated(false)
                     ->disabled(),
-            Forms\Components\TextInput::make('nombre_obra1')
-                    ->label('Nombre')
-                    ->columnSpan(2)
-                    ->required()
-                    ->disabled(),
+                Forms\Components\TextInput::make('nombre_obra1')
+                        ->label('Nombre')
+                        ->columnSpan(2)
+                        ->required()
+                        ->extraAttributes(['class' => 'custom-textinput-class'])
+                        ->disabled(),
 
-            Forms\Components\TextInput::make('forma_ejecucion')
-                    ->label('Forma ejecución')
-                    ->columnSpan(1)
-                    //->required()
-                    ->disabled(),
-            Forms\Components\PlaceHolder::make('ejecucion')
-                    ->id('ejecucion')
-                    ->columnSpan(2)
-                    ->label('Forma de Ejecución')
-                    ->content(function ($get, $record) {
-                        
-                        $ejecucion = $record?->ejecucion;
-                        if ($ejecucion ) {
-                            return ucwords($ejecucion->DEN_CONTRATA); 
-                        }
-                        return 'No disponible';
-                    })
-                    ->dehydrated(false)
-                    ->disabled(),
-            Forms\Components\PlaceHolder::make('Estado')
-                    ->label('Estado')
-                    ->content(function ($get, $record) {
+                Forms\Components\TextInput::make('forma_ejecucion')
+                        ->label('Forma ejecución')
+                        ->columnSpan(1)
+                        ->extraAttributes(['class' => 'custom-textinput-class'])
+                        //->required()
+                        ->disabled(),
+                Forms\Components\PlaceHolder::make('ejecucion')
+                        ->id('ejecucion')
+                        ->columnSpan(2)
+                        ->label('Forma de Ejecución')
+                        ->content(function ($get, $record) {
                             
-                        $estado = $record?->estados;
-                        if ($estado ) {
-                            return ucwords($estado->estado); 
-                        }   
-                        return 'No disponible';
-                    })
-                    //->columnSpan(2)
-                    //->required()
-                    ->disabled(),
-
-                ]),
-               
+                            $ejecucion = $record?->ejecucion;
+                            if ($ejecucion ) {
+                                return ucwords($ejecucion->DEN_CONTRATA); 
+                            }
+                            return 'No disponible';
+                        })
+                        ->dehydrated(false)
+                        ->disabled(),
+                Forms\Components\PlaceHolder::make('Estado')
+                        ->label('Estado')
+                        ->content(function ($get, $record) {
+                                
+                            $estado = $record?->estados;
+                            if ($estado ) {
+                                return ucwords($estado->estado); 
+                            }   
+                            return 'No disponible';
+                        })
+                        //->columnSpan(2)
+                        //->required()
+                        ->disabled(),
+                    ]),       
             Forms\Components\Section::make('Referencia de Obra')
                 ->columns(7)
                 ->schema([
                 Forms\Components\Select::make('TipoActuacion')
                     ->label('Tipo de Actuación')
                     ->relationship('tipoactuacion', 'descripcion_actuacion')
+                    ->columnSpan(2)
                     //->dehydrated(false)
 
-                    ->extraAttributes(['class' => 'custom-select-class']),
+                    ->extraAttributes(['class' => 'compact-select']),
                 Forms\Components\TextInput::make('TipoObra')
                     ->nullable()
-                    ->label('Tipo de Obra'),
+                    ->label('Tipo de Obra')
+                    ->extraAttributes(['class' => 'custom-textinput-class']),
+                    
                     //->required()
 
-                Forms\Components\TextInput::make('LicenciaObra')
+                Forms\Components\Select::make('LicenciaObra')
                     ->label('Licencia de Obra')
-                    ->maxlength(2)
-                    ->extraAttributes(['class' => 'custom-textinput-class']),
-                Forms\Components\TextInput::make('disponibilidad_terreno')
+                    ->extraAttributes(['class' => 'compact-select'])
+                    ->options([
+                            'SI' => 'SI',
+                            'NO' => 'NO',
+                            'NR' => 'NR'                    ]),
+                Forms\Components\Select::make('disponibilidad_terreno')
                     ->label('Disp. Terrenos')
                     ->nullable()
-                    ->extraAttributes(['class' => 'custom-textinput-class']),
+                    ->extraAttributes(['class' => 'compact-select'])
+                    ->options([
+                        'SI' => 'SI',
+                        'NO' => 'NO',
+                        'NR' => 'NR'                    ]),
                     //->required()
                 Forms\Components\TextInput::make('Expediente')
                     ->label('Expediente')
-                    ->required(),
+                    ->required()
+                    ->extraAttributes(['class' => 'custom-textinput-class']),
                 Forms\Components\TextInput::make('PartidaPresupuesto')
                     ->nullable()
-                    ->label('Partida Presupuestaria'),
+                    ->label('Partida Presupuestaria')
+                    ->extraAttributes(['class' => 'custom-textinput-class']),
                 Forms\Components\TextInput::make('peticion_ayuda_tec')
                     ->nullable()
-                    ->label('Petición Ayuda técnica'),
+                    ->label('Petición Ayuda técnica')
+                    ->extraAttributes(['class' => 'custom-textinput-class']),
                 Forms\Components\TextArea::make('EstadoServicioTecnico')
                     ->label('Estado Servicio Tecnico')
                     ->nullable()
@@ -231,13 +250,27 @@ class DatosDeInicioDeObrasResource extends BaseResource
                     ->extraAttributes(['class' => 'custom-textinput-class']),
                 Forms\Components\Select::make('TipoPrograma')
                     ->label('Tipo Programa')
+                    ->extraAttributes(['class' => 'compact-select'])
                     ->options([
                         'Concertado' => 'Concertado',
                         'No-Concertado ' => 'NO_Concertado',
 
                     ]),
-               
-
+                Forms\Components\Select::make('Clasificacion')
+                    ->label('Clasificación.')
+                    ->reactive()
+                    ->dehydrated(false)
+                    ->extraAttributes(['class' => 'compact-select'])
+                    ->options([
+                        'SI' => 'SI',
+                        'NO' => 'NO',
+                        'NR' => 'NR'                    ]),
+                Forms\Components\TextInput::make('importes.importe_aprobado')
+                            ->label('Importe Aprobado')
+                            ->nullable()
+                            ->numeric()
+                            ->prefix('€')
+                            ->extraAttributes(['class' => 'custom-textinput-class']),
                 Forms\Components\radio::make('Aportacion')
                     ->label('Aportación del Ayto.')
                     ->default('NO')
@@ -279,14 +312,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
                             'EF' => 'Entidad financiera',
 
                     ]),
-                    Forms\Components\Select::make('Clasificacion')
-                    ->label('Clasificación.')
-                    ->reactive()
-                    ->dehydrated(false)
-                    ->options([
-                        'SI' => 'SI',
-                        'NO' => 'NO',
-                        'NR' => 'NR'                    ]),
+                   
 
                     Forms\Components\FieldSet::make('Patronato')
                         ->label('Patronato')
@@ -308,12 +334,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
                                     ->nullable(),
 
                             ]),
-                        Forms\Components\TextInput::make('importes.importe_aprobado')
-                            ->label('Importe Aprobado')
-                            ->nullable()
-                            ->numeric()
-                            ->prefix('€')
-                            ->extraInputAttributes(['class' => '!h-9 !py-1 !text-sm !leading-none']),
+                        
                             
 
                 ]),
@@ -403,6 +424,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
 
             Forms\Components\Section::make('Ayuda Técnica')
                 ->columns(4)
+                ->collapsible()
                 //->id('ayuda')
                 //->relationship('ayuda')
                 ->schema([
@@ -426,7 +448,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
 
                 Forms\Components\TextInput::make('ayuda.AyuTecRed')
                     ->label('Ayuda Técnica a la Redacción')
-                    ->extraInputAttributes(['class' => '!h-9 !py-1 !text-sm !leading-none']),
+                    ->extraInputAttributes(['class' => 'bg-red']),
 
                 Forms\Components\TextInput::make('ayuda.AyuTecDir')
                 ->label('Ayuda Técnica a la Dirección'),
@@ -572,7 +594,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
             //
             ImportesPorOrganismoRelationManager::class,
             AyudaRelationManager::class,
-            //DocumentosRelationManager::class
+            DocumentoExpedienteRelationManager::class
         ];
     }
 

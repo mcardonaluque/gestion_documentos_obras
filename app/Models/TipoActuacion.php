@@ -12,5 +12,8 @@ class TipoActuacion extends Model
     protected $primaryKey = 'codigo';
     //protected $keyType = 'string';
     public $incrementing = false;
+    public function obras(){
+        return $this->hasMany (DatosDeInicioDeObras::class,'TipoActuacion','codigo');
+    }
 }
 

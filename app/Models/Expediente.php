@@ -24,11 +24,27 @@ class Expediente extends Model
         return $this->hasOne(Datos_Ejecucion_Obras::class);
     
     }
+    Function obraJustificacion(){
+        return $this->hasOne(Justificacion_Obra::class);
+    
+    }
+    Function obraCesion(){
+        return $this->hasOne(ObraCedida::class);
+    
+    }
     function documentosexpedientes(){
         return $this->HasMany(DocumentoExpediente::class);
     }
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+    public function estado(): BelongsTo
+    {
+        return $this->belongsTo(TablaDeEstados::class);
+    }
+    public function ejecucion():BelongsTo
+    {
+        return $this->belongsTo(FormaEjecucion::class, 'forma_ejecucion', 'COD_CONTRATA' );
     }
 }

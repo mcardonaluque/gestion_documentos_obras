@@ -1,7 +1,10 @@
 <?php
 
 return [
-
+    'guards' => [
+        'web',
+        'filament', // Añade este guard
+    ],
     'models' => [
 
         /*
@@ -189,3 +192,4 @@ return [
         'store' => 'default',
     ],
 ];
+

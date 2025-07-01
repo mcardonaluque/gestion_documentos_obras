@@ -35,8 +35,8 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->brandName('Planes-Administración')
-            
             ->login()
+            ->authGuard('web') 
             ->favicon(asset('img/favicon.ico'))
             ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))
             ->brandLogoHeight('2rem')
@@ -46,11 +46,18 @@ class AdminPanelProvider extends PanelProvider
                 
             ])
             ->colors([
-                'primary' => Color::Amber,
+                //'primary' => Color::Amber,
+                'primary'=>'rgb(28, 20, 99)',
             ])
-           ->resources([UserResource::class])
+            ->resources([UserResource::class,
+                \App\Filament\Obras\Resources\DatosDeInicioDeObrasResource::class,
+                \App\Filament\Obras\Resources\ImportesDeobrasResource::class, 
+                \App\Filament\Obras\Resources\ImportesPorOrganismoResource::class,
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ->discoverResources(in: app_path('Filament/Obras/Resources'), for: 'App\\Filament\\Obras\\Resources')
             ->discoverPages(in: app_path('Filament/Resources/Pages'), for: 'App\\Filament\\Resources\\Pages')
+            ->discoverPages(in: app_path('Filament/Obras/Resources/Pages'), for: 'App\\Filament\\Obras\\Resources\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])

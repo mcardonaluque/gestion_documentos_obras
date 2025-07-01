@@ -26,8 +26,16 @@ class DocumentoExpediente extends Model
     function documento(){
         return $this->belongsTo(DocumentoGenerico::class);
     }
-    public function teams(): BelongsTo
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
-}
+    public function destino(): BelongsTo
+    {
+        return $this->belongsTo(DestinoDeDocumentos::class);
+    }
+    public function procedencia(): BelongsTo
+    {
+        return $this->belongsTo(DestinoDeDocumentos::class);
+    }
+}    

@@ -10,4 +10,7 @@ class TecnicoObra extends Model
     protected $connection='Obras';
     protected $table='TecnicosObras';
     protected $primaryKey='CodTec';
+    function proyecto(){
+        return $this->HasMany(Proyecto::class,'CodTec','director_tecnico');
+    }
 }

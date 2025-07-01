@@ -20,7 +20,7 @@ class FaseDocumento extends Model
     function documentos_genericos(){
         return $this->hasMany(DocumentoGenerico::class,'fase_doc','cod_fase');
     }
-    public function teams(): BelongsTo
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }

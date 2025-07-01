@@ -12,15 +12,15 @@ class alerta extends Model
     protected $connection='Obras';
     
     protected $foreingKey = ['fase','estado'];
-    public function estadoRelacionado()
-{
-    return $this->belongsTo(TablaDeEstados::class, 'estado', 'cod_estado');
-}
+   public function estadoRelacionado()
+    {
+        return $this->belongsTo(TablaDeEstados::class, 'estado', 'cod_estado');
+    }
 
-public function faseRelacionada()
-{
-    return $this->belongsTo(FaseDocumento::class, 'fase', 'cod_fase');
-}
+    public function faseRelacionada()
+    {
+        return $this->belongsTo(FaseDocumento::class, 'fase', 'cod_fase');
+    }
 public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);

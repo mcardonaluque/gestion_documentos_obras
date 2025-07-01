@@ -15,5 +15,8 @@ class TablaDeEstados extends Model
     protected $primaryKey='cod_estado';
     protected $keyType = 'string';
     public $incrementing = false;
+    public function obras(){
+        return $this->hasMany (DatosDeInicioDeObras::class,'municipio','codigo_municipio');
+    }
     
 }

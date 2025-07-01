@@ -16,15 +16,33 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class ImportesPorOrganismoResource extends Resource
 {
     protected static ?string $model = ImportesPorOrganismo::class;
+    protected static ?string $tenantOwnershipRelationshipName = 'team';
     protected static ?string $navigationGroup="Importes";
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static bool $shouldRegisterNavigation = true;
+    protected static ?string $navigationLabel = 'Importes por organismo';
+    public static function getEloquentQuery(): Builder
+    {
+        $añoActual = now()->year;
 
+        $añoAnterior2 = now()->subYear(2)->year;
+   
+
+        return parent::getEloquentQuery()
+        ->select('ImportesPorOrganismo.*') // Selecciona todas las columnas de la tabla "obras"
+            ->leftJoin('DatosInicioDeObras', 'DatosInicioDeObras.Expediente', '=', 'ImportesPorOrganismo.Expediente') // Join con la tabla "municipios"
+            //->addSelect(trim('TablaDeMunicipios.nombre_municipio'))
+           // ->WhereNotNull('carretera');  //->with('municipios');
+            ->where('ImportesPorOrganismo.ao_ejecucion', '>=', $añoAnterior2)
+            ->where('ImportesPorOrganismo.ao_ejecucion', '<=', $añoActual);
+            //->where('codigo_municipio','=', )
+      
+    }
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('Expediente')
+            Forms\Components\TextInput::make('Expediente')
                 ->required()
                 ->maxLength(255),
             Forms\Components\TextInput::make('organismo')

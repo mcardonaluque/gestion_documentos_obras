@@ -9,6 +9,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Models\AyudaTecnica;
 
 class AyudaRelationManager extends RelationManager
 {
@@ -20,6 +21,9 @@ class AyudaRelationManager extends RelationManager
             ->schema([
                 Forms\Components\TextInput::make('Expediente')
                     //->required()
+                    ->fillUsing(function ($component, $state, $record) {
+                        $component->state($this->ownerRecord->expediente);
+                    })
                     ->disabled()
                     ->maxLength(255),
                 Forms\Components\Select::make('dpto_redactor')
@@ -68,7 +72,8 @@ class AyudaRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                ->visible(fn() =>!AyudaTecnica::exists()),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

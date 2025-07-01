@@ -15,10 +15,11 @@ class DatosDeInicioDeObras extends Model
     protected $connection='Obras';
     protected $table='DatosInicioDeObras';
     protected $primaryKey='Expediente';
-    protected $foreignKey = 'municipio';
+    //protected $foreignKey = 'municipio';
     public $incrementing=false;
     protected $keyType='string';
     public $timestamps = false;
+   
    // protected $fillable=['TipoActuacion'];
    protected $fillable = [
     'EstadoServicioTecnico', // Asegúrate de que esté incluido
@@ -98,8 +99,12 @@ class DatosDeInicioDeObras extends Model
     {
         return $this->CompApAyto ? $this->CompApAyto : null;
     }
-    public function teams():BelongsTo{
+    public function team():BelongsTo{
         return $this->belongsTo(Team::class);
+    }
+    public function actuacion():BelongsTo
+    {
+        return $this->belongsTo(Tipoactuacion::class, 'codigo_estado_obra', 'cod_estado' );
     }
     
 }

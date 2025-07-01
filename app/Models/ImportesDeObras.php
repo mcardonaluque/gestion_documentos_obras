@@ -14,11 +14,14 @@ class ImportesDeObras extends Model
     protected $connection='Obras';
     protected $table='ImportesDeObras';
     protected $primaryKey='Expediente';
-    public function obra()
+    protected $casts = [
+        'Expediente' => 'string',
+    ];
+    public function obra(): BelongsTo
     {
         return $this->belongsTo(DatosDeInicioDeObras::class, 'Expediente','Expediente');
     }
-    public function teams(): BelongsTo
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }

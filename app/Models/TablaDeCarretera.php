@@ -14,4 +14,7 @@ class TablaDeCarretera extends Model
     protected $primaryKey = 'CodCar';
     protected $keyType = 'string';
     public $incrementing = false;
+    public function obras(){
+        return $this->hasMany (DatosDeInicioDeObras::class,'municipio','codigo_municipio');
+    }
 }

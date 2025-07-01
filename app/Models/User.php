@@ -13,11 +13,12 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasPermissions;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
 //use \BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 
-class User extends Authenticatable implements FilamentUser //, HasTenants
+class User extends Authenticatable implements FilamentUser , HasTenants
 {
     use HasFactory, Notifiable, HasRoles, HasPanelShield, HasPermissions;
     protected $connection = 'Obras';
@@ -56,26 +57,31 @@ class User extends Authenticatable implements FilamentUser //, HasTenants
             'password' => 'hashed',
         ];
     }
-    public function teams(): BelongsToMany
+    public function team(): BelongsToMany
     {
-        return $this->belongsToMany(Team::class);
+        return $this->belongsToMany(Team::class,'team_user','user_id', 'team_id');
     }
  
     public function getTenants(Panel $panel): array|Collection
     {
-        return $this->teams;
+        return $this->team;
     }
- 
+    public function departamento():BelongsTo
+    {
+        return $this->belongsTo(TablaDeDepartamento::class);
+    }
     public function canAccessTenant(Model $tenant): bool
     {
-        return $this->teams()->whereKey($tenant)->exists();
+        return $this->team()->whereKey($tenant)->exists();
     }
     public function canAccessPanel(Panel $panel): bool
     {
+        //dd($this->hasRole('panel_user'));
         if ($panel->getId() === 'admin') {
             return $this->hasRole('super_admin');
         }
         if ($panel->getId() === 'obras') {
+            //dd($panel->getID());
             return true;
         }
        return false;

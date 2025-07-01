@@ -4,7 +4,7 @@ namespace App\Filament\Obras\Resources;
 
 use App\Filament\Obras\Resources\ImportesDeobrasResource\Pages;
 use App\Filament\Obras\Resources\ImportesDeobrasResource\RelationManagers;
-use App\Models\ImportesDeobras;
+use App\Models\ImportesDeObras;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,21 +12,54 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Facades\Filament;
 
-class ImportesDeobrasResource extends Resource
+class ImportesDeObrasResource extends Resource
 {
-    protected static ?string $model = ImportesDeobras::class;
-
+    protected static ?string $model = ImportesDeObras::class;
+    protected static ?string $tenantOwnershipRelationshipName = 'team';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static bool $shouldRegisterNavigation = true;
     protected static ?string $navigationGroup="Importes";
     protected static ?string $navigationLabel = 'Importes de Obras';
+    public static function getLabel(): string
+    {
+        return 'Importes de Obras';
+    }
+    public static function getEloquentQuery(): Builder
+    {
+        $añoActual = now()->year;
 
+        $añoAnterior2 = now()->subYear(2)->year;
+        
+        return parent::getEloquentQuery()
+        ->with('obra')
+        ->whereHas('obra', function ($query) {
+            $query->where('team_id', Filament::getTenant()->id);
+        })
+        ->where('ao_ejecucion', '>=', $añoAnterior2)
+        ->where('ao_ejecucion', '<=', $añoActual);
+      
+    }
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 //
+            Forms\Components\TextInput::make('Expediente')
+                ->required()
+                ->maxLength(255),
+           
+            Forms\Components\TextInput::make('Porc_imp_aprobado')
+                ->required()
+                ->maxLength(255),
+            Forms\Components\TextInput::make('importe_aprobado')
+                ->required()
+                ->maxLength(255),
+            Forms\Components\TextInput::make('Porc_imp_contratar')
+                ->required()
+                ->maxLength(255),
+            Forms\Components\TextInput::make('Importe_a_contratar')
             ]);
     }
 
@@ -35,6 +68,9 @@ class ImportesDeobrasResource extends Resource
         return $table
             ->columns([
                 //
+                Tables\Columns\TextColumn::make('obra.Expediente'),
+                Tables\Columns\TextColumn::make('importe_aprobado'),
+                Tables\Columns\TextColumn::make('importe_a_contratar'),
             ])
             ->filters([
                 //

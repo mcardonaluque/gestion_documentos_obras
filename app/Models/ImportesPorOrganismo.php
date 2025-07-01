@@ -20,7 +20,7 @@ class ImportesPorOrganismo extends Model
     {
         return $this->belongsTo(DatosDeInicioDeObras::class, 'Expediente', 'Expediente');
     }
-    public function teams(): BelongsTo
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }

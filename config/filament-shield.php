@@ -2,6 +2,8 @@
 
 return [
     'shield_resource' => [
+        'enabled'=>true,
+        'model' => \Spatie\Permission\Models\Role::class,
         'should_register_navigation' => true,
         'slug' => 'shield/roles',
         'navigation_sort' => -1,
@@ -9,11 +11,11 @@ return [
         'navigation_group' => true,
         'is_globally_searchable' => false,
         'show_model_path' => true,
-        'is_scoped_to_tenant' => true,
+        'is_scoped_to_tenant' => false,
         'cluster' => null,
     ],
-
-    'tenant_model' => null,
+    'guard' => 'web',
+    'tenant_model' => 'Team',
 
     'auth_provider_model' => [
         'fqcn' => 'App\\Models\\User',
@@ -75,13 +77,15 @@ return [
             'AccountWidget', 'FilamentInfoWidget',
         ],
 
-        'resources' => [],
+        'resources' => [
+            'role'=>\App\Filament\Resources\RoleResource::class,
+        ],
     ],
 
     'discovery' => [
-        'discover_all_resources' => false,
+        'discover_all_resources' => true,
         'discover_all_widgets' => false,
-        'discover_all_pages' => false,
+        'discover_all_pages' => true,
     ],
 
     'register_role_policy' => [

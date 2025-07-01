@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 //use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 
 use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource;
+use App\Filament\Obras\Resources\DatosEjecucionObrasResource;
 use App\Filament\Obras\Resources\ImportesDeobrasResource;
 use App\Filament\Obras\Resources\ImportesPorOrganismoResource;
 use App\Models\Team;
@@ -39,6 +40,9 @@ class ObrasPanelProvider extends PanelProvider
                 ImportesDeobrasResource::class,
                 ImportesPorOrganismoResource::class,
                 DatosDeInicioDeObrasResource::class,
+                DatosEjecucionObrasResource::class,
+                //\BezhanSalleh\FilamentShield\Resources\RoleResource::class,
+
             ])
             ->login()
             ->favicon(asset('img/favicon.ico'))
@@ -46,13 +50,17 @@ class ObrasPanelProvider extends PanelProvider
             ->brandLogoHeight('2rem')
             ->maxContentWidth(MaxWidth::Full)
             ->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
+                
             ])
             ->colors([
                 //'primary' => Color::Amber,
                 'primary'=>'rgb(28, 20, 99)',
             ])
-           
+            ->tenant(Team::class,ownershipRelationship: 'members',slugAttribute: 'slug')
+            //->tenantMiddleware([
+            //    \BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant::class,
+           // ], isPersistent: true)
             ->discoverResources(in: app_path('Filament/Obras/Resources'), for: 'App\\Filament\\Obras\\Resources')
             ->discoverPages(in: app_path('Filament/Obras/Resources/Pages'), for: 'App\\Filament\\Resources\\Pages')
             ->pages([

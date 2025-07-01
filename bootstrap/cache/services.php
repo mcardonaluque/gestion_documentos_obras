@@ -48,7 +48,8 @@
     44 => 'Spatie\\Permission\\PermissionServiceProvider',
     45 => 'App\\Providers\\AppServiceProvider',
     46 => 'App\\Providers\\Filament\\AdminPanelProvider',
-    47 => 'App\\Providers\\Filament\\ObrasPanelProvider',
+    47 => 'App\\Providers\\Filament\\AyuntamientosPanelProvider',
+    48 => 'App\\Providers\\Filament\\ObrasPanelProvider',
   ),
   'eager' => 
   array (
@@ -84,7 +85,8 @@
     29 => 'Spatie\\Permission\\PermissionServiceProvider',
     30 => 'App\\Providers\\AppServiceProvider',
     31 => 'App\\Providers\\Filament\\AdminPanelProvider',
-    32 => 'App\\Providers\\Filament\\ObrasPanelProvider',
+    32 => 'App\\Providers\\Filament\\AyuntamientosPanelProvider',
+    33 => 'App\\Providers\\Filament\\ObrasPanelProvider',
   ),
   'deferred' => 
   array (

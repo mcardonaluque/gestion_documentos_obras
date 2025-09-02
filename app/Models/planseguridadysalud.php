@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class planseguridadysalud extends Model
+class Planseguridadysalud extends Model
 {
     //
     protected $connection='Obras';
-    protected $table='PlanSeguridadYSalus';
+    protected $table='PlanSeguridadYSalud';
     protected $primaryKey='Expediente';
     //protected $foreignKey = 'municipio';
     public $incrementing=false;

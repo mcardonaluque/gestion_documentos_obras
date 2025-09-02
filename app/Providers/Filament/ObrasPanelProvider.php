@@ -8,6 +8,7 @@ use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource;
 use App\Filament\Obras\Resources\DatosEjecucionObrasResource;
 use App\Filament\Obras\Resources\ImportesDeobrasResource;
 use App\Filament\Obras\Resources\ImportesPorOrganismoResource;
+use App\Filament\Obras\Resources\PlanseguridadysaludResource;
 use App\Models\Team;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -41,6 +42,7 @@ class ObrasPanelProvider extends PanelProvider
                 ImportesPorOrganismoResource::class,
                 DatosDeInicioDeObrasResource::class,
                 DatosEjecucionObrasResource::class,
+               
                 //\BezhanSalleh\FilamentShield\Resources\RoleResource::class,
 
             ])

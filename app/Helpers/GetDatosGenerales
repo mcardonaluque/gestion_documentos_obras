@@ -15,7 +15,17 @@ class GetDatosGenerales{
     public static $Gl_Depto;
     public static $Gl_Diputado;
     public static $Gl_JefeServicio;
-    public function getDatos( string $tabla, string $dato){
+    public static $Gl_Nombremunicipio;
+    public static $Gl_Carretera;
+    public static $Gl_DenominacionPlan;
+    public static $Gl_DescripcionPlan;
+    public static $Gl_DenEstado;
+    public static $Gl_DenFase;
+    public static $Gl_DenDocumento;
+    public static $Gl_NombreObra;
+    public static $Gl_Expediente;
+    
+    public function getData( string $table, string $data){
         
 
 

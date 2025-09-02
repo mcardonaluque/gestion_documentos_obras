@@ -48,7 +48,8 @@ class DatosDeInicioDeObrasResource extends BaseResource
             ->addSelect(trim('TablaDeMunicipios.nombre_municipio'))
            // ->WhereNotNull('carretera');  //->with('municipios');
             ->where('ao_ejecucion', '>=', $añoAnterior2)
-            ->where('ao_ejecucion', '<=', $añoActual);
+            ->where('ao_ejecucion', '<=', $añoActual) 
+            ->where('Codigo_Plan','<>','');
             //->where('codigo_municipio','=', )
       
     }
@@ -492,7 +493,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
                 ->hidden(),
             Tables\Columns\TextColumn::make('Obra')
                     ->label('Obra')
-                    ->sortable()
+                    // ->sortable()
                    // ->searchable()
                    // ->grow()
                     ->extraHeaderAttributes(['class' => 'px-8'])

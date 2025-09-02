@@ -22,16 +22,15 @@ class DatosEjecucionObrasResource extends Resource
     protected static ?string $navigationColor = 'custom-blue';
     protected static ?string $navigationGroup="Ejecución";
     protected static ?string $navigationLabel ='Ejecución de Obras';
+   
     public static function getEloquentQuery(): Builder
     {
         $añoActual = now()->year;
 
         $añoAnterior2 = now()->subYear(2)->year;
-   
-
         return parent::getEloquentQuery()
         ->select('Datos_Ejecucion_Obras.*') // Selecciona todas las columnas de la tabla "obras"
-            ->leftJoin('DatosInicioDeObras', 'DatosInicioDeObras.Expediente', '=', 'Datos_Ejecucion_Obras.Expediente') // Join con la tabla "municipios"
+            //->leftJoin('DatosInicioDeObras', 'DatosInicioDeObras.Expediente', '=', 'Datos_Ejecucion_Obras.Expediente') // Join con la tabla "municipios"
             //->addSelect(trim('TablaDeMunicipios.nombre_municipio'))
            // ->WhereNotNull('carretera');  //->with('municipios');
             ->where('Datos_Ejecucion_Obras.ao_ejecucion', '>=', $añoAnterior2)

@@ -16,7 +16,7 @@ class TablaDeEstados extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     public function obras(){
-        return $this->hasMany (DatosDeInicioDeObras::class,'municipio','codigo_municipio');
+        return $this->hasMany (DatosDeInicioDeObras::class,'codigo_estado_obra','cod_estado');
     }
     
 }

@@ -12,6 +12,8 @@ class TipoDocumento extends Model
     protected $connection='Obras';
     protected $table='tipo_documentos';
     protected $primaryKey = 'id';
-     protected $fillable=['IdTipo','nombre','descripcion'];
-     
+    protected $fillable=['IdTipo','nombre','descripcion'];
+    public function documentos(){
+        return $this->Hasmany(DocumentoExpediente::class);
+    }
 }

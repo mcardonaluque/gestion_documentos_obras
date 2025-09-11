@@ -23,7 +23,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class AvisoResource extends Resource
 {
     protected static ?string $model = Aviso::class;
-    protected static bool $isScopedToTenant = false;
+    //protected static bool $isScopedToTenant = false;
+    protected static ?string $tenantOwnershipRelationshipName = 'team';
     protected static ?string $navigationGroup="Notificaciones";
     protected static ?string $navigationIcon = 'heroicon-o-bell';
 

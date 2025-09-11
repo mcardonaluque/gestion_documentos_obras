@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use PHPUnit\Framework\Constraint\IsTrue;
 
@@ -32,6 +33,10 @@ class Aviso extends Model
     ];
     public function tipoaviso(){
         return $this->belongsTo(TiposAviso::class);
+    }
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
    
 }

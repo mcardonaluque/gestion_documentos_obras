@@ -41,4 +41,9 @@ class DatosEjecucionObras extends Model
     function obra(){
         return $this->belongsTo(DatosDeInicioDeObras::class);
     }
+    public function certificaciones():HasMany
+    {
+        return $this->Hasmany(certificaciones::class, 'Expediente', 'Expediente' );
+    }
+    
 }

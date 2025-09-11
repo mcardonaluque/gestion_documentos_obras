@@ -21,7 +21,7 @@ class Expediente extends Model
         return $this->hasOne (DatosDeInicioDeObras::class);
     }
     Function obraEjecucion(){
-        return $this->hasOne(Datos_Ejecucion_Obras::class);
+        return $this->hasOne(DatosEjecucionObras::class);
     
     }
     Function obraJustificacion(){

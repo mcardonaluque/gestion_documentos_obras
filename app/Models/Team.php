@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -11,6 +12,10 @@ class Team extends Model
     //
     protected $connection='Obras';
     protected $fillable=['name','slug','domain'];
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = trim($value); // Elimina espacios al inicio y final
+    }
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class,'team_user','team_id', 'user_id');
@@ -21,13 +26,15 @@ class Team extends Model
    //     return $this->hasMany(Role::class);
    // }
 
-   
     public function InicioObras(): HasMany
     {
         return $this->hasMany(\App\Models\DatosDeInicioDeObras::class);
     }
 
-  
+    public function datosejecucion():HasMany
+    {
+        return $this->hasMany(DatosEjecucionObras::class, 'Expediente', 'Expediente' );
+    }
     public function expedientes(): HasMany
     {
         return $this->hasMany(\App\Models\Expediente::class);
@@ -40,8 +47,8 @@ class Team extends Model
     {
         return $this->hasMany(ImportesDeObras::class);
     }
-   /* public function alertas()
+    public function alertas()
     {
         return $this->hasMany(Alerta::class);
-    }*/
+    }
 }

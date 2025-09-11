@@ -27,7 +27,7 @@ class Usuario extends Authenticatable implements FilamentUser , HasTenants
     }    
     public function getTenants(Panel $panel): array|Collection
     {
-        return $this->departamento;
+        return $this->departamento()->get();
     }
     public function canAccessTenant(Model $tenant): bool
     {

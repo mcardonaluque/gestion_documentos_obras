@@ -2,8 +2,10 @@
 
 namespace App\Filament\Obras\Resources;
 
+use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\RelationManagers\ImportesPorOrganismoRelationManager;
 use App\Filament\Obras\Resources\DatosEjecucionObrasResource\Pages;
 use App\Filament\Obras\Resources\DatosEjecucionObrasResource\RelationManagers;
+use App\Filament\Obras\Resources\DatosEjecucionObrasResource\RelationManagers\CertificacionesRelationManager;
 use App\Models\DatosEjecucionObras;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -18,6 +20,7 @@ class DatosEjecucionObrasResource extends Resource
     protected static ?string $model = DatosEjecucionObras::class;
 
     protected static ?string $tenantOwnershipRelationshipName = 'team';
+    protected static ?int $navigationSort = 3;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationColor = 'custom-blue';
     protected static ?string $navigationGroup="Ejecución";
@@ -248,6 +251,8 @@ class DatosEjecucionObrasResource extends Resource
     {
         return [
             //
+            CertificacionesRelationManager::class,
+            ImportesPorOrganismoRelationManager::class,
         ];
     }
 

@@ -10,7 +10,7 @@ class Proyecto extends Model
     //
     protected $connection='Obras';
     //protected $table='documentacionexpediente';
-    protected $table='dbo.Proyectos';
+    protected $table='Proyectos';
     protected $primaryKey='Expediente';
 
     protected $fillable =[];
@@ -37,5 +37,8 @@ class Proyecto extends Model
     }
     function tecnico_redactor(){
         return $this->belongsTo(TablaDeDepartamento::class,'CODIGO_DPTO','servicio_gestor',);
+    }
+    function fases(){
+        return $this->hasMany(FaseDeProyecto::class,'Expediente','Expediente',);
     }
 }

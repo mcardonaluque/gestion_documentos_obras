@@ -62,7 +62,10 @@ class DatosDeInicioDeObras extends Model
     {
         return $this->hasMany(ImportesporOrganismo::class, 'Expediente', 'Expediente' );
     }
-    public function estados():BelongsTo
+
+    public function datosjecucion():HasOne    {
+        return $this->hasOne(DatosEjecucionObras::class, 'Expediente','Expediente');
+    }    public function estados():BelongsTo
     {
         return $this->belongsTo(TablaDeEstados::class, 'codigo_estado_obra', 'cod_estado' );
     }
@@ -78,9 +81,21 @@ class DatosDeInicioDeObras extends Model
     {
         return $this->Hasmany(DocumentoExpediente::class, 'Expediente', 'Expediente' );
     }
+    public function certificaciones():HasMany
+    {
+        return $this->Hasmany(certificaciones::class, 'Expediente', 'Expediente' );
+    }
     public function tipoactuacion():BelongsTo
     {
         return $this->belongsTo(TipoActuacion::class, 'TipoActuacion', 'codigo' );
+    }
+    
+    public function team():BelongsTo{
+        return $this->belongsTo(Team::class);
+    }
+    public function actuacion():BelongsTo
+    {
+        return $this->belongsTo(Tipoactuacion::class, 'codigo_estado_obra', 'cod_estado' );
     }
     public function getUbicacionAttribute()
     {
@@ -99,12 +114,4 @@ class DatosDeInicioDeObras extends Model
     {
         return $this->CompApAyto ? $this->CompApAyto : null;
     }
-    public function team():BelongsTo{
-        return $this->belongsTo(Team::class);
-    }
-    public function actuacion():BelongsTo
-    {
-        return $this->belongsTo(Tipoactuacion::class, 'codigo_estado_obra', 'cod_estado' );
-    }
-    
 }

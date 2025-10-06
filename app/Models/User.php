@@ -84,6 +84,14 @@ class User extends Authenticatable implements FilamentUser , HasTenants
             //dd($panel->getID());
             return true;
         }
+        if ($panel->getId() === 'planes') {
+            //dd($panel->getID());
+            return true;
+        }
+        if ($panel->getId() === 'ayuntamientos') {
+            //dd($panel->getID());
+            return true;
+        }
        return false;
     }
     protected static function booted(): void

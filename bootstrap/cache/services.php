@@ -50,6 +50,7 @@
     46 => 'App\\Providers\\Filament\\AdminPanelProvider',
     47 => 'App\\Providers\\Filament\\AyuntamientosPanelProvider',
     48 => 'App\\Providers\\Filament\\ObrasPanelProvider',
+    49 => 'App\\Providers\\Filament\\PlanesPanelProvider',
   ),
   'eager' => 
   array (
@@ -87,6 +88,7 @@
     31 => 'App\\Providers\\Filament\\AdminPanelProvider',
     32 => 'App\\Providers\\Filament\\AyuntamientosPanelProvider',
     33 => 'App\\Providers\\Filament\\ObrasPanelProvider',
+    34 => 'App\\Providers\\Filament\\PlanesPanelProvider',
   ),
   'deferred' => 
   array (

@@ -47,7 +47,7 @@ class DatosDeInicioDeObras extends Model
             'nombre_municipio' => 'Sin municipio', // Valor por defecto
         ]);
     }
-    public function ayuda():HasOne
+    public function ayudaTecnica():HasOne
     {
         return $this->HasOne(AyudaTecnica::class, 'Expediente', 'Expediente' );
     }
@@ -62,7 +62,12 @@ class DatosDeInicioDeObras extends Model
     {
         return $this->hasMany(ImportesporOrganismo::class, 'Expediente', 'Expediente' );
     }
-
+    public function planeseguridadysalud():HasOne    {
+        return $this->hasOne(PlanSeguridadYSalud::class, 'Expediente','Expediente');
+    }
+    public function proyectos():HasOne    {
+        return $this->hasOne(Proyecto::class, 'Expediente','Expediente');
+    }
     public function datosjecucion():HasOne    {
         return $this->hasOne(DatosEjecucionObras::class, 'Expediente','Expediente');
     }    public function estados():BelongsTo
@@ -95,7 +100,7 @@ class DatosDeInicioDeObras extends Model
     }
     public function actuacion():BelongsTo
     {
-        return $this->belongsTo(Tipoactuacion::class, 'codigo_estado_obra', 'cod_estado' );
+        return $this->belongsTo(Tipoactuacion::class, 'TipoActuacion', 'cod_estado' );
     }
     public function getUbicacionAttribute()
     {

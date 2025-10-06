@@ -1,0 +1,184 @@
+/* resources/css/filament/admin/theme.css */
+
+/* ===== TOP MENU STYLES ===== */
+.fi-nav-group[data-group-name="top-navigation"] {
+    display: flex;
+    background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%) !important;
+    border-radius: 12px;
+    padding: 0.5rem;
+    margin: 0 0 2rem 0;
+    border: 2px solid #3730a3;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dark .fi-nav-group[data-group-name="top-navigation"] {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
+    border-color: #4338ca;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3),
+                0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+.fi-nav-group[data-group-name="top-navigation"] .fi-nav-group-content {
+    display: flex;
+    gap: 0.25rem;
+    width: 100%;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.fi-nav-group[data-group-name="top-navigation"] .fi-nav-group-header {
+    display: none !important;
+}
+
+/* Top menu items */
+.fi-nav-group[data-group-name="top-navigation"] .fi-nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    margin: 0;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+    background: transparent;
+    color: #e0e7ff !important;
+    font-weight: 500;
+}
+
+.fi-nav-group[data-group-name="top-navigation"] .fi-nav-item:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    color: #ffffff !important;
+}
+
+.fi-nav-group[data-group-name="top-navigation"] .fi-nav-item-active {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: #818cf8;
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Top menu icons */
+.fi-nav-group[data-group-name="top-navigation"] .fi-nav-item-icon {
+    margin-right: 0.5rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: inherit;
+}
+
+/* ===== SIDEBAR MENU STYLES ===== */
+.fi-nav-group:not([data-group-name="top-navigation"]) {
+    margin-bottom: 1.5rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.75rem;
+    background: white;
+}
+
+.dark .fi-nav-group:not([data-group-name="top-navigation"]) {
+    border-color: #374151;
+    background: #1f2937;
+}
+
+/* Sidebar group headers */
+.fi-nav-group:not([data-group-name="top-navigation"]) .fi-nav-group-header {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #374151;
+    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.dark .fi-nav-group:not([data-group-name="top-navigation"]) .fi-nav-group-header {
+    color: #d1d5db;
+    border-bottom-color: #374151;
+}
+
+/* Sidebar group icons */
+.fi-nav-group:not([data-group-name="top-navigation"]) .fi-icon {
+    color: #6b7280;
+    margin-right: 0.5rem;
+}
+
+.dark .fi-nav-group:not([data-group-name="top-navigation"]) .fi-icon {
+    color: #9ca3af;
+}
+
+/* Sidebar items */
+.fi-nav-group:not([data-group-name="top-navigation"]) .fi-nav-item {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin: 0.25rem 0;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    color: #4b5563;
+}
+
+.dark .fi-nav-group:not([data-group-name="top-navigation"]) .fi-nav-item {
+    color: #d1d5db;
+}
+
+.fi-nav-group:not([data-group-name="top-navigation"]) .fi-nav-item:hover {
+    background-color: #f3f4f6;
+    border-color: #d1d5db;
+    color: #1f2937;
+}
+
+.dark .fi-nav-group:not([data-group-name="top-navigation"]) .fi-nav-item:hover {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+}
+
+.fi-nav-group:not([data-group-name="top-navigation"]) .fi-nav-item-active {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white !important;
+    border-color: #2563eb;
+    font-weight: 600;
+}
+
+/* Sidebar item icons */
+.fi-nav-group:not([data-group-name="top-navigation"]) .fi-nav-item-icon {
+    margin-right: 0.5rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: inherit;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+    .fi-nav-group[data-group-name="top-navigation"] .fi-nav-group-content {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .fi-nav-group[data-group-name="top-navigation"] .fi-nav-item {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+.fi-nav-item {
+    transition: all 0.3s ease;
+}
+
+.fi-nav-item:hover {
+    transform: translateX(4px);
+}
+
+.fi-nav-group[data-group-name="top-navigation"] .fi-nav-item:hover {
+    transform: translateY(-2px);
+}
+
+app\Filament\Pages\Dashboard.php
+app\Filament\Pages\Dashboard.php
+app\Filament\Obras\Pages\Dashboard.php
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+  <path fillRule="evenodd" d="M4.5 3.75a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V6.75a3 3 0 0 0-3-3h-15Zm4.125 3a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Zm-3.873 8.703a4.126 4.126 0 0 1 7.746 0 .75.75 0 0 1-.351.92 7.47 7.47 0 0 1-3.522.877 7.47 7.47 0 0 1-3.522-.877.75.75 0 0 1-.351-.92ZM15 8.25a.75.75 0 0 0 0 1.5h3.75a.75.75 0 0 0 0-1.5H15ZM14.25 12a.75.75 0 0 1 .75-.75h3.75a.75.75 0 0 1 0 1.5H15a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3.75a.75.75 0 0 0 0-1.5H15Z" clipRule="evenodd" />
+</svg>

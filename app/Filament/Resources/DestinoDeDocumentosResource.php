@@ -17,7 +17,7 @@ class DestinoDeDocumentosResource extends Resource
 {
     protected static ?string $model = DestinoDeDocumentos::class;
     protected static ?string $navigationGroup = 'Documentación';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-inbox-arrow-down';
 
     public static function form(Form $form): Form
     {

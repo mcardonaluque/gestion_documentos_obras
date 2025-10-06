@@ -14,18 +14,18 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-
+use App\Forms\Components\ObraGeneralInfo;
 class DatosEjecucionObrasResource extends Resource
 {
     protected static ?string $model = DatosEjecucionObras::class;
 
     protected static ?string $tenantOwnershipRelationshipName = 'team';
-    protected static ?int $navigationSort = 3;
+    /**protected static ?int $navigationSort = 3;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationColor = 'custom-blue';
     protected static ?string $navigationGroup="Ejecución";
     protected static ?string $navigationLabel ='Ejecución de Obras';
-   
+   **/
     public static function getEloquentQuery(): Builder
     {
         $añoActual = now()->year;
@@ -45,6 +45,7 @@ class DatosEjecucionObrasResource extends Resource
     {
         return $form
             ->schema([
+               
                 Forms\Components\TextInput::make('Codigo_Plan')
                     ->required()
                     ->maxLength(7),
@@ -236,6 +237,9 @@ class DatosEjecucionObrasResource extends Resource
             ])
             ->filters([
                 //
+            ])
+            ->headerActions([   
+                Tables\Actions\CreateAction::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

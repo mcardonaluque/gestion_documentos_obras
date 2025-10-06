@@ -19,9 +19,9 @@ class PlanSSResource extends Resource
     protected static ?string $modelLabel = 'Plan de Seguridad';
     protected static ?string $pluralModelLabel = 'Planes de Seguridad'; 
     protected static ?string $tenantOwnershipRelationshipName = 'team';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    /**protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationColor = 'custom-blue';
-    protected static ?string $navigationGroup="Ejecución";
+    //protected static ?string $navigationGroup="Ejecución";**/
     protected static ?string $navigationLabel ='Planes de Seguridad y Salud';
 
     protected function getHeading(): string
@@ -55,6 +55,7 @@ class PlanSSResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+        ->columns(7)
             ->schema([
                 Forms\Components\TextInput::make('Codigo_Plan')
                     ->required()

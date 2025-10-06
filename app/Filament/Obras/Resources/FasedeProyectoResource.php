@@ -20,10 +20,10 @@ class FasedeProyectoResource extends Resource
     protected static ?string $modelLabel = 'Fase de Proyecto';
     protected static ?string $pluralModelLabel = 'Fases de Proyectos'; 
     protected static ?string $tenantOwnershipRelationshipName = 'team';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    /**protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationColor = 'custom-blue';
     protected static ?string $navigationGroup="Proyectos";
-    protected static ?string $navigationLabel ='Fases de Proyectos';
+    protected static ?string $navigationLabel ='Fases de Proyectos';**/
 
     public static function getEloquentQuery(): Builder
     {

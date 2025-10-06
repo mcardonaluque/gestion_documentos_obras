@@ -17,7 +17,8 @@ class TablaDeEstadosResource extends Resource
 {
     protected static ?string $model = TablaDeEstados::class;
     protected static bool $isScopedToTenant = false;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+
 
     public static function form(Form $form): Form
     {

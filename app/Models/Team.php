@@ -33,7 +33,7 @@ class Team extends Model
 
     public function datosejecucion():HasMany
     {
-        return $this->hasMany(DatosEjecucionObras::class, 'Expediente', 'Expediente' );
+        return $this->hasMany(DatosEjecucionObras::class);
     }
     public function expedientes(): HasMany
     {
@@ -51,4 +51,10 @@ class Team extends Model
     {
         return $this->hasMany(Alerta::class);
     }
+    public function proyectos()
+    {
+        return $this->hasMany(Proyecto::class);
+    }
+    public function getRouteKeyName(): string { return 'name'; }
+   
 }

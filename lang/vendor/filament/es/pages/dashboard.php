@@ -2,7 +2,7 @@
 
 return [
 
-    'title' => 'Escritorio',
+    'title' => 'Planes Provinciales de Obras',
 
     'actions' => [
 

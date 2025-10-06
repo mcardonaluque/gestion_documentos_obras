@@ -22,9 +22,10 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-//use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Navigation\MenuItem;
 use Filament\Support\Enums\MaxWidth;
+use App\Filament\Pages\Dashboard as AdminDashboard;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -42,24 +43,25 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('2rem')
             ->maxContentWidth(MaxWidth::Full)
             ->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+                FilamentShieldPlugin::make(),
                 
             ])
+            
             ->colors([
                 //'primary' => Color::Amber,
                 'primary'=>'rgb(28, 20, 99)',
             ])
             ->resources([UserResource::class,
-                \App\Filament\Obras\Resources\DatosDeInicioDeObrasResource::class,
-                \App\Filament\Obras\Resources\ImportesDeobrasResource::class, 
-                \App\Filament\Obras\Resources\ImportesPorOrganismoResource::class,
+                \BezhanSalleh\FilamentShield\Resources\RoleResource::class,
+                
+                
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverResources(in: app_path('Filament/Obras/Resources'), for: 'App\\Filament\\Obras\\Resources')
+            //->discoverResources(in: app_path('Filament/Obras/Resources'), for: 'App\\Filament\\Obras\\Resources')
             ->discoverPages(in: app_path('Filament/Resources/Pages'), for: 'App\\Filament\\Resources\\Pages')
-            ->discoverPages(in: app_path('Filament/Obras/Resources/Pages'), for: 'App\\Filament\\Obras\\Resources\\Pages')
+            //->discoverPages(in: app_path('Filament/Obras/Resources/Pages'), for: 'App\\Filament\\Obras\\Resources\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                AdminDashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
@@ -80,6 +82,6 @@ class AdminPanelProvider extends PanelProvider
            ->authMiddleware([
                 Authenticate::class,
             ])
-            ->topNavigation();
+            ->renderHook('panels::head.end', fn () => view('admin-styles'));
     }
 }

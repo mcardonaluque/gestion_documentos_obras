@@ -15,12 +15,16 @@ module.exports = {
       },
   },
 };
-export default {
+export default {  
     presets: [preset],
     content: [
         './app/Filament/**/*.php',
         './resources/views/filament/**/*.blade.php',
         './vendor/filament/**/*.blade.php',
+        './resources/css/filament/**/*.css',   
+        './resources/**/*.blade.php',
+        './resources/**/*.js',
+        './resources/**/*.vue', 
     ],
     theme: {
         extend: {

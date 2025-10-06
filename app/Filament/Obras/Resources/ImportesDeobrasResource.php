@@ -18,10 +18,10 @@ class ImportesDeObrasResource extends Resource
 {
     protected static ?string $model = ImportesDeObras::class;
     protected static ?string $tenantOwnershipRelationshipName = 'team';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    /**protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static bool $shouldRegisterNavigation = true;
-    protected static ?string $navigationGroup="Importes";
-    protected static ?string $navigationLabel = 'Importes de Obras';
+    protected static ?string $navigationGroup="Gestión de Importes";
+    protected static ?string $navigationLabel = 'Importes de Obras';**/
     public static function getLabel(): string
     {
         return 'Importes de Obras';

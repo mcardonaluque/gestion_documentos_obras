@@ -90,7 +90,10 @@ return [
     'livewire_loading_delay' => 'default',
     'panel-providers' => [
         App\Providers\Filament\AdminPanelProvider::class,
-        App\Providers\Filament\ObrasPanelProvider::class, // 👈 asegúrate de que esto esté aquí
+        App\Providers\Filament\ObrasPanelProvider::class,
+        App\Providers\Filament\AyuntamientosPanelProvider::class,
+        App\Providers\Filament\PlanesPanelProvider::class,
+         // 👈 asegúrate de que esto esté aquí
     ],
     'panels' => [
         'admin' => [
@@ -107,6 +110,10 @@ return [
                 ],
             ],
         ],
+    ],
+    'styles' => [
+        // ... otros styles
+        resource_path('css/filament/admin/theme.css'),
     ],
 
 ];

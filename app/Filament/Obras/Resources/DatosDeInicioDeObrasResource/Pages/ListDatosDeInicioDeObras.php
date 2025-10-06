@@ -16,15 +16,21 @@ class ListDatosDeInicioDeObras extends ListRecords
 {
     $añoActual=now()->year;
     $añoAnterior = now()->subYear(1)->year;
-    $añoAnterior2 = now()->subYear(2)->year;
-    return [
-        $añoAnterior2 => ComponentsTab::make('Año ' . $añoAnterior2)
+    $añoAnterior2 = now()->subYear(10)->year;
+    foreach (range($añoAnterior2, $añoActual) as $año) {
+        // Aquí puedes realizar alguna acción con cada año
+        // Por ejemplo, podrías crear una pestaña para cada año
+        $Tabs[] = ComponentsTab::make('Año ' . $año)
+            ->query(fn (Builder $query) => $query->where('ao_ejecucion', $año));
+    }
+    return $Tabs;
+        /*$añoAnterior2 => ComponentsTab::make('Año ' . $añoAnterior2)
             ->query(fn (Builder $query) => $query->where('ao_ejecucion', $añoAnterior2)),
         $añoAnterior => ComponentsTab::make('Año ' . $añoAnterior)
             ->query(fn (Builder $query) => $query->where('ao_ejecucion', $añoAnterior)),        
         $añoActual => ComponentsTab::make('Año ' . $añoActual)
-            ->query(fn (Builder $query) => $query->where('ao_ejecucion', $añoActual)),    
-    ];
+            ->query(fn (Builder $query) => $query->where('ao_ejecucion', $añoActual)),   */ 
+    
 }
     protected static string $resource = DatosDeInicioDeObrasResource::class;
     protected function getHeaderActions(): array

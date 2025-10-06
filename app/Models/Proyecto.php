@@ -23,20 +23,23 @@ class Proyecto extends Model
         return $this->belongsTo(Team::class);
     }
     
-    function servicio_red(){
-        return $this->belongsTo(TablaDeDepartamento::class,'CODIGO_DPTO','servicio_redactor',);
+    function servicioRed(){
+        return $this->belongsTo(TablaDeDepartamento::class,'servicio_redactor','CODIGO_DPTO',);
+    }
+    function municipio(){
+        return $this->belongsTo(TablaDeMunicipio::class,'CODIGO_MUNICIPIO','codigo_municipio',);
     }
     function obra(){
         return $this->belongsTo(DatosDeInicioDeObras::class,'Expediente','Expediente',);
     }
-    function servicio_dir(){
-        return $this->belongsTo(TablaDeDepartamento::class,'CODIGO_DPTO','servicio_direccion',);
+    function servicioDir(){
+        return $this->belongsTo(TablaDeDepartamento::class,'servicio_direccion','CODIGO_DPTO',);
     }
-    function servicio_gestor(){
-        return $this->belongsTo(TablaDeDepartamento::class,'CODIGO_DPTO','servicio_gestor',);
+    function servicioGestor(){
+        return $this->belongsTo(TablaDeDepartamento::class,'Servicio_Gestor','CODIGO_DPTO',);
     }
-    function tecnico_redactor(){
-        return $this->belongsTo(TablaDeDepartamento::class,'CODIGO_DPTO','servicio_gestor',);
+    function tecnicoDir(){
+        return $this->belongsTo(TecnicoObra::class,'director_tecnico','CodTec',);
     }
     function fases(){
         return $this->hasMany(FaseDeProyecto::class,'Expediente','Expediente',);

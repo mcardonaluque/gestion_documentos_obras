@@ -3,6 +3,8 @@
 namespace App\Policies;
 
 use App\Models\User;
+use BezhanSalleh\FilamentShield\Facades\FilamentShield;
+use Filament\Facades\Filament;
 use Spatie\Permission\Models\Role;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -13,6 +15,15 @@ class RolePolicy
     /**
      * Determine whether the user can view any models.
      */
+    public function before(User $user, $ability)
+    {
+        if (Filament::getCurrentPanel()?->getId() !== 'admin') {
+            return false;
+        }
+
+        return null; // deja que sigan las comprobaciones normales en admin
+    }
+
     public function viewAny(User $user): bool
     {
         return $user->can('view_any_role');

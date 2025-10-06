@@ -25,6 +25,17 @@ class AyudaTecnica extends Model
         'SubvencionEconomicaD',
         'codigo_municipio',
     ];
+    protected static function booted()
+    {
+        static::creating(function ($ayuda) {
+            if ($ayuda->obra) {
+                $ayuda->Codigo_Plan     = $ayuda->obra->Codigo_Plan;
+                $ayuda->numero_obra     = $ayuda->obra->numero_obra;
+                $ayuda->subreferencia   = $ayuda->obra->subreferencia;
+                $ayuda->ao_ejecucion    = $ayuda->obra->ao_ejecucion;
+            }
+        });
+    }
     public function ayudaR():BelongsTo
     {
         return $this->belongsTo(Departamentos::class, 'dpto_redactor', 'CODIGO_DPTO' );

@@ -17,10 +17,10 @@ class ImportesPorOrganismoResource extends Resource
 {
     protected static ?string $model = ImportesPorOrganismo::class;
     protected static ?string $tenantOwnershipRelationshipName = 'team';
-    protected static ?string $navigationGroup="Importes";
+   /**protected static ?string $navigationGroup="Gestión de Importes";
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static bool $shouldRegisterNavigation = true;
-    protected static ?string $navigationLabel = 'Importes por organismo';
+    protected static ?string $navigationLabel = 'Importes por organismo';**/
     public static function getEloquentQuery(): Builder
     {
         $añoActual = now()->year;

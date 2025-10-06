@@ -14,12 +14,18 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use BezhanSalleh\FilamentShield\Resources\RoleResource\Pages;
 use BezhanSalleh\FilamentShield\Resources\RoleResource as BaseRoleResource;
+use Filament\Facades\Filament;
+
+
 class RoleResource extends BaseRoleResource
 {
     protected static ?string $model = Role::class;
     protected static ?string $tenantOwnershipRelationshipName = '';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    public static function shouldRegisterNavigation(): bool
+{
+    return Filament::getCurrentPanel()?->getId() === 'admin'; // o el ID de tu panel de administración
+}
     public static function form(Form $form): Form
     {
         return $form

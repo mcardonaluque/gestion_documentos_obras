@@ -1,7 +1,11 @@
 <?php
-
 namespace App\Providers\Filament;
-
+use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource;
+use App\Filament\Obras\Resources\DatosEjecucionObrasResource;
+use App\Filament\Obras\Resources\ImportesDeobrasResource;
+use App\Filament\Obras\Resources\ImportesPorOrganismoResource;
+use App\Filament\Obras\Resources\PlanseguridadysaludResource;
+use App\Http\Middleware\CleanTenantUrl;
 use App\Models\Team;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -17,7 +21,15 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Str;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Filament\Navigation\MenuItem;
+use Filament\Support\Enums\MaxWidth;
+use Illuminate\Support\Facades\Auth;
+use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
+use App\Filament\Obras\Pages\Dashboard as AyuntamientosDashboard;
 
 class AyuntamientosPanelProvider extends PanelProvider
 {
@@ -27,24 +39,34 @@ class AyuntamientosPanelProvider extends PanelProvider
             ->id('ayuntamientos')
             ->path('ayuntamientos')
             ->login()
-            ->colors([
-               //'primary' => Color::Amber,
-                'primary'=>'rgb(28, 20, 99)',
+            ->authGuard('web') // 
+            ->authMiddleware([
+                Authenticate::class, // 
             ])
-            ->tenant(Team::class)
+            ->topNavigation()
+            ->favicon(asset('img/favicon.ico'))
+            ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))
+            ->brandLogoHeight('2rem')
+            ->maxContentWidth(MaxWidth::Full)
+            ->colors([
+                'primary' => 'rgb(28, 20, 99)',
+            ])
+            ->tenant(Team::class,ownershipRelationship: 'members',slugAttribute: 'slug')// 👈 si realmente quieres tenancy
             ->discoverResources(in: app_path('Filament/Ayuntamientos/Resources'), for: 'App\\Filament\\Ayuntamientos\\Resources')
             ->discoverPages(in: app_path('Filament/Ayuntamientos/Pages'), for: 'App\\Filament\\Ayuntamientos\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                AyuntamientosDashboard::class,
             ])
             ->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
-                
+                FilamentShieldPlugin::make(),
             ])
             ->discoverWidgets(in: app_path('Filament/Ayuntamientos/Widgets'), for: 'App\\Filament\\Ayuntamientos\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
+            ])
+            ->tenantMiddleware([
+                CleanTenantUrl::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -56,10 +78,6 @@ class AyuntamientosPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-            ])
-            
-            ->authMiddleware([
-                Authenticate::class,
             ]);
     }
 }

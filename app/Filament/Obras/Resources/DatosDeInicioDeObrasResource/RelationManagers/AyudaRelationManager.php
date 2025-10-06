@@ -13,7 +13,7 @@ use App\Models\AyudaTecnica;
 
 class AyudaRelationManager extends RelationManager
 {
-    protected static string $relationship = 'ayuda';
+    protected static string $relationship = 'ayudaTecnica';
 
     public function form(Form $form): Form
     {

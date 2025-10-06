@@ -20,7 +20,7 @@ class EditDatosDeInicioDeObras extends EditRecord
     {
         // Obtener el modelo actual
         $record = $this->getRecord();
-        //dd($record->ayuda);
+        //dd($data->ayuda);
         // Calcular el valor de `ubicacion`
         if ($record) {
             $data['Ubicacion'] = $record->municipios ? $record->municipios->nombre_municipio : $record->carretera;

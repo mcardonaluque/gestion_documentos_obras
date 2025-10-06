@@ -21,31 +21,32 @@ class ProyectoResource extends Resource
     protected static ?string $modelLabel = 'Proyecto';
     protected static ?string $pluralModelLabel = 'Proyectos'; 
     protected static ?string $tenantOwnershipRelationshipName = 'team';
-    protected static ?int $navigationSort = 2;
+    /**protected static ?int $navigationSort = 2;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationColor = 'custom-blue';
     protected static ?string $navigationGroup="Proyectos";
-    protected static ?string $navigationLabel ='Proyectos';
+    protected static ?string $navigationLabel ='Proyectos';**/
 
     public static function getEloquentQuery(): Builder
     {
         $añoActual = now()->year;
 
-        $añoAnterior2 = now()->subYear(2)->year;
+        $añoAnterior2 = now()->subYear(10)->year;
         return parent::getEloquentQuery()
         ->select('Proyectos.*') // Selecciona todas las columnas de la tabla "obras"
             //->leftJoin('DatosInicioDeObras', 'DatosInicioDeObras.Expediente', '=', 'Datos_Ejecucion_Obras.Expediente') // Join con la tabla "municipios"
             //->addSelect(trim('TablaDeMunicipios.nombre_municipio'))
            // ->WhereNotNull('carretera');  //->with('municipios');
            ->where('Proyectos.Expediente', '!=', NULL)
-            ->where('Proyectos.ao_ejecucion', '>=', $añoAnterior2)
-            ->where('Proyectos.ao_ejecucion', '<=', $añoActual);
+           ->where('Proyectos.AO_PROYECTO', '>=', $añoAnterior2)
+           ->where('Proyectos.AO_PROYECTO', '<=', $añoActual);
             //->where('codigo_municipio','=', )
       
     }
     public static function form(Form $form): Form
     {
         return $form
+        ->columns(7)
             ->schema([
                 Forms\Components\TextInput::make('CODIGO_MUNICIPIO')
                     ->required()
@@ -201,28 +202,32 @@ class ProyectoResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('CODIGO_MUNICIPIO')
+                Tables\Columns\TextColumn::make('municipio.nombre_municipio')
                     ->numeric()
+                    ->label('Municipio')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('AO_PROYECTO')
+                    ->label('Año')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('NUMERO_PROYECTO')
+                ->label('Número')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('Servicio_Gestor')
+                Tables\Columns\TextColumn::make('servicioGestor.DENOMINACION')
+                    
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\IconColumn::make('Compartido')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('den_proyecto')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('importe_proyecto_Pts')
-                    ->numeric()
-                    ->sortable(),
+                //Tables\Columns\TextColumn::make('importe_proyecto_Pts')
+                //    ->numeric()
+                //    ->sortable(),
                 Tables\Columns\TextColumn::make('organismo_redactor')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('Servicio_redactor')
+                Tables\Columns\TextColumn::make('servicioRed.DENOMINACION')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('autor')
@@ -261,27 +266,27 @@ class ProyectoResource extends Resource
                 Tables\Columns\TextColumn::make('formula4')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('presu_gral_ejecucion_material_Pts')
-                    ->numeric()
-                    ->sortable(),
+               // Tables\Columns\TextColumn::make('presu_gral_ejecucion_material_Pts')
+               //     ->numeric()
+               //     ->sortable(),
                 Tables\Columns\TextColumn::make('por_gastos_generales')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('importe_gastos_generales_Pts')
-                    ->numeric()
-                    ->sortable(),
+               // Tables\Columns\TextColumn::make('importe_gastos_generales_Pts')
+               //     ->numeric()
+               //     ->sortable(),
                 Tables\Columns\TextColumn::make('por_beneficio_industriales')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('importe_beneficio_industriales_Pts')
-                    ->numeric()
-                    ->sortable(),
+                //Tables\Columns\TextColumn::make('importe_beneficio_industriales_Pts')
+                //    ->numeric()
+                //    ->sortable(),
                 Tables\Columns\TextColumn::make('por_control_calidad')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('importe_control_calidad_Pts')
-                    ->numeric()
-                    ->sortable(),
+               // Tables\Columns\TextColumn::make('importe_control_calidad_Pts')
+               //     ->numeric()
+               //     ->sortable(),
                 Tables\Columns\TextColumn::make('por_iva')
                     ->numeric()
                     ->sortable(),
@@ -291,15 +296,15 @@ class ProyectoResource extends Resource
                 Tables\Columns\TextColumn::make('por_subcontrata')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('subcontrata_Pts')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('honorarios_dir_Pts')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('honorarios_red_Pts')
-                    ->numeric()
-                    ->sortable(),
+                //Tables\Columns\TextColumn::make('subcontrata_Pts')
+                //    ->numeric()
+                //    ->sortable(),
+                //Tables\Columns\TextColumn::make('honorarios_dir_Pts')
+                //    ->numeric()
+                //    ->sortable(),
+                //Tables\Columns\TextColumn::make('honorarios_red_Pts')
+                //    ->numeric()
+                //    ->sortable(),
                 Tables\Columns\TextColumn::make('fecha_entrega_proyecto')
                     ->dateTime()
                     ->sortable(),
@@ -394,17 +399,17 @@ class ProyectoResource extends Resource
                     ->boolean(),
                 Tables\Columns\TextColumn::make('Expediente')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('team.name')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+               // Tables\Columns\TextColumn::make('team.name')
+               //     ->numeric()
+               //     ->sortable(),
+               // Tables\Columns\TextColumn::make('created_at')
+               //     ->dateTime()
+               //     ->sortable()
+               //     ->toggleable(isToggledHiddenByDefault: true),
+               // Tables\Columns\TextColumn::make('updated_at')
+               //     ->dateTime()
+               //     ->sortable()
+               //     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Codigo_Plan')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('referencia')
@@ -421,7 +426,7 @@ class ProyectoResource extends Resource
                 Tables\Columns\TextColumn::make('director_tecnico')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('servicio_direccion')
+                Tables\Columns\TextColumn::make('servicioDir.DENOMINACION')
                     ->numeric()
                     ->sortable(),
             ])

@@ -24,7 +24,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource;
 use App\Filament\Obras\Resources\DatosEjecucionObrasResource;
-use App\Filament\Obras\Resources\ImportesDeobrasResource;
+use App\Filament\Obras\Resources\ImportesDeObrasResource;
 use App\Filament\Obras\Resources\ImportesPorOrganismoResource;
 use App\Filament\Obras\Resources\PlanseguridadysaludResource;
 Use App\Filament\Widgets\UltimasObrasTableWidget;
@@ -42,7 +42,7 @@ class PlanesPanelProvider extends PanelProvider
             ->navigation(false) // Desactivamos navegación de recursos
             ->navigation(fn (NavigationBuilder $builder) => $this->getTopNavigation($builder))
             ->resources([
-                ImportesDeobrasResource::class,
+                ImportesDeObrasResource::class,
                 ImportesPorOrganismoResource::class,
                 DatosDeInicioDeObrasResource::class,
                 DatosEjecucionObrasResource::class,
@@ -51,6 +51,7 @@ class PlanesPanelProvider extends PanelProvider
 
             ])
             ->login()
+            ->authGuard('web')
             ->favicon(asset('img/favicon.ico'))
             ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))
             ->brandLogoHeight('2rem')

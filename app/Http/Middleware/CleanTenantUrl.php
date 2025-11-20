@@ -20,7 +20,7 @@ class CleanTenantUrl
     {
         // Obtener la ruta actual
         $path = $request->getRequestUri();
-      
+        //dd($path);
         // Limpiar múltiples espacios codificados
         $cleanPath = preg_replace('/(%20)+/', '%20', $path);
        

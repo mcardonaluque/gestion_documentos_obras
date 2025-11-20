@@ -18,18 +18,77 @@ class DocumentosRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('Expediente')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\TextInput::make('cod_plan')
+                ->required()
+                ->maxLength(45),
+            Forms\Components\TextInput::make('referencia')
+                ->required()
+                ->numeric(),
+            Forms\Components\TextInput::make('subreferencia')
+                ->numeric()
+                ->default(null),
+            Forms\Components\TextInput::make('ao_ejecucion')
+                ->required()
+                ->numeric(),
+            Forms\Components\DatePicker::make('fechaincorporacion')
+                ->required(),
+            Forms\Components\DatePicker::make('fechaHelp'),
+            Forms\Components\TextInput::make('coddcoumento')
+                ->required()
+                ->numeric(),
+            Forms\Components\TextInput::make('csv')
+                ->maxLength(50)
+                ->default(null),
+            Forms\Components\TextInput::make('nregistro')
+                ->maxLength(45)
+                ->default(null),
+            Forms\Components\TextInput::make('nsecuencia')
+                ->numeric()
+                ->default(null),
+            Forms\Components\TextInput::make('estado')
+                ->required()
+                ->numeric(),
+            Forms\Components\TextInput::make('descripcion')
+                ->maxLength(255)
+                ->default(null),
+            Forms\Components\TextInput::make('destino')
+                ->numeric(),
+            Forms\Components\TextInput::make('procedencia')
+                ->numeric(),
             ]);
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('Expediente')
+            ->recordTitleAttribute('expediente_id')
             ->columns([
-                Tables\Columns\TextColumn::make('Expediente'),
+                Tables\Columns\TextColumn::make('cod_plan')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('referencia')
+                ->numeric()
+                ->sortable(),
+            Tables\Columns\TextColumn::make('subreferencia')
+                ->numeric()
+                ->sortable(),
+            Tables\Columns\TextColumn::make('ao_ejecucion')
+                ->numeric()
+                ->sortable(),
+            Tables\Columns\TextColumn::make('fechaincorporacion')
+                ->date()
+                ->sortable(),
+            Tables\Columns\TextColumn::make('fechaHelp')
+                ->date()
+                ->sortable(),
+            Tables\Columns\TextColumn::make('coddcoumento')
+                ->numeric()
+                ->sortable(),
+            Tables\Columns\TextColumn::make('expediente_id')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('csv')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('nregistro')
+                ->searchable(),
             ])
             ->filters([
                 //

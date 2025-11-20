@@ -2,8 +2,8 @@
 
 namespace App\Filament\Obras\Resources;
 
-use App\Filament\Obras\Resources\ImportesDeobrasResource\Pages;
-use App\Filament\Obras\Resources\ImportesDeobrasResource\RelationManagers;
+use App\Filament\Obras\Resources\ImportesDeObrasResource\Pages;
+use App\Filament\Obras\Resources\ImportesDeObrasResource\RelationManagers;
 use App\Models\ImportesDeObras;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -46,7 +46,7 @@ class ImportesDeObrasResource extends Resource
         return $form
             ->schema([
                 //
-            Forms\Components\TextInput::make('Expediente')
+            Forms\Components\TextInput::make('expediente_id')
                 ->required()
                 ->maxLength(255),
            
@@ -68,7 +68,7 @@ class ImportesDeObrasResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('obra.Expediente'),
+                Tables\Columns\TextColumn::make('obra.expediente_id'),
                 Tables\Columns\TextColumn::make('importe_aprobado'),
                 Tables\Columns\TextColumn::make('importe_a_contratar'),
             ])

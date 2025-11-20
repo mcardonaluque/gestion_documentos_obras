@@ -115,7 +115,7 @@ class AyudaTecnicaResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('AyuTecDir')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('Expediente')
+                Tables\Columns\TextColumn::make('expediente_id')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('team_id')
                     ->numeric()

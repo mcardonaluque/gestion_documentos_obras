@@ -1,5 +1,6 @@
 /* resources/css/filament/admin/theme.css */
-
+@source '../../../../app/Filament';
+@source '../../../../resources/views/filament';
 /* ===== TOP MENU STYLES ===== */
 .fi-nav-group[data-group-name="top-navigation"] {
     display: flex;

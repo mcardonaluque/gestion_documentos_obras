@@ -30,7 +30,7 @@ class ImportesPorOrganismoResource extends Resource
 
         return parent::getEloquentQuery()
         ->select('ImportesPorOrganismo.*') // Selecciona todas las columnas de la tabla "obras"
-            ->leftJoin('DatosInicioDeObras', 'DatosInicioDeObras.Expediente', '=', 'ImportesPorOrganismo.Expediente') // Join con la tabla "municipios"
+            ->leftJoin('DatosInicioDeObras', 'DatosInicioDeObras.expediente_id', '=', 'ImportesPorOrganismo.expediente_id') // Join con la tabla "municipios"
             //->addSelect(trim('TablaDeMunicipios.nombre_municipio'))
            // ->WhereNotNull('carretera');  //->with('municipios');
             ->where('ImportesPorOrganismo.ao_ejecucion', '>=', $añoAnterior2)
@@ -42,7 +42,7 @@ class ImportesPorOrganismoResource extends Resource
     {
         return $form
             ->schema([
-            Forms\Components\TextInput::make('Expediente')
+            Forms\Components\TextInput::make('expediente_id')
                 ->required()
                 ->maxLength(255),
             Forms\Components\TextInput::make('organismo')
@@ -80,7 +80,7 @@ class ImportesPorOrganismoResource extends Resource
         return $table
             ->columns([
                 //
-                Tables\Columns\TextColumn::make('Expediente'),
+                Tables\Columns\TextColumn::make('expediente_id'),
                 Tables\Columns\TextColumn::make('organismo'),
                 Tables\Columns\TextColumn::make('importe_aprobado'),
                 Tables\Columns\TextColumn::make('Porc_imp_contratar'),

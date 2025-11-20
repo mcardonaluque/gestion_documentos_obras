@@ -6,7 +6,8 @@ namespace App\Providers\Filament;
 
 use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource;
 use App\Filament\Obras\Resources\DatosEjecucionObrasResource;
-use App\Filament\Obras\Resources\ImportesDeobrasResource;
+use App\Filament\Obras\Resources\ExpedienteResource;
+use App\Filament\Obras\Resources\ImportesDeObrasResource;
 use App\Filament\Obras\Resources\ImportesPorOrganismoResource;
 use App\Filament\Obras\Resources\PlanseguridadysaludResource;
 use App\Http\Middleware\CleanTenantUrl;
@@ -33,7 +34,9 @@ use Filament\Support\Enums\MaxWidth;
 use Illuminate\Support\Facades\Auth;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
+Use App\Filament\Widgets\UltimasObrasTableWidget;
 use App\Filament\Obras\Pages\Dashboard as ObrasDashboard;
+use App\Filament\Obras\Resources\DocumentoexpedienteResource;
 
 class ObrasPanelProvider extends PanelProvider
 {
@@ -58,13 +61,18 @@ class ObrasPanelProvider extends PanelProvider
         return $panel
             ->id('obras')
             ->path('obras')
+            ->authGuard('web')
             ->brandName('Planes Provinciales')
             ->navigation(false)
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
             ->resources([
-                ImportesDeobrasResource::class,
+                ImportesDeObrasResource::class,
                 ImportesPorOrganismoResource::class,
                 DatosDeInicioDeObrasResource::class,
                 DatosEjecucionObrasResource::class,
+                DocumentoexpedienteResource::class,
+                ExpedienteResource::class,
                
                 //\BezhanSalleh\FilamentShield\Resources\RoleResource::class,
 
@@ -84,7 +92,7 @@ class ObrasPanelProvider extends PanelProvider
                 'primary'=>'rgb(28, 20, 99)',
             ])
         
-            ->tenant(Team::class,ownershipRelationship: 'members',slugAttribute: 'slug')
+           // ->tenant(Team::class,ownershipRelationship: 'members',slugAttribute: 'slug')
             //->tenantMiddleware([
             //    \BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant::class,
            // ], isPersistent: true)
@@ -93,11 +101,13 @@ class ObrasPanelProvider extends PanelProvider
             ->pages([
                 ObrasDashboard::class,
             ])
+           //->viteTheme('resources/css/custom.css')
+           //->theme('resources/css/filament/custom.css')
             ->discoverWidgets(in: app_path('Filament/Obras/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
-                Widgets\TableWidget::class,
+                UltimasObrasTableWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -115,9 +125,9 @@ class ObrasPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->tenantMiddleware([
-                CleanTenantUrl::class,
-            ])
+           // ->tenantMiddleware([
+           //     CleanTenantUrl::class,
+           // ])
             //->sidebarCollapsibleOnDesktop();;
             ->topNavigation()
             ->renderHook('panels::head.end', fn () => view('obras-styles'));

@@ -37,7 +37,8 @@ class AvisoResource extends Resource
                     ->maxLength(50),
                 Select::make('TipoAviso')
                     ->label('Tipo de Aviso')
-                    ->options(TiposAviso::all()->pluck('nombre', 'id')) // Obtener los tipos de aviso
+                    ->relationship('tipodeaviso', 'Des') // Usar la relación para obtener los tipos de aviso
+                   // ->options(TiposAviso::all()->pluck('Des', 'TipoAviso')) // Obtener los tipos de aviso
                     ->required(),
                 TextInput::make('Codigo_Plan')
                     ->maxLength(7),
@@ -60,7 +61,7 @@ class AvisoResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('Referencia')->sortable()->searchable(),
-                TextColumn::make('tipoAviso.nombre')->label('Tipo de Aviso')->sortable(), // Mostrar el nombre del tipo de aviso
+                TextColumn::make('tipodeaviso.Des')->label('Tipo de Aviso')->sortable(), // Mostrar el nombre del tipo de aviso
                 TextColumn::make('Codigo_Plan')->sortable()->searchable(),
                 TextColumn::make('numero_obra')->sortable(),
                 TextColumn::make('subreferencia')->sortable(),

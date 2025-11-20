@@ -11,11 +11,11 @@ class Proyecto extends Model
     protected $connection='Obras';
     //protected $table='documentacionexpediente';
     protected $table='Proyectos';
-    protected $primaryKey='Expediente';
+    protected $primaryKey='expediente_id';
 
     protected $fillable =[];
     function expediente(){
-        return $this->belongsTo(Expediente::class,'Expediente','Expediente',);
+        return $this->belongsTo(Expediente::class,'expediente_id','expediente_id',);
     }
    
     public function team(): BelongsTo
@@ -30,7 +30,7 @@ class Proyecto extends Model
         return $this->belongsTo(TablaDeMunicipio::class,'CODIGO_MUNICIPIO','codigo_municipio',);
     }
     function obra(){
-        return $this->belongsTo(DatosDeInicioDeObras::class,'Expediente','Expediente',);
+        return $this->belongsTo(DatosDeInicioDeObras::class,'expediente_id','expediente_id');
     }
     function servicioDir(){
         return $this->belongsTo(TablaDeDepartamento::class,'servicio_direccion','CODIGO_DPTO',);
@@ -42,6 +42,6 @@ class Proyecto extends Model
         return $this->belongsTo(TecnicoObra::class,'director_tecnico','CodTec',);
     }
     function fases(){
-        return $this->hasMany(FaseDeProyecto::class,'Expediente','Expediente',);
+        return $this->hasMany(FaseDeProyecto::class,'expediente_id','expediente_id',);
     }
 }

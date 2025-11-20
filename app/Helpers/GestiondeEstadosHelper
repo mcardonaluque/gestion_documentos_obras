@@ -10,6 +10,9 @@ Class GestiondeEstadosHelper
     public static function getEstadoActual(?int $docuemnto_id){
 
     }
+    public static function saveEstadoActual(?int $docuemnto_id){
+
+    }
     public static function getEstadoSiguiente(?int $documento_id){
 
     }
@@ -24,6 +27,15 @@ Class GestiondeEstadosHelper
         
     }
     public static function getDocumentoSiguiente(?int $documento_id){
+        
+    }
+    public static function saveDocumento(?int $documento_id){
+
+    }
+    public static function saveDocumentoHelp(?int $documento_id){
+        
+    }
+    public static function getDocumentoHelp(?int $documento_id){
         
     }
 }

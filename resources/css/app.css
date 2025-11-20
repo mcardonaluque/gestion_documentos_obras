@@ -3,6 +3,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
 .filament-resource-header{
     font-size: 1.5rem; /* Cambia el tamaño de la letra del encabezado */
 }
@@ -23,4 +25,39 @@
 .custom-textinput-class {
     width: 20px; /* Cambia el ancho del select */
     height: 20px; /* Cambia la altura del select */
+}
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+.transition-transform {
+    transition: transform 0.2s ease-in-out;
+}
+.tabla-excel table {
+    border-collapse: collapse !important;
+    width: 100%;
+}
+
+.tabla-excel th,
+.tabla-excel td {
+    border: 0.5px solid #090909 !important; /* gris claro */
+    padding: 4px 6px !important; /* filas más compactas */
+    line-height: 1 !important; /* menor altura */
+    font-size: 0.85rem !important; /* texto más pequeño */
+}
+
+.tabla-excel th {
+    background-color: #f3f4f6; /* color cabecera */
+    font-weight: 600;
+}
+
+.tabla-excel tr:nth-child(even) td {
+    background-color: #f9fafb; /* rayado alterno */
+}
+
+/* Si quieres aún menos altura */
+.tabla-excel .filament-tables-cell,
+.tabla-excel .filament-tables-header-cell {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
 }

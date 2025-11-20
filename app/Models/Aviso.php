@@ -12,8 +12,9 @@ class Aviso extends Model
     //
     protected $connection='Obras';
     public $incrementing = true;
-    protected $primaryKey='Id';
-    protected $foreignKey = 'TipoAviso';
+    protected $table='Avisos';
+    protected $primaryKey='id';
+   //protected $foreignKey = 'TipoAviso';
     //protected $keyType = 'string';
 
     protected $fillable = [
@@ -31,8 +32,8 @@ class Aviso extends Model
         'borrado' => 'boolean',
         'FecSolucion' => 'datetime',
     ];
-    public function tipoaviso(){
-        return $this->belongsTo(TiposAviso::class);
+    public function tipodeaviso() : BelongsTo{
+        return $this->belongsTo(TiposAviso::class, 'TipoAviso', 'TipoAviso');
     }
     public function team(): BelongsTo
     {

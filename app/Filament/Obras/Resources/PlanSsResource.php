@@ -13,7 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class PlanSSResource extends Resource
+class PlanSsResource extends Resource
 {
     protected static ?string $model = Planseguridadysalud::class;
     protected static ?string $modelLabel = 'Plan de Seguridad';

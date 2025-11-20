@@ -21,7 +21,7 @@ class ImportesPorOrganismoRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('Expediente')
+                Forms\Components\TextInput::make('expediente_id')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('organismo')
@@ -41,7 +41,7 @@ class ImportesPorOrganismoRelationManager extends RelationManager
     {
         
         return $table
-            ->recordTitleAttribute('Expediente')
+            ->recordTitleAttribute('expediente_id')
             ->columns([
                 Tables\Columns\TextColumn::make('organismo'),
                 Tables\Columns\TextColumn::make('Porc_imp_aprobado'),

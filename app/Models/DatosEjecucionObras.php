@@ -14,7 +14,7 @@ class DatosEjecucionObras extends Model
     use HasFactory;
     protected $connection='Obras';
     protected $table='Datos_Ejecucion_Obras';
-    protected $primaryKey='Expediente';
+    protected $primaryKey='expediente_id';
     
     public $incrementing=false;
     protected $keyType='string';
@@ -24,14 +24,14 @@ class DatosEjecucionObras extends Model
         return $this->belongsTo(Team::class);
     }
     public function expediente(){
-        return $this->belongsTo(Expediente::class);
+        return $this->belongsTo(Expediente::class,'expediente_id','expediente_id');
     }
     function importes():HasOne   {
-        return $this->hasOne(ImportesDeObras::class, 'Expediente','Expediente');
+        return $this->hasOne(ImportesDeObras::class, 'expediente_id', 'expediente_id');
     }
     public function importesPorOrganismo():HasMany
     {
-        return $this->hasMany(ImportesporOrganismo::class, 'Expediente', 'Expediente' );
+        return $this->hasMany(ImportesPorOrganismo::class, 'expediente_id', 'expediente_id' );
     }
     
     public function planes():BelongsTo
@@ -39,11 +39,13 @@ class DatosEjecucionObras extends Model
         return $this->belongsTo(Planes::class, 'Codigo_Plan', 'codigo_plan' );
     }
     function obra(){
-        return $this->belongsTo(DatosDeInicioDeObras::class);
+        return $this->belongsTo(DatosDeInicioDeObras::class, 'expediente_id', 'expediente_id');
     }
     public function certificaciones():HasMany
     {
-        return $this->Hasmany(certificaciones::class, 'Expediente', 'Expediente' );
+        return $this->Hasmany(certificaciones::class, 'expediente_id', 'expediente_id' );
     }
-    
+    function pseguridadsalud():HasOne   {
+        return $this->hasOne(Planseguridadysalud::class, 'expediente_id', 'expediente_id');
+    }
 }

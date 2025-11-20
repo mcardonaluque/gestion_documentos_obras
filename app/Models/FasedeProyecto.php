@@ -10,7 +10,7 @@ class FasedeProyecto extends Model
     //
     protected $connection='Obras';
     //protected $table='documentacionexpediente';
-    protected $table='dbo.documentacionexpedientes';
+    protected $table='dbo.FasesdeProyectos';
     protected $primaryKey='Expediente';
 
     protected $fillable =[];

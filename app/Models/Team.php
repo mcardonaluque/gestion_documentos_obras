@@ -18,7 +18,7 @@ class Team extends Model
     }
     public function members(): BelongsToMany
     {
-        return $this->belongsToMany(User::class,'team_user','team_id', 'user_id');
+        return $this->belongsToMany(User::class, 'team_user', 'team_id', 'user_id');
     }
       
    //public function roles(): HasMany
@@ -55,6 +55,15 @@ class Team extends Model
     {
         return $this->hasMany(Proyecto::class);
     }
-    public function getRouteKeyName(): string { return 'name'; }
+    public function getRouteKeyName(): string { return 'name'; 
+    }
+    public function notifications()
+    {
+        return $this->morphMany(CustomNotification::class, 'notifiable');
+    }
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'team_user', 'team_id', 'user_id');
+    }
    
 }

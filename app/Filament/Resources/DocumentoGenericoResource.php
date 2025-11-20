@@ -33,9 +33,11 @@ class DocumentoGenericoResource extends Resource
         return $form
             ->schema([
                 //
-                Forms\Components\TextInput::make('nombreDocumento')
-                    ->required(),
-                Forms\Components\Textarea::make('Descricpcion')
+                Forms\Components\TextInput::make('nombre')
+                ->label('Nombre del documento')
+                ->visible()
+                ->required(),
+                Forms\Components\Textarea::make('descripcion')
                     ->required(),
                 Forms\Components\Select::make('fase_doc')
                     //->relationship(name : 'fasedoc', titleAttribute:'nombre')
@@ -54,11 +56,15 @@ class DocumentoGenericoResource extends Resource
                 Forms\Components\Select::make('cod_tipo_doc')
                     //->relationship(name : 'tipodoc', titleAttribute:'nombre')
                     ->label('Tipo de documento')
-                    ->options(TipoDocumento::All()->pluck('nombre','IdTipo')->toArray())
+                    ->options(TipoDocumento::All()->pluck('nombre','id')->toArray())
                     ->searchable()
                     ->preload()
                     ->live(),
+                Forms\Components\TextInput::make('cod_documento')
+                    ->visible()
+                    ->label('Código Identificativo'),
                 Forms\Components\Checkbox::make('con_plantilla')
+                    ->label('¿Tiene plantilla?')
                     ->required()
                     ->reactive()
                     ->default(true),
@@ -70,7 +76,7 @@ class DocumentoGenericoResource extends Resource
                     ->visible(fn (Get $get): bool =>  $get('con_plantilla'))
                     ->label('Plantilla')
                     ->autocomplete(true),
-                 Forms\Components\TextInput::make('rutaPlantilla')
+                 Forms\Components\TextInput::make('ruta_plantilla')
                     ->visible(fn (Get $get): bool =>  $get('con_plantilla'))
                     ->url ()
                     ->autocomplete(true),
@@ -84,17 +90,25 @@ class DocumentoGenericoResource extends Resource
                     ->searchable()
                     ->preload()
                     ->live(),
+                Forms\Components\Select::make('cod_origen')
+                    //->relationship(name : 'tipodoc', titleAttribute:'nombre')
+                    ->label('Origen del documento')
+                    ->options(DestinoDeDocumentos::All()->pluck('destino','id')->toArray())
+                    ->searchable()
+                    ->preload()
+                    ->live(),
+                Forms\Components\Select::make('cod_destino')
+                    //->relationship(name : 'tipodoc', titleAttribute:'nombre')
+                    ->label('Destinatario del documento')
+                    ->options(DestinoDeDocumentos::All()->pluck('destino','id')->toArray())
+                    ->searchable()
+                    ->preload()
+                    ->live(),
                 Forms\Components\Select::make('entrada_salida')
                     ->label('Entrada/Salida')
                     ->options(['Entrada'=>'Entrada',
                                         'Salida'=>'Salida']),
-                Forms\Components\Select::make('cod_estado')
-                                        //->relationship(name : 'tipodoc', titleAttribute:'nombre')
-                    ->label('Estado del expediente')
-                    ->options(DestinoDeDocumentos::All()->pluck('destino','id')->toArray())
-                    ->searchable()
-                    ->preload()
-                   ->live(),                        
+                                  
                         
             ])->columns(3);
     }
@@ -105,26 +119,25 @@ class DocumentoGenericoResource extends Resource
         return $table
             ->columns([
                 //
-            Tables\Columns\TextColumn::make('nombreDocumento')
-                ->sortable()
-                ->searchable(),
-            Tables\Columns\TextColumn::make('descripcion')
-                ->sortable()
-                ->searchable(),
-                
-            Tables\Columns\TextColumn::make('tipoDocumento.name')
-                ->searchable(),
-            Tables\Columns\TextColumn::make('faseDocumento.name')
+            Tables\Columns\TextColumn::make('nombre')
                 ->sortable()
                 ->searchable(),
             Tables\Columns\TextColumn::make('descripcion')
                 ->sortable()
                 ->searchable()
                 ->toggleable(isToggledHiddenByDefault: true),
-            Tables\Columns\TextColumn::make('created_at')
-                ->dateTime()
+            Tables\Columns\TextColumn::make('tipodoc.nombre')
                 ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
+                ->searchable(),
+            Tables\Columns\TextColumn::make('fasedoc.nombre')
+                ->sortable()
+                ->searchable(),
+            Tables\Columns\TextColumn::make('fasedocsig.nombre')
+                ->sortable()
+                ->searchable(),
+            Tables\Columns\TextColumn::make('destino.destino')
+           
+            
             ])
             ->filters([
                 //

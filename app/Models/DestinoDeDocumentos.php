@@ -12,9 +12,15 @@ class DestinoDeDocumentos extends Model
     protected $connection='Obras';
     protected $table='DestinosDeDocumentos';
     protected $primaryKey='id';
+    protected $fillable=['destino'];
+    public $timestamps = false;
     use HasFactory;
     public function docuemntosgenericos()
     {
         return $this->hasMany(DocumentoGenerico::class);
+    }
+    public function documentos()
+    {
+        return $this->hasMany(DocumentoExpediente::class,'id','destino');
     }
 }

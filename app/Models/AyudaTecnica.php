@@ -11,12 +11,12 @@ class AyudaTecnica extends Model
     //
     protected $connection='Obras';
     protected $table='Ayuda_Tecnica';
-    protected $primaryKey='Expediente';
+    protected $primaryKey='expediente_id';
     protected $foreignKey = 'departamento';
     public $incrementing=false;
     protected $keyType='string';
     protected $fillable = [
-        'Expediente',
+        'expediente_id',
         'dpto_redactor',
         'departamento_direccion',
         'AyuTecRed',
@@ -46,7 +46,7 @@ class AyudaTecnica extends Model
     }
     public function Obra():BelongsTo
     {
-        return $this->belongsTo(DatosDeInicioDeObras::class, 'Expediente', 'Expediente' );
+        return $this->belongsTo(DatosDeInicioDeObras::class, 'expediente_id', 'expediente_id' );
     }
     public function municipio():BelongsTo
     {

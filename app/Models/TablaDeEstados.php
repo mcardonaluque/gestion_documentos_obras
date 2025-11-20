@@ -18,5 +18,11 @@ class TablaDeEstados extends Model
     public function obras(){
         return $this->hasMany (DatosDeInicioDeObras::class,'codigo_estado_obra','cod_estado');
     }
+    public function expedientes(){
+        return $this->hasMany (Expediente::class,'cod_estado','cod_estado');
+    }
+    public function documentosgenerico(){
+        return $this->hasMany (DocumentoGenerico::class,'cod_estado','cod_estado');
+    }
     
 }

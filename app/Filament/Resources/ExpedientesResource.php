@@ -19,12 +19,15 @@ class ExpedientesResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup="Documentación";
+    protected static ?string $tenantOwnershipRelationshipName = 'team';
+    
 
     public static function form(Form $form): Form
     {
         return $form
+            ->columns(5)
             ->schema([
-                Forms\Components\TextInput::make('numero_exp')
+                Forms\Components\TextInput::make('expediente_id')
                     ->required()
                     ->maxLength(510),
                 Forms\Components\TextInput::make('codigo_plan')
@@ -59,7 +62,7 @@ class ExpedientesResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('numero_exp')
+                Tables\Columns\TextColumn::make('expediente_id')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('codigo_plan')
                     ->searchable(),

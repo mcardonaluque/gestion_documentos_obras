@@ -5,6 +5,7 @@ namespace App\Filament\Obras\Resources;
 use App\Filament\Obras\Resources\CertificacionesResource\Pages;
 use App\Filament\Obras\Resources\CertificacionesResource\RelationManagers;
 use App\Models\Certificaciones;
+use App\Models\DatosDeInicioDeObras;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,6 +14,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Forms\Components\ObraGeneralInfo;
+use GdFont;
 
 class CertificacionesResource extends Resource
 {
@@ -28,10 +30,14 @@ class CertificacionesResource extends Resource
 
     public static function form(Form $form): Form
     {
+       // $obra =GetObraData(request()->route('record'));
+       $record=$form->getRecord();
+        $obra = request()->route('record') ? DatosDeInicioDeObras::find(request()->route('record')) : null;
         return $form
             ->columns(7)
             
             ->schema([
+               
                 ObraGeneralInfo::make('informacion_general')
                 ->label('Información General de la Obra')
                 ->SetObraData($record ?? null),
@@ -101,7 +107,7 @@ class CertificacionesResource extends Resource
                 Forms\Components\TextInput::make('CSVC')
                     ->maxLength(50),
                 Forms\Components\Toggle::make('cert_final'),
-                Forms\Components\TextInput::make('Expediente')
+                Forms\Components\TextInput::make('expediente_id')
                     ->maxLength(100),
             ]);
     }
@@ -110,7 +116,7 @@ class CertificacionesResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('Expediente')
+                Tables\Columns\TextColumn::make('expediente_id')
                 ->searchable(),
                 Tables\Columns\TextColumn::make('Codigo_plan')
                     ->searchable(),
@@ -230,7 +236,7 @@ class CertificacionesResource extends Resource
                     ->searchable(),
                 Tables\Columns\IconColumn::make('cert_final')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('Expediente')
+                Tables\Columns\TextColumn::make('expediente_id')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('team_id')
                     ->numeric()
@@ -271,5 +277,11 @@ class CertificacionesResource extends Resource
             'create' => Pages\CreateCertificaciones::route('/create'),
             'edit' => Pages\EditCertificaciones::route('/{record}/edit'),
         ];
+    }
+    protected static function GetObraData(Certificaciones $obra)
+    {
+        
+        return  DatosDeInicioDeObras::find($obra);
+        
     }
 }

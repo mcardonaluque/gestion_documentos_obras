@@ -11,12 +11,16 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Forms\Components\ObraGeneralInfo;
+use App\Filament\Traits\CommonFilters;
+use App\Filament\Traits\MunicipiosFilter;
 class DatosEjecucionObrasResource extends Resource
 {
+    use MunicipiosFilter;
     protected static ?string $model = DatosEjecucionObras::class;
 
     protected static ?string $tenantOwnershipRelationshipName = 'team';
@@ -30,7 +34,7 @@ class DatosEjecucionObrasResource extends Resource
     {
         $añoActual = now()->year;
 
-        $añoAnterior2 = now()->subYear(2)->year;
+        $añoAnterior2 = now()->subYear(10)->year;
         return parent::getEloquentQuery()
         ->select('Datos_Ejecucion_Obras.*') // Selecciona todas las columnas de la tabla "obras"
             //->leftJoin('DatosInicioDeObras', 'DatosInicioDeObras.Expediente', '=', 'Datos_Ejecucion_Obras.Expediente') // Join con la tabla "municipios"
@@ -43,9 +47,13 @@ class DatosEjecucionObrasResource extends Resource
     }
     public static function form(Form $form): Form
     {
+        $record=$form->getRecord();
         return $form
+        ->columns(7)
             ->schema([
-               
+                ObraGeneralInfo::make('informacion_general')
+                ->label('Información General de la Obra')
+                ->SetObraData($record ?? null),
                 Forms\Components\TextInput::make('Codigo_Plan')
                     ->required()
                     ->maxLength(7),
@@ -58,6 +66,9 @@ class DatosEjecucionObrasResource extends Resource
                 Forms\Components\TextInput::make('ao_ejecucion')
                     ->required()
                     ->numeric(),
+              Forms\Components\TextInput::make('expediente_id')
+                   // ->searchable()
+                    ->disabled(),
                 Forms\Components\DateTimePicker::make('Fecha_Inicio_Acta_Replanteo'),
                 Forms\Components\DateTimePicker::make('Fecha_Final_Acta_Replanteo'),
                 Forms\Components\DateTimePicker::make('Fecha_Prorroga_Acta_Replanteo'),
@@ -112,9 +123,10 @@ class DatosEjecucionObrasResource extends Resource
                     ->relationship('team', 'name'),
             ]);
     }
-
+    use CommonFilters; 
     public static function table(Table $table): Table
     {
+        
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('Codigo_Plan')
@@ -126,6 +138,9 @@ class DatosEjecucionObrasResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('ao_ejecucion')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('obra.nombre_obra1')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('Fecha_Inicio_Acta_Replanteo')
@@ -221,7 +236,7 @@ class DatosEjecucionObrasResource extends Resource
                 Tables\Columns\TextColumn::make('Fecha_Medicion')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('Expediente')
+                Tables\Columns\TextColumn::make('expediente_id')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('team.name')
                     ->numeric()
@@ -237,7 +252,10 @@ class DatosEjecucionObrasResource extends Resource
             ])
             ->filters([
                 //
-            ])
+                ...self::getCommonFilters(),
+                self::getMunicipioFromInicioObrasFilter(),
+            ],layout: FiltersLayout::AboveContent)
+          
             ->headerActions([   
                 Tables\Actions\CreateAction::make(),
             ])

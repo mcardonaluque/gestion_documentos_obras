@@ -8,33 +8,38 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
-
+use Illuminate\Support\Facades\DB;
+use App\Models\DatosDeInicioDeObras;
 class ObraGeneralInfo extends Fieldset
-{
-    public function setObraData($obra): static
+{    
+    private  $obra;
+    public function setObraData($reg): static
     {
       //  dd($obra->municipios->municipio->zonas->ZONA);
-       
+       $tablaobra='DatosInicioDeObras';
+       $this->obra=DatosDeInicioDeObras::where('expediente_id',$reg->expediente_id)->first();
+       //dd($this->obra);
         return $this->default([
-            'Codigo_Plan' => $obra->Codigo_Plan ?? null,
-            'Plan' => $obra->planes->denominacion_plan ?? null,
-            'numero_obra' => $obra->numero_obra ?? null,
-            'subreferencia' => $obra->subreferencia ?? null,
-            'ao_ejecucion' => $obra->ao_ejecucion ?? null,
-            'Ubicacion' => $obra ? ($obra->municipio->nombre_municipio ?? $obra->carretera) : 'Sin obra',
-            'Zona' => $obra->municipios->municipio->zonas->ZONA ?? null,
-            'nombre_obra' => $obra->nombre_obra1?? null,
-            'Expediente' => $obra->Expediente ?? null,
-            'forma_ejecucion' => $obra->ejecucion->DESCRIPCION ?? null,
-            'estado_obra' => $obra->estados->DESCRIPCION ?? null,
+            'Codigo_Plan' => $this->obra->Codigo_Plan ?? null,
+            'Plan' => $this->obra->planes->denominacion_plan ?? null,
+            'numero_obra' => $this->obra->numero_obra ?? null,
+            'subreferencia' => $this->obra->subreferencia ?? null,
+            'ao_ejecucion' => $this->obra->ao_ejecucion ?? null,
+            'Ubicacion' => $this->obra ? ($this->obra->municipio->nombre_municipio ?? $this->obra->carretera) : 'Sin obra',
+            'Zona' => $this->obra->municipios->municipio->zonas->ZONA ?? null,
+            'nombre_obra' => $this->obra->nombre_obra1?? null,
+            'Expediente' => $this->obra->expediente_id ?? null,
+            'forma_ejecucion' => $this->obra->ejecucion->DESCRIPCION ?? null,
+            'estado_obra' => $this->obra->estados->DESCRIPCION ?? null,
         ]);
+        
     }
     
    
     public function getChildComponents(): array
     {
         return [
-        Section::make('Datos de la Obra')
+        Section::make('Información de la obra de la Obra')
             ->columns(5)
             ->schema([
         TextInput::make('Codigo_Plan')
@@ -44,8 +49,7 @@ class ObraGeneralInfo extends Fieldset
         Placeholder::make('Plan')
             ->label('Plan')
             ->content(function ($record) {
-                // dd($record->municipios);
-
+                  // dd($record->planes);
                    return $record->planes->denominacion_plan;
                })
             
@@ -69,20 +73,19 @@ class ObraGeneralInfo extends Fieldset
             ->extraAttributes(['class' => 'custom-textinput-class'])
             //->searchable()
             ->content(function ($record) {
-                // dd( $record?->municipios?->nombre_municipio ?? $record?->carretera ?? 'Sin ubicación disponible');
-
-                   return  $record?->municipios?->nombre_municipio ?? $record?->carretera ?? 'Sin ubicación disponible';
+                // dd( $this->obra->municipios->nombre_municipio );
+                return  $this->obra?->municipios?->nombre_municipio ?? $this->obra?->carretera ?? 'Sin ubicación disponible';
                })
             ->disabled() // Hace que el campo sea de solo lectura
             
-            ->dehydrated(false) // Evita que el campo se guarde en la base de datos
-            ->visible(fn ($get) => $get('municipio') || $get('carretera')),
+            ->dehydrated(false), // Evita que el campo se guarde en la base de datos
+            //->visible(fn ($get) => $get('municipio') || $get('carretera')),
         PlaceHolder::make('zona')
             ->id('zona')
             ->label('Zona')
             ->content(function ($get, $record) {
                 // Obtener el municipio y su zona
-                $municipio = $record?->municipios;
+                $municipio = $this->obra->municipios;
                 if ($municipio && $municipio->zonas) {
                     return $municipio->zonas->ZONA; 
                 }
@@ -90,17 +93,26 @@ class ObraGeneralInfo extends Fieldset
             })
             ->dehydrated(false)
             ->disabled(),
-        TextInput::make('nombre_obra1')
+        PlaceHolder::make('nombre_obra1')
             ->label('Nombre de la Obra')
             ->columnSpan(2)
+            ->content(function ($record) {
+               // dd( $this->obra->nombre_obra1);
+               return  $this->obra?->nombre_obra1 ?? 'Sin nombre disponible';
+              })
             ->disabled(),
-        TextInput::make('Expediente')
+        TextInput::make('expediente_id')
             ->label('Expediente')
             ->columnSpan(2)
+            ->extraAttributes(['class' => 'compact-input w-40'])
             ->disabled(),
-        TextInput::make('forma_ejecucion')
+        PLaceHolder::make('forma_ejecucion')
             ->label('Forma de Ejecución')
             ->columnSpan(1)
+            ->content(function ($record) {
+                //dd( $this->obra->municipios->nombre_municipio );
+               return  $this->obra?->forma_ejecucion ?? 'Sin nombre disponible';
+              })
             ->disabled(),
         PlaceHolder::make('ejecucion')
             ->id('ejecucion')
@@ -110,7 +122,7 @@ class ObraGeneralInfo extends Fieldset
             ->label('Forma de Ejecución')
             ->content(function ($get, $record) {
                 
-                $ejecucion = $record?->ejecucion;
+                $ejecucion = $this->obra?->ejecucion;
                 if ($ejecucion ) {
                     return ucwords($ejecucion->DEN_CONTRATA); 
                 }
@@ -118,17 +130,23 @@ class ObraGeneralInfo extends Fieldset
             })
             ->dehydrated(false)
             ->disabled(),
-        TextInput::make('codigo_estado_obra')
+        PlaceHolder::make('codigo_estado_obra')
             ->label('Estado de la Obra')
             ->columnSpan(1)
+            ->content(function ($get, $record) {
+                return ucwords($this->obra?->codigo_estado_obra); 
+            })   
             ->disabled(),
+                            
+
         PlaceHolder::make('Estado')
             ->label('Estado')
             ->content(function ($get, $record) {
                     
-                $estado = $record?->estados;
+                $estado = $this->obra?->estados;
+               
                 if ($estado ) {
-                    return ucwords($estado->estado); 
+                    return ucwords($estado->estado_abrev); 
                 }   
                 return 'No disponible';
             })
@@ -171,11 +189,11 @@ Public function getObraFields(): array
             ->label('Zona')
             ->columnSpan(1)
             ->disabled(),
-        TextInput::make('nombre_obra')
+        TextInput::make('nombre_obra1')
             ->label('Nombre de la Obra')
             ->columnSpan(5)
             ->disabled(),
-        TextInput::make('Expediente')
+        TextInput::make('expediente_id')
             ->label('Expediente')
             ->columnSpan(2)
             ->disabled(),
@@ -193,7 +211,7 @@ Public function getObraFields(): array
  public function getFixComponents(): array{
  return[
  
-    Section::make('Datos de la Obra')
+    Section::make('Identificación de la Obra')
     ->columns(5)
     ->schema([
         // Campo virtual "Ubicación"*/

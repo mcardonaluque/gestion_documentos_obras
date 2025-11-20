@@ -13,13 +13,13 @@ class ImportesDeObras extends Model
     use HasFactory;
     protected $connection='Obras';
     protected $table='ImportesDeObras';
-    protected $primaryKey='Expediente';
+    protected $primaryKey='expediente_id';
     protected $casts = [
         'Expediente' => 'string',
     ];
     public function obra(): BelongsTo
     {
-        return $this->belongsTo(DatosDeInicioDeObras::class, 'Expediente','Expediente');
+        return $this->belongsTo(DatosDeInicioDeObras::class, 'expediente_id', 'expediente_id');
     }
     public function team(): BelongsTo
     {

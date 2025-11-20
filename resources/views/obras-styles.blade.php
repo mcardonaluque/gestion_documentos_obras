@@ -292,9 +292,9 @@
         
         // Usar el team ACTUAL del usuario, no el primero
        
-       $team = \Filament\Facades\Filament::getTenant();
+       //$team = \Filament\Facades\Filament::getTenant();
        // Si no hay team, usar un slug por defecto   
-       $municipioSlug = $team?->name ?? 'default';//$team ? \Illuminate\Support\Str::slug($team->name) : 'default';
+       //$municipioSlug = $team?->name ?? 'default';//$team ? \Illuminate\Support\Str::slug($team->name) : 'default';
     @endphp
 @if($user)
 <div class="custom-tabs-container">
@@ -303,7 +303,7 @@
            <div class="custom-tab" data-tab="inicio">
             🚀 Inicio
             <div class="custom-submenu">
-                <a href="/obras/{{ $municipioSlug }}/datos-de-inicio-de-obras" class="custom-submenu-item">
+                <a href="/obras/datos-de-inicio-de-obras" class="custom-submenu-item">
                     🏗️ Inicio de Obras
                 </a>
             </div>
@@ -312,10 +312,10 @@
         <div class="custom-tab" data-tab="proyectos">
             📁 Proyectos
             <div class="custom-submenu">
-                <a href="/obras/{{ $municipioSlug }}/proyectos" class="custom-submenu-item">
+                <a href="/obras/proyectos" class="custom-submenu-item">
                     📋 Proyectos
                 </a>
-                <a href="/obras/{{ $municipioSlug }}/fase-de-proyectos" class="custom-submenu-item">
+                <a href="/obras/fase-de-proyectos" class="custom-submenu-item">
                     📊 Fases de Proyectos
                 </a>
             </div>
@@ -324,9 +324,10 @@
            <div class="custom-tab" data-tab="Cesión">
             🚀 Cesión
             <div class="custom-submenu">
-                <a href="/obras/{{ $municipioSlug }}/obra-cedidas" class="custom-submenu-item">
+                <a href="/obras/obra-cedidas" class="custom-submenu-item">
                     📦 Cesión de Obras
                 </a>
+                📢
             </div>
         </div>
      
@@ -335,13 +336,14 @@
         <div class="custom-tab" data-tab="ejecucion">
             ⚡ Ejecución
             <div class="custom-submenu">
-                <a href="/obras/{{ $municipioSlug }}/datos-ejecucion-obras" class="custom-submenu-item">
+           {{-- -  <a href="/obras/{{ $municipioSlug }}/datos-ejecucion-obras" class="custom-submenu-item"> --}}
+                <a href="/obras/datos-ejecucion-obras" class="custom-submenu-item">
                     📈 Datos de Ejecución
                 </a>
                 <a href="/obras/planss" class="custom-submenu-item">
                     👷‍♀️ Acta de replanteo
                 </a>
-                <a href="/obras/{{ $municipioSlug }}/certificaciones" class="custom-submenu-item">
+                <a href="/obras/certificaciones" class="custom-submenu-item">
                     📝 Certificaciones
                 </a>
                 <a href="/obras/planss" class="custom-submenu-item">
@@ -353,6 +355,45 @@
                 </a>
             </div>
         </div>
+        <div class="custom-tab" data-tab="Expedientes">
+            📁 Proyectos
+            <div class="custom-submenu">
+                <a href="/obras/expedientes" class="custom-submenu-item">
+                    📋 Expedientes
+                </a>
+                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                    🗒️ Documentos de Proyectos
+                </a>
+            </div>
+        </div>
+        <div class="custom-tab" data-tab="Expedientes">
+            📁Documentación
+            <div class="custom-submenu">
+                <a href="/obras/expedientes" class="custom-submenu-item">
+                    📋 Documentos de Incio
+                </a>
+                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                    🗒️ Documentos de Proyectos
+                </a>
+                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                    🗒️ Documentos de Cesión
+                </a>
+                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                    🗒️ Documentos de Ejecución
+                </a>
+                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                    🗒️ Documentos de Justificación
+                </a>
+            </div>
+        </div>
+        <div class="custom-tab" data-tab="Cesión">
+            📢 Tareas
+            <div class="custom-submenu">
+                <a href="/obras/notifications" class="custom-submenu-item">
+                    📢 Notificaciones
+                </a>
+                
+            </div>
     </nav>
 </div>
 @endauth

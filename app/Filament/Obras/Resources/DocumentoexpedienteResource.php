@@ -15,9 +15,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DocumentoexpedienteResource extends Resource
 {
-    protected static ?string $model = Documentoexpediente::class;
-
+    protected static ?string $model = DocumentoExpediente::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationLabel = 'Documentos del Expediente';
+    protected static ?string $tenantOwnershipRelationshipName = 'team';
 
     public static function form(Form $form): Form
     {
@@ -38,7 +39,7 @@ class DocumentoexpedienteResource extends Resource
                 Forms\Components\DatePicker::make('fechaincorporacion')
                     ->required(),
                 Forms\Components\DatePicker::make('fechaHelp'),
-                Forms\Components\TextInput::make('coddcoumento')
+                Forms\Components\TextInput::make('cod_dcoumento')
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('csv')
@@ -50,24 +51,27 @@ class DocumentoexpedienteResource extends Resource
                 Forms\Components\TextInput::make('nsecuencia')
                     ->numeric()
                     ->default(null),
-                Forms\Components\TextInput::make('estado')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\TextInput::make('estado.nombre')
+                    ->required(),
+                   
                 Forms\Components\TextInput::make('descripcion')
                     ->maxLength(255)
                     ->default(null),
                 Forms\Components\Select::make('team_id')
                     ->relationship('team', 'name'),
-                Forms\Components\TextInput::make('destino')
-                    ->numeric(),
-                Forms\Components\TextInput::make('procedencia')
-                    ->numeric(),
+                Forms\Components\TextInput::make('destino.destino')
+                    ->label('Destino'),
+                 
+                Forms\Components\TextInput::make('procedencia.destino')
+                    ->label('Procedencia')
+                   
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+       
             ->columns([
                 Tables\Columns\TextColumn::make('cod_plan')
                     ->searchable(),
@@ -86,10 +90,10 @@ class DocumentoexpedienteResource extends Resource
                 Tables\Columns\TextColumn::make('fechaHelp')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('coddcoumento')
+                Tables\Columns\TextColumn::make('cod_dcoumento')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('Expediente')
+                Tables\Columns\TextColumn::make('expediente_id')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('csv')
                     ->searchable(),
@@ -106,11 +110,11 @@ class DocumentoexpedienteResource extends Resource
                 Tables\Columns\TextColumn::make('team.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('destino')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('destinos.destino')
+                    ->label('Destino')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('procedencia')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('procedencias.destino')
+                   ->label('Procedencia')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -126,6 +130,11 @@ class DocumentoexpedienteResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make('Ver Documento')
+                ->url(function ($record){
+                    $tenant = \Filament\Facades\Filament::getTenant();
+                     route('filament.ayuntamientos.resources.documentoexpedientes.view', ['record' => $record,'tenant' => $tenant]);
+                }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -147,6 +156,7 @@ class DocumentoexpedienteResource extends Resource
             'index' => Pages\ListDocumentoexpedientes::route('/'),
             'create' => Pages\CreateDocumentoexpediente::route('/create'),
             'edit' => Pages\EditDocumentoexpediente::route('/{record}/edit'),
+            'view' => Pages\ViewDocumentoexpediente::route('/{record}'),
         ];
     }
 }

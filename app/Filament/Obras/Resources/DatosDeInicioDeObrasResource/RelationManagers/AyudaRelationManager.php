@@ -19,7 +19,7 @@ class AyudaRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('Expediente')
+                Forms\Components\TextInput::make('expediente_id')
                     //->required()
                     ->fillUsing(function ($component, $state, $record) {
                         $component->state($this->ownerRecord->expediente);
@@ -57,9 +57,9 @@ class AyudaRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('Expediente')
+            ->recordTitleAttribute('expediente_id')
             ->columns([
-                Tables\Columns\TextColumn::make('Expediente'),
+                Tables\Columns\TextColumn::make('expediente_id'),
                 Tables\Columns\TextColumn::make('dpto_redactor'),
                 Tables\Columns\TextColumn::make('departamento_direcccion'),
                 Tables\Columns\TextColumn::make('AyuTecRed'),

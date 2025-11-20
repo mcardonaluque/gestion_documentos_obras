@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Models\ImportesDeObras;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class ImportesDeobrasPolicy
+class ImportesDeObrasPolicy
 {
     use HandlesAuthorization;
 

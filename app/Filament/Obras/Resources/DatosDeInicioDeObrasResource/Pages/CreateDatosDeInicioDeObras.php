@@ -31,7 +31,7 @@ protected function mutateFormDataBeforeFill(array $data): array
     if ($record && $record->ayuda) {
         // Carga los datos de "ayuda" en el formulario
         $data['ayuda'] = [
-            'Expediente' => $record->ayuda->Expediente,
+            'Expediente' => $record->ayuda->expediente_id,
             'dpto_redactor' => $record->ayuda->dpto_redactor,
             'departamento_direccion' => $record->ayuda->departamento_direccion,
             'AyuTecRed' => $record->ayuda->AyuTecRed,

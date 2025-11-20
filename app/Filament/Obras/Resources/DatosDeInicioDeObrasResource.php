@@ -5,7 +5,9 @@ namespace App\Filament\Obras\Resources;
 use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\Pages;
 use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\RelationManagers\ImportesPorOrganismoRelationManager;
 use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\RelationManagers\AyudaRelationManager;
-use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\RelationManagers\DocumentoExpedienteRelationManager;
+use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource\RelationManagers\DocumentosRelationManager;
+use App\Filament\Traits\ZonasFilter;
+use App\Forms\Components\ImportesInfo;
 use App\Models\DatosDeInicioDeObras;
 use App\Models\TablaDeDepartamento;
 use App\Models\TablaDeMunicipio;
@@ -22,8 +24,19 @@ use Dompdf\Dompdf;
 use Illuminate\Support\Facades\DB;
 use Filament\Notifications\Notification;
 use App\Forms\Components\ObraGeneralInfo;
+use Filament\Tables\Enums\FiltersLayout;
+use App\Filament\Traits\CommonFilters;
+use App\Filament\Traits\MunicipiosFilter;
+
+//use Filament\QueryBuilder\Constraints\TextConstraint;
+use Filament\Tables\Filters\QueryBuilder;
+use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
+
 class DatosDeInicioDeObrasResource extends BaseResource
 {
+    use MunicipiosFilter;
+    use CommonFilters; 
+    use ZonasFilter;
     protected static ?string $model = DatosDeInicioDeObras::class;
     protected static ?string $tenantOwnershipRelationshipName = 'team';
     /**protected static ?int $navigationSort = 1;
@@ -35,7 +48,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
         'municipios.nombre',
         'Codigo_Plan',
         'ao_ejecuciion',
-        'Expediente',
+        'expediente_id',
     ];
  
     public static function getEloquentQuery(): Builder
@@ -66,6 +79,11 @@ class DatosDeInicioDeObrasResource extends BaseResource
             ObraGeneralInfo::make('informacion_general')
                 ->label('Información General de la Obra')
                 ->SetObraData($record ?? null),
+            ImportesInfo::make('importes')
+                ->label('Importes de la Obra')
+                ->setImportesDataOrganismo(function($record){
+                    dd($record->ImportesporOrganismo);
+                }),
            /* Forms\Components\Select::make('municipio')
                 ->label('Municipio')
                 ->relationship('municipios', 'nombre_municipio')
@@ -107,7 +125,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
                         'NO' => 'NO',
                         'NR' => 'NR'                    ]),
                     //->required()
-                Forms\Components\TextInput::make('Expediente')
+                Forms\Components\TextInput::make('expediente_id')
                     ->label('Expediente')
                     ->required(),
                 Forms\Components\TextInput::make('PartidaPresupuesto')
@@ -116,14 +134,14 @@ class DatosDeInicioDeObrasResource extends BaseResource
                 Forms\Components\TextInput::make('peticion_ayuda_tec')
                     ->nullable()
                     ->label('Petición Ayuda técnica'),
-                Forms\Components\TextArea::make('EstadoServicioTecnico')
+                Forms\Components\Textarea::make('EstadoServicioTecnico')
                     ->label('Estado Servicio Tecnico')
                     ->nullable(),
 
-                Forms\Components\TextArea::make('EstadoServicioAdministrativo')
+                Forms\Components\Textarea::make('EstadoServicioAdministrativo')
                     ->label('Estado Servicio Admvo.')
                     ->nullable(),
-                Forms\Components\TextArea::make('comentario')
+                Forms\Components\Textarea::make('comentario')
                     ->label('Comentario')
                     ->nullable(),
                 Forms\Components\Select::make('TipoPrograma')
@@ -145,7 +163,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
                             ->label('Importe Aprobado')
                             ->nullable()
                             ->numeric(),
-                Forms\Components\radio::make('Aportacion')
+                Forms\Components\Radio::make('Aportacion')
                     ->label('Aportación del Ayto.')
                     ->default('NO')
                     ->reactive()
@@ -163,12 +181,12 @@ class DatosDeInicioDeObrasResource extends BaseResource
                         'NO' => 'NO',
                     ]),
 
-                Forms\Components\radio::make('CompApAyto')
+                Forms\Components\Radio::make('CompApAyto')
                         ->label('Forma de Aportación')
                         ->reactive()
                         ->visible(fn ($get) => $get('Aportacion')==='SI')
                         //->dehydrateStateUsing(function ($state, $get) {
-                            // Si el campo "forma" está vacío, guarda el valor del campo radio
+                            // Si el campo "forma" está vacío, guarda el valor del campo Radio
                            // dd($get('Aportacion'));
                         //    return empty($state) ? $get('Aportacion') : $state;
                         //})
@@ -301,12 +319,12 @@ class DatosDeInicioDeObrasResource extends BaseResource
                 ->id('ayuda_tecnica')
                 ->relationship('ayudaTecnica')
                 ->schema([
-                Forms\Components\TextInput::make('Expediente')
+                Forms\Components\TextInput::make('expediente_id')
                     ->label('Expediente')
                     ->dehydrateStateUsing(function ($state, $get) {
 
                        dd($state);
-                        return empty($state) ? $get('Expediente') : $state;
+                        return empty($state) ? $get('expediente_id') : $state;
                     })
                     ->disabled(),
 
@@ -337,34 +355,46 @@ class DatosDeInicioDeObrasResource extends BaseResource
 
             ]);
     }
-
+   
     public static function table(Table $table): Table
     {
         
         return $table
         ->defaultSort('ao_ejecucion', 'desc')
+        ->contentGrid([
+            'md' => 1, // una sola columna
+        ])
+        
+        ->striped() // Filas alternas tipo Excel
+        //->paginated(false) // Mostrar todas las filas
             ->columns([
                 //
 
             Tables\Columns\TextColumn:: make('Codigo_Plan')
                 ->sortable()
-                ->hidden()
+                ->toggleable(isToggledHiddenByDefault: false)
                 ->searchable(),
             Tables\Columns\TextColumn::make('numero_obra')
                 ->sortable()
                 ->searchable()
-                ->hidden(),
+                ->toggleable(isToggledHiddenByDefault: false),
             Tables\Columns\TextColumn::make('subreferencia')
                 ->searchable()
-                ->hidden(),
+                ->searchable()
+                ->toggleable(isToggledHiddenByDefault: false),
             Tables\Columns\TextColumn::make('ao_ejecucion')
                 ->sortable()
-                ->searchable()
-                ->hidden(),
+                //->searchable()
+                ->toggleable(isToggledHiddenByDefault: false),
             Tables\Columns\TextColumn::make('Obra')
                     ->label('Obra')
-                    // ->sortable()
-                   // ->searchable()
+                     ->sortable()
+                    /*->searchable([
+                        'Codigo_Plan',
+                        'numero_obra', 
+                        'subreferencia',
+                        'ao_ejecucion'
+                    ])*/
                    // ->grow()
                     ->extraHeaderAttributes(['class' => 'px-8'])
                     ->extraCellAttributes(['class' => 'px-8'])
@@ -435,10 +465,10 @@ class DatosDeInicioDeObrasResource extends BaseResource
                 ->extraHeaderAttributes(['class' => 'px-8'])
                 ->extraCellAttributes(['class' => 'px-8'])
                 ->toggleable(isToggledHiddenByDefault: false),
-            Tables\Columns\TextColumn::make('Expediente')
+            Tables\Columns\TextColumn::make('expediente_id')
                 ->label('Expediente')
                 ->sortable()
-                ->searchable()
+               // ->searchable()
                 ->grow()
                 ->extraHeaderAttributes(['class' => 'px-8'])
                 ->extraCellAttributes(['class' => 'px-8'])
@@ -447,9 +477,12 @@ class DatosDeInicioDeObrasResource extends BaseResource
 
             ->filters([
                 //
-            ])
+            ...self::getCommonFilters(),
+            self::getMunicipioFromInicioObrasFilter(),
+            self::getZonaFromInicioObrasFilter(),
+           ],layout: FiltersLayout::AboveContent)
             ->actions([
-              //  Tables\Actions\EditAction::make()   ,
+               Tables\Actions\EditAction::make()   ,
             ])
 
             ->bulkActions([
@@ -465,7 +498,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
             //
             ImportesPorOrganismoRelationManager::class,
             AyudaRelationManager::class,
-            DocumentoExpedienteRelationManager::class
+            DocumentosRelationManager::class
         ];
     }
 
@@ -476,7 +509,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
             ->where('carretera', 'like', "%{$search}%")
             ->orWhere('Codigo_Plan', 'like', "%{$search}")
             ->orWhere('ao_ejecucion', 'like', "%{$search}")
-            ->orWhere('Expediente','like',"%{$search}")  // Busca en el campo "carretera"
+            ->orWhere('expediente_id','like',"%{$search}")  // Busca en el campo "carretera"
             ->orWhereHas('municipios', function (Builder $query) use ($search) {
                 $query->where('nombre_municipio', 'like', "%{$search}%");
             }) // Busca en el campo "nombre" de la relación "municipio"*/
@@ -499,7 +532,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
         if ($record && $record->ayuda) {
             // Carga los datos de "ayuda" en el formulario
             $data['ayudaTecnica'] = [
-                'Expediente' => $record->ayuda->Expediente,
+                'Expediente' => $record->ayuda->expediente_id,
                 'dpto_redactor' => $record->ayuda->dpto_redactor,
                 'departamento_direccion' => $record->ayuda->departamento_direccion,
                 'AyuTecRed' => $record->ayuda->AyuTecRed,

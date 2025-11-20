@@ -9,31 +9,34 @@ use Filament\Forms\Components\DatePicker;
 
 class ImportesInfo extends Fieldset
 {
+    
     public function setImportesDataOrganismo($Importes): static
-    {
-        return $this->default([
-            'importe_aprobado' => $Importes->importe_aprobado ?? null,
-            'numero_obra' => $importes->numero_obra ?? null,
-            'subreferencia' => $importes->subreferencia ?? null,
-            'ao_ejecucion' => $importes->ao_ejecucion ?? null,
-            'organismo' => $Importes->organismos->DESCRIPCION ?? null,
-            'Porc_Imp_Aprobado' => $Importes->Porc_Imp_aprobado ?? null,
-            'importe_a_contratar' => $Importes->importe_a_contratar?? null,
+    { 
+        $i=0;
+        $datos = [];
+       foreach ($Importes as $Importe){
+        $datos[$i]=[
+            'organismo' => $Importe->organismos->DESCRIPCION ?? null,
             'Expediente' => $obra->Expediente ?? null,
-            'importe_adjudicacion' => $Importes->importe_adjudicacioin ?? null,
-            'importe_adremanente' => $Importes->importe_remanente ?? null,
-            'importe_baja_contratacion' => $Importes->importe_baja_contratacion ?? null,
-            'importe_ejecutado' => $Importes->importe_ejecutado ?? null,
-            'importe_ejecutado_decreto' => $Importes->importe_ejecutado_decreto ?? null,
-            'Porc_imp_Adjudicado' => $Importes->Porc_imp_adjudicado ?? null,
-            'Porc_imp_ejecutado' => $Importes->Porc_imp_ejecutado ?? null,
-            'Porc_imp_contratar' => $Importes->Porc_imp_contratar ?? null,
-            'Porc_imp_baja' => $Importes->Porc_imp_baja ?? null,
-
-        ]);
+            'importe_aprobado' => $Importe->importe_aprobado ?? null,
+            'Porc_Imp_Aprobado' => $Importe->Porc_Imp_aprobado ?? null,
+            'importe_a_contratar' => $Importe->importe_a_contratar?? null,
+            'importe_adjudicacion' => $Importe->importe_adjudicacioin ?? null,
+            'importe_adremanente' => $Importe->importe_remanente ?? null,
+            'importe_baja_contratacion' => $Importe->importe_baja_contratacion ?? null,
+            'importe_ejecutado' => $Importe->importe_ejecutado ?? null,
+            'importe_ejecutado_decreto' => $Importe->importe_ejecutado_decreto ?? null,
+            'Porc_imp_Adjudicado' => $Importe->Porc_imp_adjudicado ?? null,
+            'Porc_imp_ejecutado' => $Importe->Porc_imp_ejecutado ?? null,
+            'Porc_imp_contratar' => $Importe->Porc_imp_contratar ?? null,
+            'Porc_imp_baja' => $Importe->Porc_imp_baja ?? null,
+        ];
+        $i++;
+       }
+        return $this->default($datos);
     }
     public function setImportesporOrganismo($Importes): static
-    {
+    {   $obra=$Importes->obra;
         return $this->default([
             'importe_aprobado' => $Importes->importe_aprobado ?? null,
             'numero_obra' => $obra->numero_obra ?? null,
@@ -64,8 +67,7 @@ class ImportesInfo extends Fieldset
             TextInput::make('subreferencia')
                 ->label('Subreferencia')
                 ->disabled()
-                ->dehydrated()
-                ->rows(3),
+                ->dehydrated(),
                 
             TextInput::make('ao_ejecucion')
                 ->label('Año de Ejecución')

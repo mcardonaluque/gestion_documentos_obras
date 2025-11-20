@@ -39,10 +39,10 @@ class DocumentoexpedienteResource extends Resource
                 Forms\Components\DatePicker::make('fechaincorporacion')
                     ->required(),
                 Forms\Components\DatePicker::make('fechaHelp'),
-                Forms\Components\TextInput::make('coddcoumento')
+                Forms\Components\TextInput::make('cod_dcoumento')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('Expediente')
+                Forms\Components\TextInput::make('expediente_id')
                     ->required()
                     ->maxLength(45),
                 Forms\Components\TextInput::make('csv')
@@ -54,7 +54,7 @@ class DocumentoexpedienteResource extends Resource
                 Forms\Components\TextInput::make('nsecuencia')
                     ->numeric()
                     ->default(null),
-                Forms\Components\TextInput::make('estado')
+                Forms\Components\TextInput::make('estado.nombre')
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('descripcion')
@@ -84,10 +84,10 @@ class DocumentoexpedienteResource extends Resource
                 Tables\Columns\TextColumn::make('fechaHelp')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('coddcoumento')
+                Tables\Columns\TextColumn::make('cod_dcoumento')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('nexpediente')
+                Tables\Columns\TextColumn::make('expediente_id')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('csv')
                     ->searchable(),
@@ -96,7 +96,7 @@ class DocumentoexpedienteResource extends Resource
                 Tables\Columns\TextColumn::make('nsecuencia')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('estado')
+                Tables\Columns\TextColumn::make('estado.nombre')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('descripcion')

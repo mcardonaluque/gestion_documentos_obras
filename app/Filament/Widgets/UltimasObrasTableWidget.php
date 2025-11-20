@@ -20,7 +20,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class UltimasObrasTableWidget extends BaseWidget
 {
-    protected static ?string $heading = 'Últimas 100 Obras';
+    protected static ?string $heading = 'Últimas Obras';
 
     protected int | string | array $columnSpan = 'full'; // ocupa todo el ancho
     public ?string $obraSeleccionadaId = null;
@@ -30,11 +30,12 @@ class UltimasObrasTableWidget extends BaseWidget
             ->query(
                 DatosDeInicioDeObras::query()->where('Codigo_Plan','<>','')
                     // ajusta si usas otra columna de fecha
-                    ->limit(100)
+                    //->limit(500)
+                    
             )
             ->columns([
                 
-                Tables\Columns\TextColumn::make('Expediente')
+                Tables\Columns\TextColumn::make('expediente_id')
                     ->label('ID')
                     ->searchable()
                     ->sortable(),
@@ -51,7 +52,7 @@ class UltimasObrasTableWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('nombre_obra1')
                     ->label('Nombre')
                     ->searchable()
-                    ->wrap()
+                    //->wrap()
                     ->grow(false)
                     ->size(TextColumn\TextColumnSize::ExtraSmall),
                 Tables\Columns\TextColumn::make('codigo_estado_obra')
@@ -69,7 +70,7 @@ class UltimasObrasTableWidget extends BaseWidget
                     ->label('Zona')
                     ->sortable()
                     ->searchable()
-                    ->grow()
+                    ->grow(false)
                     ->extraHeaderAttributes(['class' => 'px-8'])
                     ->extraCellAttributes(['class' => 'px-8'])
                     ->toggleable(isToggledHiddenByDefault: false),
@@ -90,7 +91,9 @@ class UltimasObrasTableWidget extends BaseWidget
                     ->toggleable(isToggledHiddenByDefault: false),
                
             ])
-            ->paginated(false) 
+            ->paginated(true) 
+            ->defaultSort('ao_ejecucion', 'desc')
+            
             //->selectable()
             
             ->headerActions([
@@ -164,7 +167,7 @@ class UltimasObrasTableWidget extends BaseWidget
                         ->url(function () {
                             if (!$this->obraSeleccionadaId) return '#';
                             $obra = DatosDeInicioDeObras::find($this->obraSeleccionadaId);
-                            return $obra ? DatosDeInicioDeObrasResource::getUrl('view', ['record' => $obra]) : '#';
+                            return $obra ? DatosDeInicioDeObrasResource::getUrl('view', ['record' => $obra,]) : '#';
                         })
                         ->hidden(fn () => !$this->obraSeleccionadaId),
                 ])
@@ -179,29 +182,28 @@ class UltimasObrasTableWidget extends BaseWidget
             ->actions([
                 Action::make('seleccionar')
                     ->label(function (DatosDeInicioDeObras $record){ 
-                        //dd($this->obraSeleccionadaId); 
+                        //dd($record); 
                         //dd($this->obraSeleccionadaId === $record->Expediente );
                         
-                        return $this->obraSeleccionadaId === $record->Expediente 
+                        return $this->obraSeleccionadaId === $record->expediente_id 
                             ? 'Seleccionada' 
                             : 'Seleccionar';
                     })
-                    ->action(function ($record, $livewire) {
-                        $livewire->obraSeleccionada = $record->Expediente;
-                    })
+                   
                     
                     ->icon(fn (DatosDeInicioDeObras $record) => 
-                        $this->obraSeleccionadaId === $record->Expediente 
+                        $this->obraSeleccionadaId === $record->expediente_id 
                             ? 'heroicon-o-check-circle' 
                             : 'heroicon-o-plus-circle'
                     )
                     ->color(fn (DatosDeInicioDeObras $record) => 
-                        $this->obraSeleccionadaId === $record->Expediente 
+                        $this->obraSeleccionadaId === $record->expediente_id 
                             ? 'success' 
                             : 'primary'
                     )
                     ->action(function (DatosDeInicioDeObras $record) {
-                        $this->obraSeleccionadaId = $record->Expediente;
+                        $this->obraSeleccionadaId = $record->expediente_id;
+                        //dd($this->obraSeleccionadaId);
                         // Forzar recarga para actualizar la interfaz
                         $this->dispatch('refreshWidget');
                     }),
@@ -225,7 +227,7 @@ class UltimasObrasTableWidget extends BaseWidget
         }
         
         $obra = DatosDeInicioDeObras::find($this->obraSeleccionadaId);
-        return $obra ? "Obra seleccionada: {$obra->nombre} ({$obra->codigo})" : 'Obra no encontrada';
+        return $obra ? "Obra seleccionada: {$obra->nombre} ({$obra->expediente_id})" : 'Obra no encontrada';
     }
 }
 

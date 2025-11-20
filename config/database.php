@@ -109,8 +109,16 @@ return [
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'encrypt' => env('DB_ENCRYPT', 'yes'),
-            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'yes'),
+            'options' => [      
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                1002 => false, // <---- desactiva SSL
+                1001 => true, // confía en certificado autofirmado
+                PDO::SQLSRV_ATTR_QUERY_TIMEOUT => 30,
+                
+            ],
+            //'encrypt' => env('DB_ENCRYPT', 'no'),
+            //'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+            
         ],
         'Tablas' => [
             'driver' => 'sqlsrv',
@@ -124,8 +132,8 @@ return [
               'charset' => env('DB_CHARSET', 'utf8'),
               'prefix' => '',
               'prefix_indexes' => true,
-              'encrypt' => env('DB_ENCRYPT', 'no'),
-             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'yes'),
+              'encrypt' => env('DB_ENCRYPT', 'yes'),
+             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
           
             
         ],

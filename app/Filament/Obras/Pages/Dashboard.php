@@ -10,5 +10,4 @@ class Dashboard extends BaseDashboard
         return 'Planes de Obras Provinciales'; // 👈 título en el header
     }
 
-  
 }

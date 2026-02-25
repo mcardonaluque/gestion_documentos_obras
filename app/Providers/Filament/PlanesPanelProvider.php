@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages\Dashboard;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -14,7 +15,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\Width;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -22,10 +23,10 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource;
-use App\Filament\Obras\Resources\DatosEjecucionObrasResource;
-use App\Filament\Obras\Resources\ImportesDeobrasResource;
-use App\Filament\Obras\Resources\ImportesPorOrganismoResource;
+use App\Filament\Obras\Resources\DatosDeInicioDeObras\DatosDeInicioDeObrasResource;
+use App\Filament\Obras\Resources\DatosEjecucionObras\DatosEjecucionObrasResource;
+use App\Filament\Obras\Resources\ImportesDeObras\ImportesDeObrasResource;
+use App\Filament\Obras\Resources\ImportesPorOrganismos\ImportesPorOrganismoResource;
 use App\Filament\Obras\Resources\PlanseguridadysaludResource;
 Use App\Filament\Widgets\UltimasObrasTableWidget;
 
@@ -42,27 +43,28 @@ class PlanesPanelProvider extends PanelProvider
             ->navigation(false) // Desactivamos navegación de recursos
             ->navigation(fn (NavigationBuilder $builder) => $this->getTopNavigation($builder))
             ->resources([
-                ImportesDeobrasResource::class,
+                ImportesDeObrasResource::class,
                 ImportesPorOrganismoResource::class,
                 DatosDeInicioDeObrasResource::class,
                 DatosEjecucionObrasResource::class,
-               
+
                 //\BezhanSalleh\FilamentShield\Resources\RoleResource::class,
 
             ])
             ->login()
+            ->authGuard('web')
             ->favicon(asset('img/favicon.ico'))
             ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))
             ->brandLogoHeight('2rem')
-            ->maxContentWidth(MaxWidth::Full)
+            ->maxContentWidth(Width::Full)
             ->plugins([
                FilamentShieldPlugin::make()
-                                                
+
             ])
             ->discoverResources(in: app_path('Filament/Obras/Resources'), for: 'App\\Filament\\Obras\\Resources')
             ->discoverPages(in: app_path('Filament/Obras/Pages'), for: 'App\\Filament\\Obras\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Obras/Widgets'), for: 'App\\Filament\\Obras\\Widgets')
             ->widgets([
@@ -85,7 +87,7 @@ class PlanesPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->topNavigation();
-           
+
     }
     protected function getTopNavigation(NavigationBuilder $builder): NavigationBuilder
             {
@@ -105,7 +107,7 @@ class PlanesPanelProvider extends PanelProvider
                             ->icon('heroicon-o-rectangle-stack')
                             ->url('/obras/fase-de-proyectos'),
                 ]),
-            
+
                 NavigationGroup::make('Cesión')
                     ->items([
                         NavigationItem::make('Cesión de Obras')
@@ -131,7 +133,7 @@ class PlanesPanelProvider extends PanelProvider
          }
     Protected function menuInicio($builder): NavigationGroup
     {
-        return $builder->groups([ 
+        return $builder->groups([
             NavigationGroup::make('Inicio')
             ->items([
                 NavigationItem::make('Inicio de Obras')
@@ -142,7 +144,7 @@ class PlanesPanelProvider extends PanelProvider
     }
     Protected function menuProyectos($builder): NavigationGroup
     {
-        return $builder->groups([ 
+        return $builder->groups([
             NavigationGroup::make('Proyectos')
             ->items([
                 NavigationItem::make('Proyectos')

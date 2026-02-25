@@ -9,3 +9,18 @@
     width: 300px; /* Cambia el ancho del select */
     height: 20px; /* Cambia la altura del select */
 }
+.filament-tables-table {
+    border-collapse: collapse !important;
+}
+
+.filament-tables-table th,
+.filament-tables-table td {
+    border: 1px solid #d1d5db; /* gris claro */
+    padding: 6px;
+}
+
+.filament-tables-table th {
+    background-color: #f9fafb; /* encabezado más claro */
+    font-weight: 600;
+}
+Y recompila los assets:

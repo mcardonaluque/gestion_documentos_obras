@@ -1,0 +1,5 @@
+/* Alias de compatibilidad para configuración existente */
+
+:root {
+    --fi-color-primary-500: rgb(28, 20, 99);
+}

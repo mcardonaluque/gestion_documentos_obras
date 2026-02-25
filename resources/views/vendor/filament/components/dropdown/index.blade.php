@@ -14,7 +14,7 @@
 ])
 
 @php
-    use Filament\Support\Enums\MaxWidth;
+    use Filament\Support\Enums\Width;
 
     $sizeConfig = collect([
         'availableHeight' => $availableHeight,
@@ -61,17 +61,17 @@
                 'fi-dropdown-panel absolute z-10 w-screen divide-y divide-gray-100 rounded-lg bg-white shadow-lg ring-1 ring-gray-950/5 transition dark:divide-white/5 dark:bg-gray-900 dark:ring-white/10',
                 match ($width) {
                     // These max width classes need to be `!important` otherwise they will be usurped by the Floating UI "size" middleware.
-                    MaxWidth::ExtraSmall, 'xs' => '!max-w-xs',
-                    MaxWidth::Small, 'sm' => '!max-w-sm',
-                    MaxWidth::Medium, 'md' => '!max-w-md',
-                    MaxWidth::Large, 'lg' => '!max-w-lg',
-                    MaxWidth::ExtraLarge, 'xl' => '!max-w-xl',
-                    MaxWidth::TwoExtraLarge, '2xl' => '!max-w-2xl',
-                    MaxWidth::ThreeExtraLarge, '3xl' => '!max-w-3xl',
-                    MaxWidth::FourExtraLarge, '4xl' => '!max-w-4xl',
-                    MaxWidth::FiveExtraLarge, '5xl' => '!max-w-5xl',
-                    MaxWidth::SixExtraLarge, '6xl' => '!max-w-6xl',
-                    MaxWidth::SevenExtraLarge, '7xl' => '!max-w-7xl',
+                    Width::ExtraSmall, 'xs' => '!max-w-xs',
+                    Width::Small, 'sm' => '!max-w-sm',
+                    Width::Medium, 'md' => '!max-w-md',
+                    Width::Large, 'lg' => '!max-w-lg',
+                    Width::ExtraLarge, 'xl' => '!max-w-xl',
+                    Width::TwoExtraLarge, '2xl' => '!max-w-2xl',
+                    Width::ThreeExtraLarge, '3xl' => '!max-w-3xl',
+                    Width::FourExtraLarge, '4xl' => '!max-w-4xl',
+                    Width::FiveExtraLarge, '5xl' => '!max-w-5xl',
+                    Width::SixExtraLarge, '6xl' => '!max-w-6xl',
+                    Width::SevenExtraLarge, '7xl' => '!max-w-7xl',
                     null => '!max-w-[14rem]',
                     default => $width,
                 },

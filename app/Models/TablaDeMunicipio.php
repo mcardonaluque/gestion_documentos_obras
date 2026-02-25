@@ -24,7 +24,7 @@ class TablaDeMunicipio extends Model
     }
     public function zonas(): BelongsTo
     {
-        return $this->belongsTo(Zona::class,'zona');
+        return $this->belongsTo(Zona::class,'zona','CODIGO');
     }
     public function team(): BelongsTo
     {

@@ -11,7 +11,7 @@
     }}
 >
     <nav
-        class="flex h-16 items-center gap-x-4 bg-white px-4 shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10 md:px-6 lg:px-8"
+        class="flex items-center h-16 px-4 bg-white shadow-sm gap-x-4 ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10 md:px-6 lg:px-8"
     >
         {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::TOPBAR_START) }}
 
@@ -47,7 +47,7 @@
         @endif
 
         @if (filament()->hasTopNavigation() || (! filament()->hasNavigation()))
-            <div class="me-6 hidden lg:flex">
+            <div class="hidden me-6 lg:flex">
                 @if ($homeUrl = filament()->getHomeUrl())
                     <a {{ \Filament\Support\generate_href_html($homeUrl) }}>
                         <x-filament-panels::logo />
@@ -62,7 +62,7 @@
             @endif
 
             @if (filament()->hasNavigation())
-                <ul class="me-4 hidden items-center gap-x-4 lg:flex">
+                <ul class="items-center hidden me-4 gap-x-4 lg:flex">
                     @foreach ($navigation as $group)
                         @if ($groupLabel = $group->getLabel())
                             <x-filament::dropdown
@@ -157,7 +157,7 @@
             @else
                 x-persist="topbar.end"
             @endif
-            class="ms-auto flex items-center gap-x-4"
+            class="grid items-center grid-flow-col ms-auto auto-cols-max gap-x-4"
         >
             {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::GLOBAL_SEARCH_BEFORE) }}
 

@@ -18,7 +18,7 @@ class Team extends Model
     }
     public function members(): BelongsToMany
     {
-        return $this->belongsToMany(User::class,'team_user','team_id', 'user_id');
+        return $this->belongsToMany(User::class, 'team_user', 'team_id', 'user_id');
     }
       
    //public function roles(): HasMany
@@ -28,7 +28,7 @@ class Team extends Model
 
     public function InicioObras(): HasMany
     {
-        return $this->hasMany(\App\Models\DatosDeInicioDeObras::class);
+        return $this->hasMany(DatosDeInicioDeObras::class);
     }
 
     public function datosejecucion():HasMany
@@ -37,7 +37,7 @@ class Team extends Model
     }
     public function expedientes(): HasMany
     {
-        return $this->hasMany(\App\Models\Expediente::class);
+        return $this->hasMany(Expediente::class);
     }
     public function importesdeorganismos(): HasMany
     {
@@ -55,6 +55,15 @@ class Team extends Model
     {
         return $this->hasMany(Proyecto::class);
     }
-    public function getRouteKeyName(): string { return 'name'; }
+    public function getRouteKeyName(): string { return 'name'; 
+    }
+    public function notifications()
+    {
+        return $this->morphMany(CustomNotification::class, 'notifiable');
+    }
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'team_user', 'team_id', 'user_id');
+    }
    
 }

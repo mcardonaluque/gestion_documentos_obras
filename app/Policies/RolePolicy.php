@@ -17,7 +17,7 @@ class RolePolicy
      */
     public function before(User $user, $ability)
     {
-        if (Filament::getCurrentPanel()?->getId() !== 'admin') {
+        if (Filament::getCurrentOrDefaultPanel()?->getId() !== 'admin') {
             return false;
         }
 

@@ -17,9 +17,7 @@ return [
     'guard' => 'web',
     'tenant_model' => 'Team',
 
-    'auth_provider_model' => [
-        'fqcn' => 'App\\Models\\User',
-    ],
+    'auth_provider_model' => App\Models\User::class,
 
     'super_admin' => [
         'enabled' => true,
@@ -78,7 +76,7 @@ return [
         ],
 
         'resources' => [
-            'role'=>\App\Filament\Resources\RoleResource::class,
+            'role'=>\App\Filament\Resources\Roles\RoleResource::class,
         ],
     ],
 

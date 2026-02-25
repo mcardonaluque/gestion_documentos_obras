@@ -14,12 +14,12 @@ class DatosDeInicioDeObras extends Model
 {
     protected $connection='Obras';
     protected $table='DatosInicioDeObras';
-    protected $primaryKey='Expediente';
+    protected $primaryKey='expediente_id';
     //protected $foreignKey = 'municipio';
     public $incrementing=false;
     protected $keyType='string';
-    public $timestamps = false;
-   
+    //public $timestamps = false;
+
    // protected $fillable=['TipoActuacion'];
    protected $fillable = [
     'EstadoServicioTecnico', // Asegúrate de que esté incluido
@@ -38,8 +38,15 @@ class DatosDeInicioDeObras extends Model
         'municipio' => 'integer', // Convierte municipio a integer
     ];
     use HasFactory;
-    public function expediente(){
-        return $this->belongsTo(Expediente::class);
+      public function getRouteKeyName()
+    {
+        return 'expediente_id';
+    }
+    public static function getRecordRouteKey(): ?string {
+         return 'expediente_id';
+         }
+    public function expediente():BelongsTo {
+        return $this->belongsTo(Expediente::class,'expediente_id','expediente_id',);
     }
     public function municipios(){
         return $this->belongsTo(TablaDeMunicipio::class,'municipio','codigo_municipio')
@@ -49,28 +56,29 @@ class DatosDeInicioDeObras extends Model
     }
     public function ayudaTecnica():HasOne
     {
-        return $this->HasOne(AyudaTecnica::class, 'Expediente', 'Expediente' );
+        return $this->HasOne(AyudaTecnica::class, 'expediente_id', 'expediente_id' );
     }
     public function carrteras():BelongsTo
     {
         return $this->belongsTo(TablaDeCarretera::class, 'carretera', 'Cod_Car' );
     }
     public function importes():HasOne    {
-        return $this->hasOne(ImportesDeObras::class, 'Expediente','Expediente');
+        return $this->hasOne(ImportesDeObras::class, 'expediente_id','expediente_id');
     }
     public function importesPorOrganismo():HasMany
     {
-        return $this->hasMany(ImportesporOrganismo::class, 'Expediente', 'Expediente' );
+        return $this->hasMany(ImportesPorOrganismo::class, 'expediente_id','expediente_id' );
     }
     public function planeseguridadysalud():HasOne    {
-        return $this->hasOne(PlanSeguridadYSalud::class, 'Expediente','Expediente');
+        return $this->hasOne(Planseguridadysalud::class, 'expediente_id','expediente_id');
     }
     public function proyectos():HasOne    {
-        return $this->hasOne(Proyecto::class, 'Expediente','Expediente');
+        return $this->hasOne(Proyecto::class, 'expediente_id','expediente_id');
     }
     public function datosjecucion():HasOne    {
-        return $this->hasOne(DatosEjecucionObras::class, 'Expediente','Expediente');
-    }    public function estados():BelongsTo
+        return $this->hasOne(DatosEjecucionObras::class, 'expediente_id','expediente_id');
+    }
+     public function estados():BelongsTo
     {
         return $this->belongsTo(TablaDeEstados::class, 'codigo_estado_obra', 'cod_estado' );
     }
@@ -84,23 +92,23 @@ class DatosDeInicioDeObras extends Model
     }
     public function documentos():HasMany
     {
-        return $this->Hasmany(DocumentoExpediente::class, 'Expediente', 'Expediente' );
+        return $this->hasMany(DocumentoExpediente::class, 'expediente_id', 'expediente_id' );
     }
     public function certificaciones():HasMany
     {
-        return $this->Hasmany(certificaciones::class, 'Expediente', 'Expediente' );
+        return $this->hasMany(certificaciones::class, 'Expediente', 'Expediente' );
     }
     public function tipoactuacion():BelongsTo
     {
         return $this->belongsTo(TipoActuacion::class, 'TipoActuacion', 'codigo' );
     }
-    
+
     public function team():BelongsTo{
         return $this->belongsTo(Team::class);
     }
     public function actuacion():BelongsTo
     {
-        return $this->belongsTo(Tipoactuacion::class, 'TipoActuacion', 'cod_estado' );
+        return $this->belongsTo(TipoActuacion::class, 'TipoActuacion', 'cod_estado' );
     }
     public function getUbicacionAttribute()
     {

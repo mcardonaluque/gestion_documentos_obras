@@ -12,7 +12,7 @@ class alerta extends Model
     protected $connection='Obras';
     
     public $incrementing = true;
-    protected $primaryKey='Id';
+    protected $primaryKey='id';
     protected $foreignKey = 'TipoAviso';
     protected $foreingKey = ['fase','estado'];
    public function estadoRelacionado()

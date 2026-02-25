@@ -13,6 +13,6 @@ class Zona extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     public function municipio(){
-        return $this->hasMany (Zona::class,'CODIGO','zona');
+        return $this->hasMany (TablaDeMunicipio::class,'zona','CODIGO');
     }
 }

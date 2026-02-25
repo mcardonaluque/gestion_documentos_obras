@@ -5,8 +5,10 @@ namespace App\Providers\Filament;
 //use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 //use Althinect\FilamentSpatieRolesPermissions\Resources\RoleResource;
 //use Althinect\FilamentSpatieRolesPermissions\Resources\UserResource;
-use App\Filament\Resources\UserResource;
-use App\Models\Team;
+use Filament\Widgets\AccountWidget;
+use Filament\Widgets\FilamentInfoWidget;
+use App\Filament\Resources\Users\UserResource;
+use App\Filament\Widgets\NotificationsWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -23,8 +25,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use Filament\Navigation\MenuItem;
-use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\Width;
 use App\Filament\Pages\Dashboard as AdminDashboard;
 
 class AdminPanelProvider extends PanelProvider
@@ -37,24 +38,25 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->brandName('Planes-Administración')
             ->login()
-            ->authGuard('web') 
+            ->databaseNotifications()
+            ->authGuard('web')
             ->favicon(asset('img/favicon.ico'))
             ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))
             ->brandLogoHeight('2rem')
-            ->maxContentWidth(MaxWidth::Full)
+            ->maxContentWidth(Width::Full)
             ->plugins([
-                FilamentShieldPlugin::make(),
-                
+               // FilamentShieldPlugin::make(),
+
             ])
-            
+
             ->colors([
                 //'primary' => Color::Amber,
                 'primary'=>'rgb(28, 20, 99)',
             ])
             ->resources([UserResource::class,
-                \BezhanSalleh\FilamentShield\Resources\RoleResource::class,
-                
-                
+                //\BezhanSalleh\FilamentShield\Resources\RoleResource::class,
+
+
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             //->discoverResources(in: app_path('Filament/Obras/Resources'), for: 'App\\Filament\\Obras\\Resources')
@@ -65,8 +67,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                AccountWidget::class,
+                FilamentInfoWidget::class,
+                NotificationsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

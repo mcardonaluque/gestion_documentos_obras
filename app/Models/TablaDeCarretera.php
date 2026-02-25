@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use Database\Factories\TablaDeCarreteraFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TablaDeCarretera extends Model
 {
-    /** @use HasFactory<\Database\Factories\TablaDeCarreteraFactory> */
+    /** @use HasFactory<TablaDeCarreteraFactory> */
     use HasFactory;
     protected $connection = 'Obras';
     protected $table='TablaDeCarrteras';

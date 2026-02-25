@@ -7,8 +7,10 @@ use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasPermissions;
 use Spatie\Permission\Traits\HasRoles;
@@ -16,6 +18,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+
 //use \BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 
 class User extends Authenticatable implements FilamentUser , HasTenants
@@ -57,10 +61,11 @@ class User extends Authenticatable implements FilamentUser , HasTenants
             'password' => 'hashed',
         ];
     }
-    public function team(): BelongsToMany
+    public function setNameAttribute($value)
     {
-        return $this->belongsToMany(Team::class,'team_user','user_id', 'team_id');
+        $this->attributes['name'] = trim($value);
     }
+   
  
     public function getTenants(Panel $panel): array|Collection
     {
@@ -100,5 +105,27 @@ class User extends Authenticatable implements FilamentUser , HasTenants
             // ...
         });
     }
+    public function teams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'team_user', 'user_id', 'team_id');
+    }
+    public function team(): BelongsToMany
+    {
+        return $this->teams();
+    }
+
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(CustomNotification::class, 'notifiable')->orderBy('created_at', 'desc');
+    }
+
+    public function unreadNotifications(): MorphMany
+    {
+        return $this->morphMany(CustomNotification::class, 'notifiable')
+                    ->whereNull('read_at')
+                    ->orderBy('created_at', 'desc');
+    }
+
+  
    
 }

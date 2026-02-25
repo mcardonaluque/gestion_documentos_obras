@@ -1,35 +1,27 @@
 <?php
 namespace App\Providers\Filament;
-use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource;
-use App\Filament\Obras\Resources\DatosEjecucionObrasResource;
-use App\Filament\Obras\Resources\ImportesDeobrasResource;
-use App\Filament\Obras\Resources\ImportesPorOrganismoResource;
-use App\Filament\Obras\Resources\PlanseguridadysaludResource;
+
+use App\Filament\Widgets\NotificationsWidget;
+use App\Filament\Ayuntamientos\Resources\Documentoexpedientes\DocumentoexpedienteResource;
+use App\Filament\Ayuntamientos\Resources\Expedientes\ExpedienteResource;
+use App\Filament\Obras\Resources\ImportesDeObras\ImportesDeObrasResource;
+use App\Filament\Obras\Pages\Dashboard as AyuntamientosDashboard;
 use App\Http\Middleware\CleanTenantUrl;
 use App\Models\Team;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
-use Filament\Widgets;
+use Filament\Support\Enums\Width;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Str;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use Filament\Navigation\MenuItem;
-use Filament\Support\Enums\MaxWidth;
-use Illuminate\Support\Facades\Auth;
-use Filament\Navigation\NavigationGroup;
-use Filament\Navigation\NavigationItem;
-use App\Filament\Obras\Pages\Dashboard as AyuntamientosDashboard;
 
 class AyuntamientosPanelProvider extends PanelProvider
 {
@@ -39,15 +31,21 @@ class AyuntamientosPanelProvider extends PanelProvider
             ->id('ayuntamientos')
             ->path('ayuntamientos')
             ->login()
-            ->authGuard('web') // 
+            ->authGuard('web') //
             ->authMiddleware([
-                Authenticate::class, // 
+                Authenticate::class, //
+            ])
+            ->resources([
+                ImportesDeObrasResource::class,
+                DocumentoexpedienteResource::class,
+                ExpedienteResource::class,
             ])
             ->topNavigation()
+            ->databaseNotifications()
             ->favicon(asset('img/favicon.ico'))
             ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))
             ->brandLogoHeight('2rem')
-            ->maxContentWidth(MaxWidth::Full)
+            ->maxContentWidth(Width::Full)
             ->colors([
                 'primary' => 'rgb(28, 20, 99)',
             ])
@@ -62,8 +60,11 @@ class AyuntamientosPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Ayuntamientos/Widgets'), for: 'App\\Filament\\Ayuntamientos\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                //Widgets\AccountWidget::class,
+                //Widgets\FilamentInfoWidget::class,
+                //\App\Filament\Widgets\ExpedientesTable::class,
+                //\App\Filament\Widgets\DocumentosTable::class,
+                NotificationsWidget::class,
             ])
             ->tenantMiddleware([
                 CleanTenantUrl::class,

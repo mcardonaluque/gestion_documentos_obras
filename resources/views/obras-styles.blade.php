@@ -1,81 +1,82 @@
 {{-- resources/views/custom-tabs-menu.blade.php --}}
 <style>
     /* ===== ESTILOS PARA TABS CON SUBMENÚS ===== */
-    .fi-topbar nav {
-        display: flex;
-        gap: 0.25rem;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-    .fi-topbar nav a {
-        border: 2px solid transparent;
-        border-radius: 8px;
-        padding: 0.75rem 1.25rem;
-        margin: 0;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        color: #e0e7ff !important;
-        font-weight: 500;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
 
-    /* Hover */
-    .fi-topbar nav a:hover {
-        border-color: #3b82f6; /* azul */
-        background-color: #eff6ff;
-        color:rgb(28, 20, 99) /* #1d4ed8;*/
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-        
-    }
-    .fi-topbar nav a svg {
-        width: 1.25rem;
-        height: 1.25rem;
-        color: inherit;
-    }
-    /* Activo */
-    .fi-topbar nav[aria-current="page"] {
-        border-color: #1d4ed8;
-        background-color: #dbeafe;
-        font-weight: bold;
-        color: #1e3a8a;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    }
-    /*#1e40af 0%*/
-    .custom-tabs-container {
-        position: relative;
-        background: linear-gradient(135deg,rgb(28, 20, 99) , #3730a3 100%);
-        padding: 0.5rem 1rem;
-        border-bottom: 2px solid #3730a3;
-        order: 2; /* ← Esto lo coloca después de la topbar */
-        /*margin-top: 0; /* ← Elimina cualquier margen superior */
-    }
-    .fi-main {
-        display: flex;
-        flex-direction: column;
-        background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%) !important;
-        border-bottom: 2px solid #3730a3;
-        padding: 0.5rem 1rem;
-    }
-
-    /* Asegurar que la topbar de Filament permanezca arriba */
-    .fi-topbar {
-        order: 1; /* ← Primera posición */
-        position: relative;
-        top: 0;
-        margin-top: 0; /* ← Elimina cualquier margen superior */
-        z-index: 1001; /* ← Un z-index mayor */
-        
-    }
-    .dark .fi-topbar {
-        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
-        border-bottom-color: #4338ca;
-    }
        /* ===== PERSONALIZACIÓN COMPLETA DE TEXTOS ===== */
-    
+
     /* 1. TÍTULO PRINCIPAL */
+    /* Reducir tamaño del select de paginación SOLO dentro de widgets */
+    /* Centrar el botón del login en Filament */
+.filament-login-page form {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+}
+
+.filament-login-page form .fi-btn,
+.filament-login-page form button[type="submit"] {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: block !important;
+}
+
+/* Botones primarios en recursos con color corporativo */
+.fi-main .fi-btn.fi-color-primary,
+.fi-main .fi-ac-btn-action.fi-color-primary,
+.fi-main .fi-icon-btn.fi-color-primary {
+    background-color: rgb(28, 20, 99) !important;
+    border-color: rgb(28, 20, 99) !important;
+    color: #ffffff !important;
+}
+
+.fi-main .fi-btn.fi-color-primary:hover,
+.fi-main .fi-ac-btn-action.fi-color-primary:hover,
+.fi-main .fi-icon-btn.fi-color-primary:hover {
+    background-color: rgb(36, 26, 120) !important;
+    border-color: rgb(36, 26, 120) !important;
+}
+
+.fi-widget .fi-ta-pagination select,
+.fi-widget .fi-ta-pagination .fi-select-input,
+.fi-widget .fi-ta-pagination .fi-input {
+    font-size: 0.75rem !important;
+    padding: 0.25rem 0.5rem !important;
+    height: 1.75rem !important;
+    min-height: 1.75rem !important;
+    line-height: 1.75rem !important;
+    border-radius: 6px !important;
+}
+
+    .custom-tabs-container,
+    .custom-tabs-container * {
+        box-sizing: border-box;
+    }
+    .custom-tabs-container {
+        background: linear-gradient(135deg, rgb(28, 20, 99), #3730a3);
+        padding: 0.5rem 1rem;
+        border-bottom: 2px solid #3730a3;
+    }
+     .panel-background {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
+    }
+.fi-topbar nav {
+    display: flex;
+    align-items: center;
+    width: 100% !important;
+}
+
+.fi-topbar [x-persist="topbar.end"] {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+
+
     .fi-header-heading {
         font-size: 1.5rem !important;
         font-weight: 900 !important;
@@ -89,14 +90,14 @@
         margin-bottom: 0.5rem;
         padding: 0.5rem 0;
     }
-    
+
     .dark .fi-header-heading {
         background: linear-gradient(135deg, #818cf8 0%, #a5b4fc 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
-    
+
     /* 2. SUBTÍTULO */
     .fi-header-subheading {
         font-size: 1.35rem !important;
@@ -107,12 +108,12 @@
         border-left: 4px solid #3b82f6;
         padding-left: 1rem;
     }
-    
+
     .dark .fi-header-subheading {
         color: #9ca3af !important;
         border-left-color: #818cf8;
     }
-    
+
     /* 3. TÍTULOS DE WIDGETS */
     .fi-widget-header-heading {
         font-size: 1.5rem !important;
@@ -122,12 +123,12 @@
         padding-bottom: 0.5rem;
         border-bottom: 2px solid #e5e7eb;
     }
-    
+
     .dark .fi-widget-header-heading {
         color: #f9fafb !important;
         border-bottom-color: #374151;
     }
-    
+
     /* 4. TÍTULOS DE CARDS */
     .fi-card-header-heading {
         font-size: 1.3rem !important;
@@ -137,47 +138,47 @@
         align-items: center;
         gap: 0.5rem;
     }
-    
+
     .dark .fi-card-header-heading {
         color: #e5e7eb !important;
     }
-    
+
     /* 5. TEXTOS EN STATS */
     .fi-stats-overview-stat-label {
         font-size: 1.1rem !important;
         font-weight: 600 !important;
         color: #4b5563 !important;
     }
-    
+
     .dark .fi-stats-overview-stat-label {
         color: #d1d5db !important;
     }
-    
+
     .fi-stats-overview-stat-value {
         font-size: 2rem !important;
         font-weight: 800 !important;
         color: #1e40af !important;
     }
-    
+
     .dark .fi-stats-overview-stat-value {
         color: #818cf8 !important;
     }
-    
+
     /* 6. RESPONSIVE */
     @media (max-width: 768px) {
         .fi-header-heading {
             font-size: 2rem !important;
         }
-        
+
         .fi-header-subheading {
             font-size: 1.1rem !important;
         }
-        
+
         .fi-widget-header-heading {
             font-size: 1.3rem !important;
         }
     }
-    
+
     .dark .custom-tabs-container {
         background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
         border-bottom-color: #4338ca;
@@ -284,17 +285,18 @@
     .custom-tab-active .custom-submenu {
         display: block !important;
     }
+
 </style>
 @auth
     @php
-        
+
         $user = auth()->user();
-        
+
         // Usar el team ACTUAL del usuario, no el primero
-       
-       $team = \Filament\Facades\Filament::getTenant();
-       // Si no hay team, usar un slug por defecto   
-       $municipioSlug = $team?->name ?? 'default';//$team ? \Illuminate\Support\Str::slug($team->name) : 'default';
+
+       //$team = \Filament\Facades\Filament::getTenant();
+       // Si no hay team, usar un slug por defecto
+       //$municipioSlug = $team?->name ?? 'default';//$team ? \Illuminate\Support\Str::slug($team->name) : 'default';
     @endphp
 @if($user)
 <div class="custom-tabs-container">
@@ -303,20 +305,20 @@
            <div class="custom-tab" data-tab="inicio">
             🚀 Inicio
             <div class="custom-submenu">
-                <a href="/obras/{{ $municipioSlug }}/datos-de-inicio-de-obras" class="custom-submenu-item">
+                <a href="/obras/datos-de-inicio-de-obras" class="custom-submenu-item">
                     🏗️ Inicio de Obras
                 </a>
             </div>
         </div>
         <!-- Tab Proyectos -->
         <div class="custom-tab" data-tab="proyectos">
-            📁 Proyectos
+             Proyectos
             <div class="custom-submenu">
-                <a href="/obras/{{ $municipioSlug }}/proyectos" class="custom-submenu-item">
+                <a href="/obras/proyectos" class="custom-submenu-item">
                     📋 Proyectos
                 </a>
-                <a href="/obras/{{ $municipioSlug }}/fase-de-proyectos" class="custom-submenu-item">
-                    📊 Fases de Proyectos
+                <a href="/obras/obras-pendientes-proyecto" class="custom-submenu-item">
+                    📊 Obras Pendientes de Proyectos
                 </a>
             </div>
         </div>
@@ -324,112 +326,78 @@
            <div class="custom-tab" data-tab="Cesión">
             🚀 Cesión
             <div class="custom-submenu">
-                <a href="/obras/{{ $municipioSlug }}/obra-cedidas" class="custom-submenu-item">
+                <a href="/obras/obra-cedidas" class="custom-submenu-item">
                     📦 Cesión de Obras
                 </a>
+
             </div>
         </div>
-     
+
 
         <!-- Tab Ejecución -->
         <div class="custom-tab" data-tab="ejecucion">
-            ⚡ Ejecución
+            🏗️ Ejecución
             <div class="custom-submenu">
-                <a href="/obras/{{ $municipioSlug }}/datos-ejecucion-obras" class="custom-submenu-item">
+           {{-- -  <a href="/obras/{{ $municipioSlug }}/datos-ejecucion-obras" class="custom-submenu-item"> --}}
+                <a href="/obras/datos-ejecucion-obras" class="custom-submenu-item">
                     📈 Datos de Ejecución
                 </a>
                 <a href="/obras/planss" class="custom-submenu-item">
                     👷‍♀️ Acta de replanteo
                 </a>
-                <a href="/obras/{{ $municipioSlug }}/certificaciones" class="custom-submenu-item">
+                <a href="/obras/certificaciones" class="custom-submenu-item">
                     📝 Certificaciones
                 </a>
                 <a href="/obras/planss" class="custom-submenu-item">
                     🛡️ Planes de Seguridad y Salud
                 </a>
-               
+
                 <a href="/obras/planss" class="custom-submenu-item">
                     🖹 Acta de recepcion
                 </a>
+            </div>
+        </div>
+        <div class="custom-tab" data-tab="Expedientes">
+            🗄 Expedientes
+            <div class="custom-submenu">
+                <a href="/obras/expedientes" class="custom-submenu-item">
+                    📋 Expedientes
+                </a>
+                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                    🗒️ Documentos de Expedientes
+                </a>
+            </div>
+        </div>
+        <div class="custom-tab" data-tab="Expedientes">
+            📁Documentación
+            <div class="custom-submenu">
+                <a href="/obras/expedientes" class="custom-submenu-item">
+                    📋 Documentos de Incio
+                </a>
+                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                    🗒️ Documentos de Proyectos
+                </a>
+                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                    🗒️ Documentos de Cesión
+                </a>
+                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                    🗒️ Documentos de Ejecución
+                </a>
+                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                    🗒️ Documentos de Justificación
+                </a>
+            </div>
+        </div>
+        <div class="custom-tab" data-tab="Cesión">
+            📢 Tareas
+            <div class="custom-submenu">
+                <a href="/obras/notifications" class="custom-submenu-item">
+                    📢 Notificaciones
+                </a>
+
             </div>
         </div>
     </nav>
 </div>
 @endauth
 @endif
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const tabs = document.querySelectorAll('.custom-tab');
-    const submenus = document.querySelectorAll('.custom-submenu');
-    
-    // Ocultar todos los submenús inicialmente
-    submenus.forEach(menu => menu.style.display = 'none');
-    
-    // Función para cerrar todos los submenús
-    function closeAllSubmenus() {
-        tabs.forEach(tab => {
-            tab.classList.remove('custom-tab-active');
-            const menu = tab.querySelector('.custom-submenu');
-            if (menu) menu.style.display = 'none';
-        });
-    }
-    
-    // Eventos para los tabs
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function(e) {
-            e.stopPropagation();
-            
-            const isActive = this.classList.contains('custom-tab-active');
-            closeAllSubmenus();
-            
-            if (!isActive) {
-                this.classList.add('custom-tab-active');
-                const menu = this.querySelector('.custom-submenu');
-                if (menu) menu.style.display = 'block';
-            }
-        });
-        
-        // Mantener submenú visible al hover
-        tab.addEventListener('mouseenter', function() {
-            closeAllSubmenus();
-            this.classList.add('custom-tab-active');
-            const menu = this.querySelector('.custom-submenu');
-            if (menu) menu.style.display = 'block';
-        });
-    });
-    
-    // Cerrar menús al hacer clic fuera
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.custom-tabs-container')) {
-            closeAllSubmenus();
-        }
-    });
-    
-    // Marcar el tab activo basado en la URL actual
-    function setActiveTab() {
-        const currentPath = window.location.pathname;
-        
-        tabs.forEach(tab => {
-            const menuItems = tab.querySelectorAll('.custom-submenu-item');
-            let isActive = false;
-            
-            menuItems.forEach(item => {
-                if (item.href.includes(currentPath)) {
-                    isActive = true;
-                    item.classList.add('custom-submenu-active');
-                } else {
-                    item.classList.remove('custom-submenu-active');
-                }
-            });
-            
-            if (isActive) {
-                tab.classList.add('custom-tab-active');
-                const menu = tab.querySelector('.custom-submenu');
-                if (menu) menu.style.display = 'block';
-            }
-        });
-    }
-    
-    setActiveTab();
-});
-</script>

@@ -11,7 +11,7 @@ class datosadicionales extends Model
     //
     protected $connection='Obras';
     protected $table='Datosadicionales';
-    protected $primaryKey='Expediente';
+    protected $primaryKey='expediente_id';
     //protected $foreignKey = 'municipio';
     public $incrementing=false;
     protected $keyType='string';

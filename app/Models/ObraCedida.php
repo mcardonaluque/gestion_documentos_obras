@@ -14,7 +14,7 @@ class ObraCedida extends Model
     use HasFactory;
     protected $connection='Obras';
     protected $table='ObrasCedidas';
-    protected $primaryKey='Expediente';
+    protected $primaryKey='expediente_id';
     //protected $foreignKey = 'municipio';
     public $incrementing=false;
     protected $keyType='string';
@@ -22,9 +22,9 @@ class ObraCedida extends Model
    // protected $fillable=['TipoActuacion'];
    protected $fillable = [];
    //protected $guarded =[];
-      
+
     public function expediente(){
-        return $this->belongsTo(Expediente::class);
+        return $this->belongsTo(Expediente::class,'expediente_id','expediente_id');
     }
     public function Obra(){
         return $this->belongsTo(DatosDeInicioDeObras::class);
@@ -32,11 +32,11 @@ class ObraCedida extends Model
     public function team():BelongsTo{
         return $this->belongsTo(Team::class);
     }
-    
+
     public function importes():HasOne{
-        return $this->hasOne(ImportesDeObras::class,'Expediente','Expediente');
+        return $this->hasOne(ImportesDeObras::class,'expediente_id','expediente_id');
     }
     public function importesdeorganismos():HasMany{
-        return $this->hasMany(ImportesPorOrganismo::class,'Expediente','Expediente');
+        return $this->hasMany(ImportesPorOrganismo::class,'expediente_id','expediente_id');
     }
 }

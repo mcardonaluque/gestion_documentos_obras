@@ -3,12 +3,13 @@
 namespace App\Providers\Filament;
 
 //use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
-
-use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource;
-use App\Filament\Obras\Resources\DatosEjecucionObrasResource;
-use App\Filament\Obras\Resources\ImportesDeobrasResource;
-use App\Filament\Obras\Resources\ImportesPorOrganismoResource;
-use App\Filament\Obras\Resources\PlanseguridadysaludResource;
+use Filament\Widgets\AccountWidget;
+use Filament\Widgets\FilamentInfoWidget;
+use App\Filament\Obras\Resources\DatosDeInicioDeObras\DatosDeInicioDeObrasResource;
+use App\Filament\Obras\Resources\DatosEjecucionObras\DatosEjecucionObrasResource;
+use App\Filament\Obras\Resources\Expedientes\ExpedienteResource;
+use App\Filament\Obras\Resources\ImportesDeObras\ImportesDeObrasResource;
+use App\Filament\Obras\Resources\ImportesPorOrganismos\ImportesPorOrganismoResource;
 use App\Http\Middleware\CleanTenantUrl;
 use App\Models\Team;
 use Filament\Http\Middleware\Authenticate;
@@ -20,6 +21,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
+
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -28,12 +30,17 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Str;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use Filament\Navigation\MenuItem;
-use Filament\Support\Enums\MaxWidth;
+use Filament\View\PanelsRenderHook;
+use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Auth;
-use Filament\Navigation\NavigationGroup;
-use Filament\Navigation\NavigationItem;
+use Filament\Enums\UserMenuPosition;
+use App\Filament\Widgets\UltimasObrasTableWidget;
+use App\Filament\Widgets\NotificationsWidget;
 use App\Filament\Obras\Pages\Dashboard as ObrasDashboard;
+use App\Filament\Obras\Resources\Documentoexpedientes\DocumentoexpedienteResource;
+use Filament\Support\Facades\FilamentView;
+
+
 
 class ObrasPanelProvider extends PanelProvider
 {
@@ -43,9 +50,9 @@ class ObrasPanelProvider extends PanelProvider
         return Auth::user()->currentTeam ?? null; // Example implementation
     }
     protected function getTenantPrefix(): ?string
-{    
+{
     $tenant = $this->resolveTenant();
-    
+
     if (!$tenant) {
         return null;
     }
@@ -58,14 +65,20 @@ class ObrasPanelProvider extends PanelProvider
         return $panel
             ->id('obras')
             ->path('obras')
+            ->authGuard('web')
             ->brandName('Planes Provinciales')
             ->navigation(false)
+            ->userMenu(position: UserMenuPosition::Topbar)
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
             ->resources([
-                ImportesDeobrasResource::class,
+                ImportesDeObrasResource::class,
                 ImportesPorOrganismoResource::class,
                 DatosDeInicioDeObrasResource::class,
                 DatosEjecucionObrasResource::class,
-               
+                DocumentoexpedienteResource::class,
+                ExpedienteResource::class,
+
                 //\BezhanSalleh\FilamentShield\Resources\RoleResource::class,
 
             ])
@@ -73,18 +86,18 @@ class ObrasPanelProvider extends PanelProvider
             ->favicon(asset('img/favicon.ico'))
             ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))
             ->brandLogoHeight('2rem')
-            ->maxContentWidth(MaxWidth::Full)
+            ->maxContentWidth(Width::Full)
             ->plugins([
                 FilamentShieldPlugin::make()
-                                                
+
             ])
-            
+
             ->colors([
                 //'primary' => Color::Amber,
-                'primary'=>'rgb(28, 20, 99)',
+                'primary' => Color::rgb('rgb(28, 20, 99)'),
             ])
-        
-            ->tenant(Team::class,ownershipRelationship: 'members',slugAttribute: 'slug')
+
+           // ->tenant(Team::class,ownershipRelationship: 'members',slugAttribute: 'slug')
             //->tenantMiddleware([
             //    \BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant::class,
            // ], isPersistent: true)
@@ -93,11 +106,16 @@ class ObrasPanelProvider extends PanelProvider
             ->pages([
                 ObrasDashboard::class,
             ])
+           //->viteTheme('resources/css/custom.css')
+           //->theme('resources/css/filament/custom.css')
             ->discoverWidgets(in: app_path('Filament/Obras/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
-                Widgets\TableWidget::class,
+              //  AccountWidget::class,
+              //  FilamentInfoWidget::class,
+
+                UltimasObrasTableWidget::class,
+                                NotificationsWidget::class,
+
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -111,19 +129,25 @@ class ObrasPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
                 CleanTenantUrl::class,
             ])
-            
+
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->tenantMiddleware([
-                CleanTenantUrl::class,
-            ])
+           // ->tenantMiddleware([
+           //     CleanTenantUrl::class,
+           // ])
             //->sidebarCollapsibleOnDesktop();;
-            ->topNavigation()
-            ->renderHook('panels::head.end', fn () => view('obras-styles'));
-          
-           
+            ->globalSearch(false)
+            ->topNavigation();
+
+
+
     }
-    
+public function boot(): void
+{
+    FilamentView::registerRenderHook(
+        PanelsRenderHook::TOPBAR_AFTER, fn () => view('obras-styles')
+    );
+}
 
 }

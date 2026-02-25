@@ -2,61 +2,66 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Obras\Resources\DatosDeInicioDeObrasResource;
-use App\Filament\Obras\Resources\DatosEjecucionObrasResource;
-use App\Filament\Obras\Resources\ProyectoResource;
-use App\Filament\Obras\Resources\ObraCedidaResource;
+use Filament\Tables\Table;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\Action;
+use App\Filament\Obras\Resources\DatosDeInicioDeObras\DatosDeInicioDeObrasResource;
+use App\Filament\Obras\Resources\DatosEjecucionObras\DatosEjecucionObrasResource;
+use App\Filament\Obras\Resources\Documentoexpedientes\DocumentoexpedienteResource;
+use App\Filament\Obras\Resources\Proyectos\ProyectoResource;
+use App\Filament\Obras\Resources\ObraCedidas\ObraCedidaResource;
 use App\Models\DatosDeInicioDeObras;
 use App\Models\DatosEjecucionObras;
+use App\Models\DocumentoExpediente;
 use App\Models\Proyecto;
 use App\Models\ObraCedida;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ToggleColumn;
-use Illuminate\Support\Facades\Log;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Database\Eloquent\Model;
 
 class UltimasObrasTableWidget extends BaseWidget
 {
-    protected static ?string $heading = 'Últimas 100 Obras';
+    protected static ?string $heading = 'Últimas Obras';
 
     protected int | string | array $columnSpan = 'full'; // ocupa todo el ancho
     public ?string $obraSeleccionadaId = null;
-    public function table(Tables\Table $table): Tables\Table
+    public function table(Table $table): Table
     {
         return $table
             ->query(
-                DatosDeInicioDeObras::query()->where('Codigo_Plan','<>','')
+                DatosDeInicioDeObras::query()
+                    ->where('Codigo_Plan', '<>', '')
+                    ->whereNotNull('expediente_id')
+                    ->where('expediente_id', '<>', '')
                     // ajusta si usas otra columna de fecha
-                    ->limit(100)
+                    //->limit(500)
+
             )
             ->columns([
-                
-                Tables\Columns\TextColumn::make('Expediente')
+
+                TextColumn::make('expediente_id')
                     ->label('ID')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('Obra')
+                TextColumn::make('Obra')
                     ->label('Obra')
                     // ->sortable()
-                    
+
                     ->grow(false)
                     ->extraHeaderAttributes(['class' => 'px-8'])
                     ->extraCellAttributes(['class' => 'px-8'])
                     ->getStateUsing(function ($record) {
                         return $record->Codigo_Plan . '-' . $record->numero_obra . '-' . $record->subreferecnia . '-' . $record->ao_ejecucion;
                     }),
-                Tables\Columns\TextColumn::make('nombre_obra1')
-                    ->label('Nombre')
+                TextColumn::make('nombre_obra1')
+                    ->label('Nombre de la obra')
                     ->searchable()
                     ->wrap()
-                    ->grow(false)
-                    ->size(TextColumn\TextColumnSize::ExtraSmall),
-                Tables\Columns\TextColumn::make('codigo_estado_obra')
+                    ->grow(false),
+                TextColumn::make('codigo_estado_obra')
                     ->label('Estado'),
-                Tables\Columns\TextColumn::make('Ubicacion')
+                TextColumn::make('Ubicacion')
                     ->label('Ubicación')
                     ->getStateUsing(function ($record) {
                     // dd($record->municipios);
@@ -65,22 +70,22 @@ class UltimasObrasTableWidget extends BaseWidget
                     : $record->carretera;
                         //return $record->municipios->nombre_municipio ?: $record->carretera;
                     }),
-                Tables\Columns\TextColumn::make('municipios.zonas.ZONA')
+                TextColumn::make('municipios.zonas.ZONA')
                     ->label('Zona')
                     ->sortable()
                     ->searchable()
-                    ->grow()
+                    ->grow(false)
                     ->extraHeaderAttributes(['class' => 'px-8'])
                     ->extraCellAttributes(['class' => 'px-8'])
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('estados.estado_abrev')
+                TextColumn::make('estados.estado')
                     ->sortable()
                     ->searchable()
-                    ->grow()
+                    //->grow()
                     ->extraHeaderAttributes(['class' => 'px-8'])
                     ->extraCellAttributes(['class' => 'px-8'])
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('forma_ejecucion')
+                TextColumn::make('forma_ejecucion')
                     ->Label('F.Ejecuc.')
                     ->sortable()
                     ->width(50)
@@ -88,11 +93,13 @@ class UltimasObrasTableWidget extends BaseWidget
                     ->extraHeaderAttributes(['class' => 'px-8'])
                     ->extraCellAttributes(['class' => 'px-8'])
                     ->toggleable(isToggledHiddenByDefault: false),
-               
+
             ])
-            ->paginated(false) 
+            //->paginated(true)
+            ->defaultSort('ao_ejecucion', 'desc')
+
             //->selectable()
-            
+
             ->headerActions([
                 // ActionGroup para el menú de acciones
                 ActionGroup::make([
@@ -108,16 +115,36 @@ class UltimasObrasTableWidget extends BaseWidget
                             return $obra ? DatosDeInicioDeObrasResource::getUrl('edit', ['record' => $obra])  : '#';
                         })
                         ->openUrlInNewTab(false)])
-                        
+
                         ->label('Inicio de Obras')
                 ->icon('heroicon-o-cog')
                 ->color('primary')
                 ->button()
                 ->dropdownPlacement('bottom-start')
-                ->tooltip($this->obraSeleccionadaId ? 'Editar Datos de Inicio para obra seleccionada' : 'Selecciona una obra primero'),
+                ->tooltip($this->obraSeleccionadaId ? 'Editar Datos de Inicio para obra seleccionada' : 'Selecciona una obra primero')
+                ->hidden(fn () => !$this->obraSeleccionadaId),
 
-                       // ->hidden(fn () => !$this->obraSeleccionadaId),
-                ActionGroup::make([        
+                ActionGroup::make([
+                    Action::make('Documentos')
+                        ->label('Documentos del Expediente')
+                        ->icon('heroicon-o-play')
+                        ->color('info')
+                        /*->action(fn () => redirect(
+                            DatosDeInicioDeObrasResource::getUrl('edit', ['record' => $this->obraSeleccionadaId,'panel'=>'planes'])))*/
+                        ->url(function () {
+                            if (!$this->obraSeleccionadaId) return '#';
+                            $obra = DocumentoExpediente::where('expediente_id', $this->obraSeleccionadaId)->first();
+                            return $obra ? DocumentoexpedienteResource::getUrl('edit', ['record' => $obra])  : '#';
+                        })
+                        ->openUrlInNewTab(false)])
+                        ->label('Documentos')
+                ->icon('heroicon-o-cog')
+                ->color('primary')
+                ->button()
+                ->dropdownPlacement('bottom-start')
+                ->tooltip($this->obraSeleccionadaId ? 'Editar Documentos del Expediente para obra seleccionada' : 'Selecciona una obra primero')
+                ->hidden(fn () => !$this->obraSeleccionadaId),
+                ActionGroup::make([
                     Action::make('editar_ejecucion')
                         ->label('Editar Ejecución')
                         ->icon('heroicon-o-cog')
@@ -127,9 +154,9 @@ class UltimasObrasTableWidget extends BaseWidget
                             $obra = DatosEjecucionObras::find($this->obraSeleccionadaId);
                             return $obra ? DatosEjecucionObrasResource::getUrl('edit', ['record' => $obra]) . '#ejecucion' : '#';
                         })
-                        
+
                         ->hidden(fn () => !$this->obraSeleccionadaId),
-                        
+
                     Action::make('editar_cesion')
                         ->label('Editar Cesión')
                         ->icon('heroicon-o-document-duplicate')
@@ -146,7 +173,7 @@ class UltimasObrasTableWidget extends BaseWidget
                         ->dropdownPlacement('bottom-start')
                         ->tooltip($this->obraSeleccionadaId ? 'Acciones para obra seleccionada' : 'Selecciona una obra primero')
                         ->hidden(fn () => !$this->obraSeleccionadaId),
-                ActionGroup::make([        
+                ActionGroup::make([
                     Action::make('editar_proyecto')
                         ->label('Editar Proyecto')
                         ->icon('heroicon-o-clipboard-document')
@@ -157,16 +184,17 @@ class UltimasObrasTableWidget extends BaseWidget
                             return $obra ? ProyectoResource::getUrl('edit', ['record' => $obra]) . '#proyecto' : '#';
                         })
                         ->hidden(fn () => !$this->obraSeleccionadaId),
-                        
+
                     Action::make('ver_completo')
                         ->label('Ver Obra Completa')
                         ->icon('heroicon-o-eye')
                         ->url(function () {
                             if (!$this->obraSeleccionadaId) return '#';
                             $obra = DatosDeInicioDeObras::find($this->obraSeleccionadaId);
-                            return $obra ? DatosDeInicioDeObrasResource::getUrl('view', ['record' => $obra]) : '#';
+                            return $obra ? DatosDeInicioDeObrasResource::getUrl('view', ['record' => $obra,]) : '#';
                         })
                         ->hidden(fn () => !$this->obraSeleccionadaId),
+
                 ])
                 ->label('Proyecto / Obra Completa')
                 ->icon('heroicon-o-cog')
@@ -174,42 +202,63 @@ class UltimasObrasTableWidget extends BaseWidget
                 ->button()
                 ->dropdownPlacement('bottom-start')
                 ->tooltip($this->obraSeleccionadaId ? 'Acciones para obra seleccionada' : 'Selecciona una obra primero')])
-                
-            
-            ->actions([
+
+
+            ->recordActions([
                 Action::make('seleccionar')
-                    ->label(function (DatosDeInicioDeObras $record){ 
-                        //dd($this->obraSeleccionadaId); 
+                    ->label(function (DatosDeInicioDeObras $record){
+                        //dd($record);
                         //dd($this->obraSeleccionadaId === $record->Expediente );
-                        
-                        return $this->obraSeleccionadaId === $record->Expediente 
-                            ? 'Seleccionada' 
+
+                        return $this->obraSeleccionadaId === $record->expediente_id
+                            ? 'Seleccionada'
                             : 'Seleccionar';
                     })
-                    ->action(function ($record, $livewire) {
-                        $livewire->obraSeleccionada = $record->Expediente;
-                    })
-                    
-                    ->icon(fn (DatosDeInicioDeObras $record) => 
-                        $this->obraSeleccionadaId === $record->Expediente 
-                            ? 'heroicon-o-check-circle' 
+
+
+                    ->icon(fn (DatosDeInicioDeObras $record) =>
+                        $this->obraSeleccionadaId === $record->expediente_id
+                            ? 'heroicon-o-check-circle'
                             : 'heroicon-o-plus-circle'
                     )
-                    ->color(fn (DatosDeInicioDeObras $record) => 
-                        $this->obraSeleccionadaId === $record->Expediente 
-                            ? 'success' 
+                    ->color(fn (DatosDeInicioDeObras $record) =>
+                        $this->obraSeleccionadaId === $record->expediente_id
+                            ? 'success'
                             : 'primary'
                     )
                     ->action(function (DatosDeInicioDeObras $record) {
-                        $this->obraSeleccionadaId = $record->Expediente;
+                        $this->obraSeleccionadaId = $record->expediente_id;
+                        //dd($this->obraSeleccionadaId);
                         // Forzar recarga para actualizar la interfaz
                         $this->dispatch('refreshWidget');
                     }),
             ]);
-            
-            
-    
+
+
+
     }
+
+    public function getTableRecordKey(Model | array $record): string
+    {
+        if (is_array($record)) {
+            $key = $record['expediente_id'] ?? null;
+
+            if (filled($key)) {
+                return (string) $key;
+            }
+
+            return (string) md5((string) json_encode($record));
+        }
+
+        $key = $record->getKey();
+
+        if (filled($key)) {
+            return (string) $key;
+        }
+
+        return (string) md5((string) json_encode($record->getAttributes()));
+    }
+
     protected function getListeners(): array
     {
         return [
@@ -219,13 +268,13 @@ class UltimasObrasTableWidget extends BaseWidget
 
     // Método para mostrar qué obra está seleccionada globalmente
     protected function getFooter(): ?string
-    { 
+    {
         if (!$this->obraSeleccionadaId) {
             return 'No hay obra seleccionada';
         }
-        
+
         $obra = DatosDeInicioDeObras::find($this->obraSeleccionadaId);
-        return $obra ? "Obra seleccionada: {$obra->nombre} ({$obra->codigo})" : 'Obra no encontrada';
+        return $obra ? "Obra seleccionada: {$obra->nombre} ({$obra->expediente_id})" : 'Obra no encontrada';
     }
 }
 

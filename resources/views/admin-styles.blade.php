@@ -33,18 +33,35 @@
         /*margin-top: 0; /* ← Elimina cualquier margen superior */
     }
     .fi-main {
-        display: flex;
-        flex-direction: column;
+        /*display: flex;
+        flex-direction: column;*/
     }
 
     /* Asegurar que la topbar de Filament permanezca arriba */
     .fi-topbar {
-        order: 1; /* ← Primera posición */
-        position: relative;
+       /* order: 1; /* ← Primera posición */
+       /* position: relative;
         top: 0;
         margin-top: 0; /* ← Elimina cualquier margen superior */
-        z-index: 1001; /* ← Un z-index mayor */
+        z-index: 40; /* ← Un z-index mayor */
         
+    }
+    body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* El contenido principal debe crecer */
+    .fi-main > div:first-child {
+        flex-grow: 1;
+    }
+
+    /* Footer de Filament - posición correcta */
+    .fi-footer {
+        margin-top: auto !important;
+        position: relative !important;
+        bottom: auto !important;
     }
        /* ===== PERSONALIZACIÓN COMPLETA DE TEXTOS ===== */
     

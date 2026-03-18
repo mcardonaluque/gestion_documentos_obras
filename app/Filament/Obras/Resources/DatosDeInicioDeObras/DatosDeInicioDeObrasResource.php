@@ -51,6 +51,8 @@ class DatosDeInicioDeObrasResource extends BaseResource
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationColor = 'custom-blue';
     protected static ?string $navigationLabel ='Inicio de Obras';**/
+    protected static ?string $modelLabel = 'Inicio de Obras';
+    protected static ?string $pluralModelLabel = 'Inicios de Obras';
     protected static array $searchableAttributes = [
         'carretera',
         'municipios.nombre',
@@ -111,10 +113,9 @@ class DatosDeInicioDeObrasResource extends BaseResource
                 Select::make('TipoActuacion')
                     ->label('Tipo de Actuación')
                     ->relationship('tipoactuacion', 'descripcion_actuacion')
-                    ->columnSpan(2)
+                    ->columnSpan(2),
                     //->dehydrated(false)
-
-                    ->extraAttributes(['class' => 'compact-select']),
+                   // ->extraAttributes(['class' => 'compact-select']),
                 TextInput::make('TipoObra')
                     ->nullable()
                     ->label('Tipo de Obra'),

@@ -14,7 +14,7 @@ class Dashboard extends BaseDashboard
     public  function getWidgets(): array
     {
         return [
-            UltimasObrasTableWidget::class,
+           // UltimasObrasTableWidget::class,
         ];
     }
 }

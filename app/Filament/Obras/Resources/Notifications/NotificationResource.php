@@ -19,6 +19,7 @@ use App\Filament\Obras\Resources\Notifications\Pages\ListNotifications;
 use App\Models\CustomNotification;
 use App\Models\Team;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
@@ -26,7 +27,6 @@ use Filament\Tables\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 
 class NotificationResource extends Resource
 {
@@ -35,6 +35,8 @@ class NotificationResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bell';
 
     protected static string | \UnitEnum | null $navigationGroup = 'Sistema';
+    protected static ?string $modelLabel = 'Notificación';
+    protected static ?string $pluralModelLabel = 'Notificaciones';
 
     public static function form(Schema $schema): Schema
     {
@@ -43,6 +45,12 @@ class NotificationResource extends Resource
                 Toggle::make('to_all')
                     ->label('Notificar a todos los usuarios')
                     ->reactive()
+                    ->afterStateUpdated(function (callable $set, $state): void {
+                        if ($state) {
+                            $set('team_id', null);
+                            $set('user_ids', []);
+                        }
+                    })
                     ->default(false),
 
                 Select::make('team_id')
@@ -50,14 +58,27 @@ class NotificationResource extends Resource
                     ->options(Team::pluck('name', 'id'))
                     ->visible(fn (callable $get) => ! $get('to_all'))
                     ->reactive()
+                    ->afterStateUpdated(function (callable $set, $state): void {
+                        if (filled($state)) {
+                            $set('user_ids', []);
+                        }
+                    })
+                    ->dehydrated(fn (callable $get) => ! $get('to_all'))
                     ->required(fn (callable $get) => ! $get('to_all') && empty($get('user_ids')))
                     ->placeholder('Selecciona un equipo'),
 
                 Select::make('user_ids')
                     ->label('Usuarios')
                     ->multiple()
+                    ->reactive()
                     ->options(User::pluck('name', 'id'))
                     ->visible(fn (callable $get) => ! $get('to_all'))
+                    ->afterStateUpdated(function (callable $set, $state): void {
+                        if (is_array($state) && count($state) > 0) {
+                            $set('team_id', null);
+                        }
+                    })
+                    ->dehydrated(fn (callable $get) => ! $get('to_all'))
                     ->required(fn (callable $get) => ! $get('to_all') && blank($get('team_id')))
                     ->placeholder('Selecciona uno o varios usuarios'),
                 TextInput::make('title')
@@ -84,12 +105,6 @@ class NotificationResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('sender.name')
-                    ->label('De')
-                    ->sortable(),
-                TextColumn::make('recipient.name')
-                    ->label('Para')
-                    ->sortable(),
                 TextColumn::make('title')
                     ->label('Título')
                     ->searchable()
@@ -114,14 +129,14 @@ class NotificationResource extends Resource
                         'urgent' => 'Urgente',
                         default => $state,
                     }),
-                TextColumn::make('read_at')
+                TextColumn::make('estado')
                     ->label('Estado')
+                    ->getStateUsing(fn (CustomNotification $record): string => filled($record->read_at) ? 'Leída' : 'No Leída')
                     ->badge()
                     ->colors([
-                        'danger' => fn ($state) => blank($state),
-                        'success' => fn ($state) => filled($state),
-                    ])
-                    ->formatStateUsing(fn ($state): string => filled($state) ? 'Leída' : 'No Leída'),
+                        'danger' => fn (string $state): bool => $state === 'No Leída',
+                        'success' => fn (string $state): bool => $state === 'Leída',
+                    ]),
                 TextColumn::make('created_at')
                     ->label('Enviada')
                     ->dateTime()
@@ -160,7 +175,7 @@ class NotificationResource extends Resource
             ->toolbarActions([
                 BulkAction::make('markAsRead')
                     ->label('Marcar como leídas')
-                    ->icon('heroicon-o-check')
+                    ->icon('heroicon-o-envelope-open')
                     ->action(fn ($records) => $records->each->markAsRead()),
                 BulkAction::make('markAsUnread')
                     ->label('Marcar como no leídas')
@@ -182,10 +197,11 @@ class NotificationResource extends Resource
     // Solo mostrar Notificationes del usuario actual
     public static function getEloquentQuery(): Builder
     {
+        $user = Filament::auth()->user();
 
         return parent::getEloquentQuery()
             ->where('notifiable_type', User::class)
-            ->where('notifiable_id', Auth::id())
+            ->where('notifiable_id', $user?->getAuthIdentifier() ?? 0)
             ->orderBy('created_at', 'desc');
     }
 }

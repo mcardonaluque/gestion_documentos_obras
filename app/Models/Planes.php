@@ -22,8 +22,17 @@ class Planes extends Model
     public function certificaciones():HasMany{
         return $this->hasMany (certificaciones::class,'codigo_plan','Codigo_Plan');
     }
+     public function expedientes():HasMany{
+        return $this->hasMany (Expediente::class,'codigo_plan','Codigo_Plan');
+    }
+     public function documentos():HasMany{
+        return $this->hasMany (DatosDeInicioDeObras::class,'codigo_plan','Codigo_Plan');
+    }
+     public function proyectos():HasMany{
+        return $this->hasMany (DatosDeInicioDeObras::class,'codigo_plan','Codigo_Plan');
+    }
     public function getCodigoDescripcionAttribute()
-{
-    return "{$this->codigo_plan} - {$this->denominacion_plan}";
-}
+    {
+        return "{$this->codigo_plan} - {$this->denominacion_plan}";
+    }
 }

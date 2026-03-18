@@ -1,11 +1,9 @@
 <style>
-    /* BEGIN: login-centered-button (reversible) */
-    .fi-simple-page #form .fi-form-actions {
-        display: flex !important;
+    .fi-simple-main #form .fi-sc-actions {
         justify-content: center !important;
     }
 
-    .fi-simple-page #form .fi-form-actions .fi-ac {
+    .fi-simple-main #form .fi-sc-actions .fi-ac {
         display: flex !important;
         justify-content: center !important;
         grid-template-columns: none !important;
@@ -13,28 +11,27 @@
         margin-inline: auto !important;
     }
 
-    .fi-simple-page #form .fi-form-actions .fi-btn,
-    .fi-simple-page #form .fi-form-actions button[type="submit"] {
-        width: auto !important;
-        margin-inline: auto !important;
+    .fi-simple-main #form .fi-sc-actions .fi-btn,
+    .fi-simple-main #form .fi-sc-actions button[type="submit"] {
         min-width: 10rem;
+        margin-inline: auto !important;
     }
 
-    .fi-simple-page #form .fi-form-actions .fi-ac-btn-action,
-    .fi-simple-page #form .fi-form-actions button[type="submit"].fi-btn {
+    .fi-simple-main #form .fi-sc-actions .fi-ac-btn-action,
+    .fi-simple-main #form .fi-sc-actions .fi-btn,
+    .fi-simple-main #form .fi-sc-actions button[type="submit"].fi-btn {
         background-color: rgb(28, 20, 99) !important;
         border-color: rgb(28, 20, 99) !important;
         color: #fff !important;
-        margin-inline: auto !important;
     }
 
-    .fi-simple-page #form .fi-form-actions .fi-ac-btn-action:hover,
-    .fi-simple-page #form .fi-form-actions button[type="submit"].fi-btn:hover {
+    .fi-simple-main #form .fi-sc-actions .fi-ac-btn-action:hover,
+    .fi-simple-main #form .fi-sc-actions .fi-btn:hover,
+    .fi-simple-main #form .fi-sc-actions button[type="submit"].fi-btn:hover {
         background-color: rgb(28, 20, 99) !important;
         border-color: rgb(28, 20, 99) !important;
         filter: brightness(1.08);
     }
-    /* END: login-centered-button (reversible) */
 </style>
 
 <x-filament-panels::page.simple>
@@ -62,36 +59,3 @@
 
     {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::AUTH_LOGIN_FORM_AFTER, scopes: $this->getRenderHookScopes()) }}
 </x-filament-panels::page.simple>
-
-<script>
-    // BEGIN: login-centered-button-script (reversible)
-    (function () {
-        const centerLoginButton = () => {
-            const actionsContainer = document.querySelector('.fi-simple-page #form .fi-form-actions');
-            const actionsRow = document.querySelector('.fi-simple-page #form .fi-form-actions .fi-ac');
-            const submitButton = document.querySelector('.fi-simple-page #form button[type="submit"].fi-btn, .fi-simple-page #form .fi-form-actions .fi-btn');
-
-            if (actionsContainer) {
-                actionsContainer.style.display = 'flex';
-                actionsContainer.style.justifyContent = 'center';
-            }
-
-            if (actionsRow) {
-                actionsRow.style.display = 'flex';
-                actionsRow.style.justifyContent = 'center';
-                actionsRow.style.width = 'auto';
-                actionsRow.style.marginInline = 'auto';
-            }
-
-            if (submitButton) {
-                submitButton.style.marginInline = 'auto';
-                submitButton.style.width = 'auto';
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', centerLoginButton);
-        document.addEventListener('livewire:navigated', centerLoginButton);
-        centerLoginButton();
-    })();
-    // END: login-centered-button-script (reversible)
-</script>

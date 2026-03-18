@@ -17,9 +17,9 @@ class ExpedientesTable extends BaseWidget
     protected int | string | array $columnSpan = 'full';
 
     public function table(Table $table): Table
-    {      
+    {
         return $table
-     
+
             ->query(Expediente::query()->where('team_id', filament()->getTenant()->id))
             ->columns([
                 TextColumn::make('expediente_id')
@@ -41,7 +41,7 @@ class ExpedientesTable extends BaseWidget
                     ->counts('documentos')
                     ->badge()
                     ->color(fn ($state) => $state > 0 ? 'success' : 'gray'),*/
-                    
+
                 TextColumn::make('created_at')
                     ->label('Creado')
                     ->date('d/m/Y')
@@ -49,17 +49,36 @@ class ExpedientesTable extends BaseWidget
             ])
             ->recordActions([
                 Action::make('seleccionar')
-                    ->icon('heroicon-o-eye')
+                    ->label(function (Expediente $record){
+                        //dd($record);
+                        //dd($this->obraSeleccionadaId === $record->Expediente );
+
+                        return $this->expedienteSeleccionado === $record->expediente_id
+                            ? 'Seleccionada'
+                            : 'Seleccionar';
+                    })
+
+
+                    ->icon(fn (Expediente $record) =>
+                        $this->expedienteSeleccionado === $record->expediente_id
+                            ? 'heroicon-o-check-circle'
+                            : 'heroicon-o-plus-circle'
+                    )
+                    ->color(fn (Expediente $record) =>
+                        $this->expedienteSeleccionado === $record->expediente_id
+                            ? 'success'
+                            : 'primary'
+                    )
                     ->action(function (Expediente $record) {
                         $this->expedienteSeleccionado = $record->expediente_id;
                         // Emitir evento para el otro widget
                         $this->dispatch('expedienteSeleccionado', expedienteId: $record->expediente_id);
                     })
-                    ->color('primary')
+
                     ->extraAttributes(function (Expediente $record) {
                         return [
-                            'class' => $this->expedienteSeleccionado === $record->expediente_id 
-                                ? 'bg-blue-100' 
+                            'class' => $this->expedienteSeleccionado === $record->expediente_id
+                                ? 'bg-blue-100'
                                 : '',
                         ];
                     }),

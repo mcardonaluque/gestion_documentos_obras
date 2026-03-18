@@ -3,7 +3,8 @@
 return [
     'shield_resource' => [
         'enabled'=>true,
-        'model' => \Spatie\Permission\Models\Role::class,
+        //'model' => \Spatie\Permission\Models\Role::class,
+          'model' => \App\Models\Role::class,
         'should_register_navigation' => true,
         'slug' => 'shield/roles',
         'navigation_sort' => -1,

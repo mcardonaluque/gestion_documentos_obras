@@ -25,6 +25,8 @@ class ObrasPendientesProyectoResource extends Resource
     protected static ?string $model = ObrasPendienteProyecto::class;
 
     protected static ?string $slug = 'obras-pendientes-proyecto';
+    protected static ?string $modelLabel = 'Obras Pendientes de Proyecto';
+    protected static ?string $pluralModelLabel = 'Obras Pendientes de Proyecto';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
@@ -38,13 +40,11 @@ class ObrasPendientesProyectoResource extends Resource
 
 
         return parent::getEloquentQuery()
-        ->select('DatosInicioDeObras.*') // Selecciona todas las columnas de la tabla "obras"
-            ->leftJoin('TablaDeMunicipios', 'DatosInicioDeObras.municipio', '=', 'codigo_municipio') // Join con la tabla "municipios"
-            ->addSelect(trim('TablaDeMunicipios.nombre_municipio'))
-           // ->WhereNotNull('carretera');  //->with('municipios');
+            ->select('V_ObrasPendientesProyecto.*')
+            ->with(['municipios', 'servicioDir'])
             ->where('ao_ejecucion', '>=', $añoAnterior2)
             ->where('ao_ejecucion', '<=', $añoActual)
-            ->where('Codigo_Plan','<>','');
+            ->where('Codigo_Plan', '<>', '');
             //->where('codigo_municipio','=', )
 
     }

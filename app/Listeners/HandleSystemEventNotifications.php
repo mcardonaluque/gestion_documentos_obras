@@ -41,7 +41,6 @@ class HandleSystemEventNotifications implements ShouldQueue
             toAllUsers: $event->toAllUsers,
             userIds: $event->userIds,
             teamId: $event->teamId,
-            senderId: Auth::id(),
             data: array_merge($event->meta, [
                 'event_type' => $event->eventType,
                 'entity_class' => $entityClass,

@@ -3,15 +3,12 @@
 namespace App\Providers\Filament;
 
 //use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\DatosDeInicioDeObrasResource;
 use App\Filament\Obras\Resources\DatosEjecucionObras\DatosEjecucionObrasResource;
 use App\Filament\Obras\Resources\Expedientes\ExpedienteResource;
 use App\Filament\Obras\Resources\ImportesDeObras\ImportesDeObrasResource;
 use App\Filament\Obras\Resources\ImportesPorOrganismos\ImportesPorOrganismoResource;
 use App\Http\Middleware\CleanTenantUrl;
-use App\Models\Team;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -30,15 +27,15 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Str;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use Filament\View\PanelsRenderHook;
 use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Auth;
 use Filament\Enums\UserMenuPosition;
+use App\Filament\Livewire\PersistentDatabaseNotifications;
+use App\Filament\Auth\Login as CustomLogin;
 use App\Filament\Widgets\UltimasObrasTableWidget;
 use App\Filament\Widgets\NotificationsWidget;
 use App\Filament\Obras\Pages\Dashboard as ObrasDashboard;
 use App\Filament\Obras\Resources\Documentoexpedientes\DocumentoexpedienteResource;
-use Filament\Support\Facades\FilamentView;
 
 
 
@@ -69,7 +66,7 @@ class ObrasPanelProvider extends PanelProvider
             ->brandName('Planes Provinciales')
             ->navigation(false)
             ->userMenu(position: UserMenuPosition::Topbar)
-            ->databaseNotifications()
+            ->databaseNotifications(livewireComponent: PersistentDatabaseNotifications::class)
             ->databaseNotificationsPolling('30s')
             ->resources([
                 ImportesDeObrasResource::class,
@@ -82,7 +79,7 @@ class ObrasPanelProvider extends PanelProvider
                 //\BezhanSalleh\FilamentShield\Resources\RoleResource::class,
 
             ])
-            ->login()
+            ->login(CustomLogin::class)
             ->favicon(asset('img/favicon.ico'))
             ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))
             ->brandLogoHeight('2rem')
@@ -114,7 +111,7 @@ class ObrasPanelProvider extends PanelProvider
               //  FilamentInfoWidget::class,
 
                 UltimasObrasTableWidget::class,
-                                NotificationsWidget::class,
+                NotificationsWidget::class,
 
             ])
             ->middleware([
@@ -138,16 +135,17 @@ class ObrasPanelProvider extends PanelProvider
            // ])
             //->sidebarCollapsibleOnDesktop();;
             ->globalSearch(false)
+            ->renderHook('panels::head.end', fn () => view('obras-styles'))
             ->topNavigation();
 
 
 
     }
-public function boot(): void
+/*public function boot(): void
 {
     FilamentView::registerRenderHook(
         PanelsRenderHook::TOPBAR_AFTER, fn () => view('obras-styles')
     );
-}
+}*/
 
 }

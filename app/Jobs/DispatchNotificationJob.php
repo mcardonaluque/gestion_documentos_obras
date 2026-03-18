@@ -21,7 +21,6 @@ class DispatchNotificationJob implements ShouldQueue
     public bool $toAllUsers;
     public array $userIds;
     public ?int $teamId;
-    public ?int $senderId;
     public array $data;
 
     public function __construct(
@@ -31,7 +30,6 @@ class DispatchNotificationJob implements ShouldQueue
         bool $toAllUsers = false,
         array $userIds = [],
         ?int $teamId = null,
-        ?int $senderId = null,
         array $data = []
     )
     {
@@ -41,7 +39,6 @@ class DispatchNotificationJob implements ShouldQueue
         $this->toAllUsers = $toAllUsers;
         $this->userIds = $userIds;
         $this->teamId = $teamId;
-        $this->senderId = $senderId;
         $this->data     = $data;
     }
 
@@ -54,7 +51,6 @@ class DispatchNotificationJob implements ShouldQueue
             $this->toAllUsers,
             $this->userIds,
             $this->teamId,
-            $this->senderId,
             $this->data
         );
     }

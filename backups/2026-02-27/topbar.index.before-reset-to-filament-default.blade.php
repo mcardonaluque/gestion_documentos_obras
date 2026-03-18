@@ -157,7 +157,7 @@
             @else
                 x-persist="topbar.end"
             @endif
-            class="grid items-center grid-flow-col ms-auto auto-cols-max gap-x-4"
+            class="flex items-center ms-auto gap-x-4"
         >
             {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::GLOBAL_SEARCH_BEFORE) }}
 
@@ -176,6 +176,7 @@
 
                 <x-filament-panels::user-menu />
             @endif
+
         </div>
 
         {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::TOPBAR_END) }}

@@ -12,6 +12,8 @@ class DocumentoexpedienteResource extends DocumentoexpedienteResourceBase
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationLabel = 'Documentos del Expediente';
+    protected static ?string $modelLabel = 'Documento del Expediente';
+    protected static ?string $pluralModelLabel = 'Documentos del Expediente';
 
     public static function getPages(): array
     {

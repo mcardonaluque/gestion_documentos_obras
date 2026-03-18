@@ -6,7 +6,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use PhpParser\Node\Expr\Cast\Array_;
 
 class GenericDatabaseNotification extends Notification implements ShouldQueue
 {
@@ -15,15 +14,13 @@ class GenericDatabaseNotification extends Notification implements ShouldQueue
     public string $title;
     public string $message;
     public string $type;
-    
-    public ?int $sender_id = null;
 
     public function __construct(string $title, string $message, string $type)
     {
          $this->title = $title;
          $this->message = $message;     // ✅ Para Filament
          $this->type = $type;
-       
+
     }
 
     /**
@@ -44,7 +41,6 @@ class GenericDatabaseNotification extends Notification implements ShouldQueue
             'body' => $this->message,
             'message' => $this->message,
             'type' => $this->type,
-            'sender_id' =>  auth()->id(),
         ];
     }
 

@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -15,7 +14,7 @@ class DatosEjecucionObras extends Model
     protected $connection='Obras';
     protected $table='Datos_Ejecucion_Obras';
     protected $primaryKey='expediente_id';
-    
+
     public $incrementing=false;
     protected $keyType='string';
     public $timestamps = false;
@@ -33,7 +32,7 @@ class DatosEjecucionObras extends Model
     {
         return $this->hasMany(ImportesPorOrganismo::class, 'expediente_id', 'expediente_id' );
     }
-    
+
     public function planes():BelongsTo
     {
         return $this->belongsTo(Planes::class, 'Codigo_Plan', 'codigo_plan' );
@@ -47,5 +46,15 @@ class DatosEjecucionObras extends Model
     }
     function pseguridadsalud():HasOne   {
         return $this->hasOne(Planseguridadysalud::class, 'expediente_id', 'expediente_id');
+    }
+
+    public function actaReplanteo(): HasOne
+    {
+        return $this->hasOne(actadereplanteo::class, 'expediente_id', 'expediente_id');
+    }
+
+    public function actaRecepcion(): HasOne
+    {
+        return $this->hasOne(actaderecepcion::class, 'expediente_id', 'expediente_id');
     }
 }

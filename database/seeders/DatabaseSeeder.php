@@ -2,13 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-
-use function Illuminate\Log\log;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,8 +15,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             DocumentosExpedientesSeeder::class,
+            \Database\Seeders\DateValidationRuleSeeder::class,
             // Otros seeders...
         ]);
-        
+
     }
 }

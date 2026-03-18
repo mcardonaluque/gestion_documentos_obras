@@ -1,6 +1,8 @@
 <?php
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\Login as CustomLogin;
+use App\Filament\Livewire\PersistentDatabaseNotifications;
 use App\Filament\Widgets\NotificationsWidget;
 use App\Filament\Ayuntamientos\Resources\Documentoexpedientes\DocumentoexpedienteResource;
 use App\Filament\Ayuntamientos\Resources\Expedientes\ExpedienteResource;
@@ -8,7 +10,6 @@ use App\Filament\Obras\Resources\ImportesDeObras\ImportesDeObrasResource;
 use App\Filament\Obras\Pages\Dashboard as AyuntamientosDashboard;
 use App\Http\Middleware\CleanTenantUrl;
 use App\Models\Team;
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -30,7 +31,7 @@ class AyuntamientosPanelProvider extends PanelProvider
         return $panel
             ->id('ayuntamientos')
             ->path('ayuntamientos')
-            ->login()
+            ->login(CustomLogin::class)
             ->authGuard('web') //
             ->authMiddleware([
                 Authenticate::class, //
@@ -41,7 +42,7 @@ class AyuntamientosPanelProvider extends PanelProvider
                 ExpedienteResource::class,
             ])
             ->topNavigation()
-            ->databaseNotifications()
+            ->databaseNotifications(livewireComponent: PersistentDatabaseNotifications::class)
             ->favicon(asset('img/favicon.ico'))
             ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))
             ->brandLogoHeight('2rem')
@@ -49,22 +50,20 @@ class AyuntamientosPanelProvider extends PanelProvider
             ->colors([
                 'primary' => 'rgb(28, 20, 99)',
             ])
-            ->tenant(Team::class,ownershipRelationship: 'members',slugAttribute: 'slug')// 👈 si realmente quieres tenancy
+            ->tenant(Team::class, ownershipRelationship: 'members', slugAttribute: 'slug')
             ->discoverResources(in: app_path('Filament/Ayuntamientos/Resources'), for: 'App\\Filament\\Ayuntamientos\\Resources')
             ->discoverPages(in: app_path('Filament/Ayuntamientos/Pages'), for: 'App\\Filament\\Ayuntamientos\\Pages')
             ->pages([
                 AyuntamientosDashboard::class,
             ])
-            ->plugins([
-                FilamentShieldPlugin::make(),
-            ])
             ->discoverWidgets(in: app_path('Filament/Ayuntamientos/Widgets'), for: 'App\\Filament\\Ayuntamientos\\Widgets')
             ->widgets([
                 //Widgets\AccountWidget::class,
                 //Widgets\FilamentInfoWidget::class,
-                //\App\Filament\Widgets\ExpedientesTable::class,
-                //\App\Filament\Widgets\DocumentosTable::class,
                 NotificationsWidget::class,
+                \App\Filament\Widgets\ExpedientesTable::class,
+                \App\Filament\Widgets\DocumentosTable::class,
+
             ])
             ->tenantMiddleware([
                 CleanTenantUrl::class,

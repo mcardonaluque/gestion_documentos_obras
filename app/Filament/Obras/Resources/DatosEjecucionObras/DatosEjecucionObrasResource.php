@@ -3,9 +3,6 @@
 namespace App\Filament\Obras\Resources\DatosEjecucionObras;
 
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
@@ -18,6 +15,8 @@ use App\Filament\Obras\Resources\DatosEjecucionObras\Pages\CreateDatosEjecucionO
 use App\Filament\Obras\Resources\DatosEjecucionObras\Pages\EditDatosEjecucionObras;
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\ImportesPorOrganismoRelationManager;
 
+use App\Filament\Obras\Resources\DatosEjecucionObras\RelationManagers\ActaRecepcionRelationManager;
+use App\Filament\Obras\Resources\DatosEjecucionObras\RelationManagers\ActaReplanteoRelationManager;
 use App\Filament\Obras\Resources\DatosEjecucionObras\RelationManagers\CertificacionesRelationManager;
 use App\Models\DatosEjecucionObras;
 use Filament\Forms;
@@ -81,56 +80,6 @@ class DatosEjecucionObrasResource extends Resource
               TextInput::make('expediente_id')
                    // ->searchable()
                     ->disabled(),
-                DateTimePicker::make('Fecha_Inicio_Acta_Replanteo'),
-                DateTimePicker::make('Fecha_Final_Acta_Replanteo'),
-                DateTimePicker::make('Fecha_Prorroga_Acta_Replanteo'),
-                Toggle::make('Indicador_Impresion_AR')
-                    ->required(),
-                Toggle::make('Indicador_Recepcion_AR')
-                    ->required(),
-                TextInput::make('TipoActaRecepcion')
-                    ->maxLength(1),
-                DateTimePicker::make('Fecha_Acta_RecProv'),
-                TextInput::make('Lugar_Acta_Rec')
-                    ->maxLength(25),
-                DateTimePicker::make('Fecha_Com_Inf'),
-                DateTimePicker::make('Fecha_Edicto_BOE'),
-                DateTimePicker::make('Fecha_BOE'),
-                TextInput::make('Num_BOE')
-                    ->maxLength(3),
-                TextInput::make('Plazo_Reclam')
-                    ->numeric(),
-                DateTimePicker::make('Fecha_Certif_NO_Reclam'),
-                DateTimePicker::make('Fecha_Com_Inf_2'),
-                DateTimePicker::make('Fecha_Com_Gob'),
-                DateTimePicker::make('Fecha_Comun_Contrat'),
-                DateTimePicker::make('Fecha_Certif_Liquid'),
-                DateTimePicker::make('Fecha_Rem_Interv'),
-                DateTimePicker::make('Fecha_Rem_MAP'),
-                TextInput::make('Admin_ActaRecepcion')
-                    ->maxLength(60),
-                TextInput::make('Dir_ActaRecepcion')
-                    ->maxLength(60),
-                TextInput::make('Alcalde_ActaRecepcion')
-                    ->maxLength(60),
-                TextInput::make('Cont_ActaRecepcion')
-                    ->maxLength(60),
-                TextInput::make('Interv_ActaRecepcion')
-                    ->maxLength(60),
-                TextInput::make('Dipu_ActaRecepcion')
-                    ->maxLength(60),
-                Textarea::make('Texto')
-                    ->columnSpanFull(),
-                DateTimePicker::make('Fecha_Paralizacion_Temporal'),
-                TextInput::make('Motivo_Paralizacion')
-                    ->maxLength(200),
-                DateTimePicker::make('Fecha_Aprob_Paralizacion_Temporal'),
-                DateTimePicker::make('Fecha_Inicio_Paralizacion'),
-                DateTimePicker::make('Fecha_Final_Paralizacion'),
-                DateTimePicker::make('Fecha_Acta_Rec'),
-                DateTimePicker::make('Fecha_Aviso_Finalizacion'),
-                DateTimePicker::make('Fecha_Aviso_FinalizacionMAP'),
-                DateTimePicker::make('Fecha_Medicion'),
                 Select::make('team_id')
                     ->relationship('team', 'name'),
             ]);
@@ -155,97 +104,27 @@ class DatosEjecucionObrasResource extends Resource
                 TextColumn::make('obra.nombre_obra1')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('Fecha_Inicio_Acta_Replanteo')
+                TextColumn::make('actaReplanteo.Fecha_Inicio_Acta_Replanteo')
                     ->dateTime()
                     ->sortable(),
-                TextColumn::make('Fecha_Final_Acta_Replanteo')
+                TextColumn::make('actaReplanteo.Fecha_Final_Acta_Replanteo')
                     ->dateTime()
                     ->sortable(),
-                TextColumn::make('Fecha_Prorroga_Acta_Replanteo')
+                TextColumn::make('actaReplanteo.Fecha_Prorroga_Acta_Replanteo')
                     ->dateTime()
                     ->sortable(),
-                IconColumn::make('Indicador_Impresion_AR')
+                IconColumn::make('actaReplanteo.Indicador_Impresion_AR')
                     ->boolean(),
-                IconColumn::make('Indicador_Recepcion_AR')
+                IconColumn::make('actaReplanteo.Indicador_Recepcion_AR')
                     ->boolean(),
-                TextColumn::make('TipoActaRecepcion')
+                TextColumn::make('actaRecepcion.TipoActaRecepcion')
                     ->searchable(),
-                TextColumn::make('Fecha_Acta_RecProv')
+                TextColumn::make('actaRecepcion.Fecha_Acta_RecProv')
                     ->dateTime()
                     ->sortable(),
-                TextColumn::make('Lugar_Acta_Rec')
+                TextColumn::make('actaRecepcion.Lugar_Acta_Rec')
                     ->searchable(),
-                TextColumn::make('Fecha_Com_Inf')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_Edicto_BOE')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_BOE')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Num_BOE')
-                    ->searchable(),
-                TextColumn::make('Plazo_Reclam')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('Fecha_Certif_NO_Reclam')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_Com_Inf_2')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_Com_Gob')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_Comun_Contrat')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_Certif_Liquid')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_Rem_Interv')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_Rem_MAP')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Admin_ActaRecepcion')
-                    ->searchable(),
-                TextColumn::make('Dir_ActaRecepcion')
-                    ->searchable(),
-                TextColumn::make('Alcalde_ActaRecepcion')
-                    ->searchable(),
-                TextColumn::make('Cont_ActaRecepcion')
-                    ->searchable(),
-                TextColumn::make('Interv_ActaRecepcion')
-                    ->searchable(),
-                TextColumn::make('Dipu_ActaRecepcion')
-                    ->searchable(),
-                TextColumn::make('Fecha_Paralizacion_Temporal')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Motivo_Paralizacion')
-                    ->searchable(),
-                TextColumn::make('Fecha_Aprob_Paralizacion_Temporal')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_Inicio_Paralizacion')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_Final_Paralizacion')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_Acta_Rec')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_Aviso_Finalizacion')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_Aviso_FinalizacionMAP')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('Fecha_Medicion')
+                TextColumn::make('actaRecepcion.Fecha_Acta_Rec')
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('expediente_id')
@@ -287,6 +166,8 @@ class DatosEjecucionObrasResource extends Resource
             //
             CertificacionesRelationManager::class,
             ImportesPorOrganismoRelationManager::class,
+            ActaReplanteoRelationManager::class,
+            ActaRecepcionRelationManager::class,
         ];
     }
 

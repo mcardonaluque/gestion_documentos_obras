@@ -3,7 +3,6 @@
 namespace App\Filament\Ayuntamientos\Resources\ExpedienteResource\RelationManagers;
 
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
@@ -13,9 +12,8 @@ use Filament\Forms;
 use Filament\Schemas\Schema;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DocumentosexpedientesRelationManager extends RelationManager
 {
@@ -36,42 +34,22 @@ class DocumentosexpedientesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('expediente_id')
             ->columns([
-                TextInput::make('cod_plan')
-                ->required()
-                ->maxLength(45),
-            TextInput::make('referencia')
-                ->required()
-                ->numeric(),
-            TextInput::make('subreferencia')
-                ->numeric()
-                ->default(null),
-            TextInput::make('ao_ejecucion')
-                ->required()
-                ->numeric(),
-            DatePicker::make('fechaincorporacion')
-                ->required(),
-            DatePicker::make('fechaHelp'),
-            TextInput::make('cod_dcoumento')
-                ->required()
-                ->numeric(),
-            TextInput::make('expediente_id')
-                ->required()
-                ->maxLength(45),
-            TextInput::make('csv')
-                ->maxLength(50)
-                ->default(null),
-            TextInput::make('nregistro')
-                ->maxLength(45)
-                ->default(null),
-            TextInput::make('nsecuencia')
-                ->numeric()
-                ->default(null),
-            TextInput::make('estado')
-                ->required()
-                ->numeric(),
-            TextInput::make('descripcion')
-                ->maxLength(255)
-                ->default(null),
+                TextColumn::make('cod_plan')
+                    ->searchable(),
+                TextColumn::make('referencia')
+                    ->sortable(),
+                TextColumn::make('ao_ejecucion')
+                    ->sortable(),
+                TextColumn::make('tipodocumentos.nombre')
+                    ->label('Documento')
+                    ->sortable(),
+                TextColumn::make('fechaincorporacion')
+                    ->date()
+                    ->sortable(),
+                TextColumn::make('estado')
+                    ->sortable(),
+                TextColumn::make('descripcion')
+                    ->limit(50),
             ])
             ->filters([
                 //
@@ -85,7 +63,7 @@ class DocumentosexpedientesRelationManager extends RelationManager
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
                 ]),
             ]);
     }

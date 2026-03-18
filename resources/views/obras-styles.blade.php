@@ -80,7 +80,7 @@
     .fi-header-heading {
         font-size: 1.5rem !important;
         font-weight: 900 !important;
-        color: #f1f2f5 !important;
+        color: rgb(28, 20, 99) !important;
         text-transform: uppercase;
         letter-spacing: 0.1em;
        /* background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
@@ -92,25 +92,22 @@
     }
 
     .dark .fi-header-heading {
-        background: linear-gradient(135deg, #818cf8 0%, #a5b4fc 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: #f9fafb !important;
     }
 
     /* 2. SUBTÍTULO */
     .fi-header-subheading {
         font-size: 1.35rem !important;
-        font-weight: 400 !important;
-        color: #6b7280 !important;
+        font-weight: 600 !important;
+        color: rgb(28, 20, 99) !important;
         font-style: italic;
         margin-bottom: 2rem;
-        border-left: 4px solid #3b82f6;
+        border-left: 4px solid rgb(28, 20, 99);
         padding-left: 1rem;
     }
 
     .dark .fi-header-subheading {
-        color: #9ca3af !important;
+        color: #e5e7eb !important;
         border-left-color: #818cf8;
     }
 
@@ -118,10 +115,10 @@
     .fi-widget-header-heading {
         font-size: 1.5rem !important;
         font-weight: 700 !important;
-        color: #1f2937 !important;
+        color: rgb(28, 20, 99) !important;
         margin-bottom: 1rem;
         padding-bottom: 0.5rem;
-        border-bottom: 2px solid #e5e7eb;
+        border-bottom: 2px solid rgb(28, 20, 99);
     }
 
     .dark .fi-widget-header-heading {
@@ -133,7 +130,7 @@
     .fi-card-header-heading {
         font-size: 1.3rem !important;
         font-weight: 600 !important;
-        color: #374151 !important;
+        color: rgb(28, 20, 99) !important;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -147,7 +144,7 @@
     .fi-stats-overview-stat-label {
         font-size: 1.1rem !important;
         font-weight: 600 !important;
-        color: #4b5563 !important;
+        color: rgb(28, 20, 99) !important;
     }
 
     .dark .fi-stats-overview-stat-label {
@@ -157,7 +154,7 @@
     .fi-stats-overview-stat-value {
         font-size: 2rem !important;
         font-weight: 800 !important;
-        color: #1e40af !important;
+        color: rgb(28, 20, 99) !important;
     }
 
     .dark .fi-stats-overview-stat-value {
@@ -197,14 +194,23 @@
         padding: 0.75rem 1.25rem;
         border: 2px solid transparent;
         border-radius: 8px;
-        color: #e0e7ff;
+        color: #ffffff;
         font-weight: 500;
         text-decoration: none;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+
         cursor: pointer;
         transition: all 0.3s ease;
+    }
+
+    .custom-tab::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 100%;
+        height: 10px;
     }
 
     .custom-tab:hover {
@@ -223,7 +229,7 @@
     /* Submenús */
     .custom-submenu {
         position: absolute;
-        top: 100%;
+        top: calc(100% - 2px);
         left: 0;
         background: white;
         border: 2px solid #e2e8f0;
@@ -233,7 +239,7 @@
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         display: none;
         z-index: 1000;
-        margin-top: 0.25rem;
+        margin-top: 0;
     }
 
     .dark .custom-submenu {
@@ -281,6 +287,10 @@
         display: block;
     }
 
+    .custom-tab:focus-within .custom-submenu {
+        display: block;
+    }
+
     /* Mantener submenú visible cuando está activo */
     .custom-tab-active .custom-submenu {
         display: block !important;
@@ -301,9 +311,16 @@
 @if($user)
 <div class="custom-tabs-container">
     <nav class="custom-tabs-nav">
+        <div class="custom-tab" data-tab="Home">
+
+
+                <a href="/obras/" class="custom-menu-item">
+                     🏠 Escritorio
+                </a>
+        </div>
            <!-- Tab Inicio -->
            <div class="custom-tab" data-tab="inicio">
-            🚀 Inicio
+            🚀 Aprobación de Obras
             <div class="custom-submenu">
                 <a href="/obras/datos-de-inicio-de-obras" class="custom-submenu-item">
                     🏗️ Inicio de Obras
@@ -342,17 +359,17 @@
                 <a href="/obras/datos-ejecucion-obras" class="custom-submenu-item">
                     📈 Datos de Ejecución
                 </a>
-                <a href="/obras/planss" class="custom-submenu-item">
-                    👷‍♀️ Acta de replanteo
-                </a>
                 <a href="/obras/certificaciones" class="custom-submenu-item">
                     📝 Certificaciones
                 </a>
-                <a href="/obras/planss" class="custom-submenu-item">
+                <a href="/obras/actadereplanteos" class="custom-submenu-item">
+                    👷‍♀️ Acta de replanteo
+                </a>
+                <a href="/obras/plan-sses" class="custom-submenu-item">
                     🛡️ Planes de Seguridad y Salud
                 </a>
 
-                <a href="/obras/planss" class="custom-submenu-item">
+                <a href="/obras/actaderecepcions" class="custom-submenu-item">
                     🖹 Acta de recepcion
                 </a>
             </div>
@@ -363,27 +380,27 @@
                 <a href="/obras/expedientes" class="custom-submenu-item">
                     📋 Expedientes
                 </a>
-                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                <a href="/obras/documentoexpedientes" class="custom-submenu-item">
                     🗒️ Documentos de Expedientes
                 </a>
             </div>
         </div>
-        <div class="custom-tab" data-tab="Expedientes">
+        <div class="custom-tab" data-tab="Documentos">
             📁Documentación
             <div class="custom-submenu">
                 <a href="/obras/expedientes" class="custom-submenu-item">
                     📋 Documentos de Incio
                 </a>
-                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                <a href="/obras/documentoexpedientes" class="custom-submenu-item">
                     🗒️ Documentos de Proyectos
                 </a>
-                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                <a href="/obras/documentoexpedientes" class="custom-submenu-item">
                     🗒️ Documentos de Cesión
                 </a>
-                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                <a href="/obras/documentoexpedientes" class="custom-submenu-item">
                     🗒️ Documentos de Ejecución
                 </a>
-                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                <a href="/obras/documentoexpedientes" class="custom-submenu-item">
                     🗒️ Documentos de Justificación
                 </a>
             </div>

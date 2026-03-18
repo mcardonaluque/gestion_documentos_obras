@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Models\Team;
 use App\Notifications\GenericDatabaseNotification;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class NotificationService
@@ -18,7 +17,6 @@ class NotificationService
         bool $toAllUsers = false,
         array $userIds = [],
         ?int $teamId = null,
-        ?int $senderId = null,
         array $data = []
     ): Collection {
         $recipients = self::resolveRecipients($toAllUsers, $userIds, $teamId);
@@ -31,6 +29,7 @@ class NotificationService
                 'body' => $message,
                 'type' => $type,
                 'format' => 'filament',
+                'duration' => 'persistent',
             ]);
 
             $notifications->push(CustomNotification::create([
@@ -38,8 +37,6 @@ class NotificationService
                 'type' => GenericDatabaseNotification::class,
                 'notifiable_type' => User::class,
                 'notifiable_id' => $recipient->id,
-                'sender_id' => $senderId ?? Auth::id() ?? $recipient->id,
-                'recipient_id' => $recipient->id,
                 'data' => $payload,
                 'read_at' => null,
             ]));
@@ -53,34 +50,32 @@ class NotificationService
         string $title,
         string $message,
         string $type = 'info',
-        array $data = [],
-        ?int $senderId = null
+        array $data = []
     ): CustomNotification {
         return self::sendByTargets(
-            title: $title,
-            message: $message,
-            type: $type,
-            toAllUsers: false,
-            userIds: [$recipient->id],
-            teamId: null,
-            senderId: $senderId,
-            data: $data,
+            $title,
+            $message,
+            $type,
+            false,
+            [$recipient->id],
+            null,
+            $data,
         )->first();
     }
 
     protected static function resolveRecipients(bool $toAllUsers, array $userIds, ?int $teamId): Collection
     {
         if ($toAllUsers) {
-            return User::all();
+            return User::query()->get()->unique('id')->values();
+        }
+
+        if (!empty($userIds)) {
+            return User::query()->whereIn('id', $userIds)->get()->unique('id')->values();
         }
 
         if ($teamId) {
             $team = Team::find($teamId);
-            return $team?->users()->get() ?? collect();
-        }
-
-        if (!empty($userIds)) {
-            return User::whereIn('id', $userIds)->get();
+            return $team?->users()->get()->unique('id')->values() ?? collect();
         }
 
         return collect();

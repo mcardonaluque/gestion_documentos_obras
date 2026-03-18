@@ -173,7 +173,7 @@
                 <a href="/obras/expedientes" class="custom-submenu-item">
                     📋 Expedientes
                 </a>
-                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                <a href="/obras/documentoexpedientes" class="custom-submenu-item">
                     🗒️ Documentos de Proyectos
                 </a>
             </div>
@@ -184,16 +184,16 @@
                 <a href="/obras/expedientes" class="custom-submenu-item">
                     📋 Documentos de Incio
                 </a>
-                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                <a href="/obras/documentoexpedientes" class="custom-submenu-item">
                     🗒️ Documentos de Proyectos
                 </a>
-                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                <a href="/obras/documentoexpedientes" class="custom-submenu-item">
                     🗒️ Documentos de Cesión
                 </a>
-                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                <a href="/obras/documentoexpedientes" class="custom-submenu-item">
                     🗒️ Documentos de Ejecución
                 </a>
-                <a href="/obras/documentos-expedientes" class="custom-submenu-item">
+                <a href="/obras/documentoexpedientes" class="custom-submenu-item">
                     🗒️ Documentos de Justificación
                 </a>
             </div>

@@ -58,5 +58,10 @@ class Proyecto extends Model
     {
         return $this->belongsTo(TablaDeEstados::class,'cod_estado','estado_proyecto',);
     }
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Planes::class,'Codigo_Plan','codigo_plan',);
+    }
+
 }
 

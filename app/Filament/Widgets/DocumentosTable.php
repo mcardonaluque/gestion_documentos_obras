@@ -19,6 +19,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Livewire\Attributes\On;
+use Filament\Facades\Filament;
 
 class DocumentosTable extends BaseWidget
 {
@@ -26,6 +27,15 @@ class DocumentosTable extends BaseWidget
     public ?string $documentoSeleccionado = null;
     protected static ?string $heading = 'Documentos del Expediente';
     protected int | string | array $columnSpan = 'full';
+
+    public function getHeading(): string
+    {
+        if (blank($this->expedienteSeleccionado)) {
+            return 'Documentos del Expediente';
+        }
+
+        return "Documentos del Expediente: {$this->expedienteSeleccionado}";
+    }
 
     // Escuchar el evento del otro widget
     #[On('expedienteSeleccionado')]
@@ -37,6 +47,9 @@ class DocumentosTable extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
+            ->heading(fn (): string => blank($this->expedienteSeleccionado)
+                ? 'Documentos del Expediente'
+                : "Documentos del Expediente: {$this->expedienteSeleccionado}")
             ->query(function () {
                 if (!$this->expedienteSeleccionado) {
                     return DocumentoExpediente::where('idDocumento','0'); // Query vacío
@@ -52,6 +65,11 @@ class DocumentosTable extends BaseWidget
 
                 TextColumn::make('tipodocumentos.nombre')
                     ->label('Tipo Documento')
+                    ->sortable()
+                    ->searchable(),
+
+                TextColumn::make('tipodocumentos.fasedoc.nombre')
+                    ->label('Fase')
                     ->sortable()
                     ->searchable(),
 
@@ -76,37 +94,106 @@ class DocumentosTable extends BaseWidget
                     }),
             ])
             ->headerActions([
-                CreateAction::make()
-                    ->label('Nuevo Documento')
+            CreateAction::make()
+                    ->label('Añadir un documento de expediente')
                     ->schema([
-                        TextInput::make('cod_documento')
-                            ->label('Código Documento')
-                            ->required(),
+                Section::make()
+                    ->schema([
+                Select::make('expediente_id')
+                    ->label('Expediente')
+                    ->relationship('expedientes', 'expediente_id')
+                    ->searchable()
+                    ->preload()
+                    ->default(fn () => $this->expedienteSeleccionado)
+                    ->disabled()
+                    ->dehydrated()
+                    ->required(),
+                Select::make('Codigo_Plan')
+                    ->relationship('planes', 'codigo_plan')
+                    ->label('Código plan')
+                    ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
+                        'expediente_id' => $this->expedienteSeleccionado,
+                    ])['Codigo_Plan'] ?? null)
+                    ->disabled()
+                    ->required(),
+                TextInput::make('referencia')
+                    ->label('Número obra')
+                    ->readOnly()
+                    ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
+                        'expediente_id' => $this->expedienteSeleccionado,
+                    ])['referencia'] ?? null)
+                    ->required()
+                    ->numeric(),
+                TextInput::make('subreferencia')
+                    ->label('Subreferencia')
+                    ->readOnly()
+                    ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
+                        'expediente_id' => $this->expedienteSeleccionado,
+                    ])['subreferencia'] ?? null)
+                    ->numeric()
+                    ->default(null),
+                TextInput::make('ao_ejecucion')
+                    ->label('Año ejecución')
+                    ->readOnly()
+                    ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
+                        'expediente_id' => $this->expedienteSeleccionado,
+                    ])['ao_ejecucion'] ?? null)
+                    ->required()
+                    ->numeric(),
+                Select::make('cod_documento')
+                        ->label('Tipo Documento')
+                        ->relationship('tipodocumentos', 'nombre')
+                        ->searchable()
+                        ->required()
+                        ->preload(),
 
-                        Select::make('cod_documento')
-                            ->label('Tipo Documento')
-                            ->relationship('tipodocumentos', 'descripcion')
-                            ->searchable()
-                            ->preload(),
+                Textarea::make('descripcion')
+                        ->label('Descripción'),
 
-                        Textarea::make('descripcion')
-                            ->label('Descripción'),
+                DatePicker::make('fechaincorporacion')
+                        ->label('Fecha Incorporación'),
 
-                        DatePicker::make('fechaincorporacion')
-                            ->label('Fecha Incorporación'),
+                Select::make('estado')
+                        ->label('Estado')
+                        ->relationship('estados', 'nombre')
+                        ->required(),
+                TextInput::make('csv')
+                    ->required()
+                    ->maxLength(50)
+                    ->default(null),
+                TextInput::make('nregistro')
+                    ->maxLength(45)
+                    ->default(null),
+                TextInput::make('nsecuencia')
+                    ->label('Nº secuencia')
+                    ->readOnly()
+                    ->numeric()
+                    ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
+                        'expediente_id' => $this->expedienteSeleccionado,
+                    ])['nsecuencia'] ?? null),
+                 DatePicker::make('fechaHelp'),
+                  Select::make('estado')
+                    ->relationship('estados', 'nombre')
+                    ->required(),
 
-                        Select::make('estado')
-                            ->label('Estado')
-                            ->options([
-                                'pendiente' => 'Pendiente',
-                                'completado' => 'Completado',
-                                'aprobado' => 'Aprobado',
-                                'rechazado' => 'Rechazado',
-                            ]),
+                Select::make('team_id')
+                    ->label('Municipio')
+                    ->relationship('team', 'name')
+                    ->default(fn () => Filament::getTenant()?->id),
+                Select::make('destino')
+                    ->relationship('destinos', 'destino')
+                    ->label('Destino'),
+                Select::make('procedencia')
+                    ->relationship('procedencias', 'destino')
+                    ->label('Procedencia'),
                     ])
-                    ->action(function (array $data) {
+                    ->columns(2),
+                    ])
+
+                ->action(function (array $data) {
                         // Asignar automáticamente el expediente seleccionado
                         $data['expediente_id'] = $this->expedienteSeleccionado;
+                        $data = DocumentoExpediente::applyExpedienteDefaults($data);
                         $documento = DocumentoExpediente::create($data);
 
                         event(new SystemEventOccurred(
@@ -157,7 +244,7 @@ class DocumentosTable extends BaseWidget
                     ]),
                 ViewAction::make('Ver Documento')
 
-                ->label('Documentos')
+                ->label('Ver Documento')
                 ->icon('heroicon-o-folder-open')
                 ->modalWidth('x1') // opcional: ancho del modal
                 ->modalHeading(fn ($record) => "Documento {$record->descripcion} del expediente {$record->expediente_id}")

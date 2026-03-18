@@ -13,10 +13,10 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use App\Models\Expediente;
 use App\Models\DocumentoExpediente;
+use Filament\Facades\Filament;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Database\Eloquent\Builder;
 
 class TablasExpedientesDocs extends BaseWidget
 {
@@ -34,13 +34,13 @@ class TablasExpedientesDocs extends BaseWidget
                     ->searchable()
                     ->sortable()
                     ->description(fn (Expediente $record) => $record->estados->descripcion ?? 'Sin estado'),
-                
+
                 TextColumn::make('documentos_count')
                     ->label('Nº Documentos')
                     ->counts('documentos')
                     ->badge()
                     ->color(fn ($state) => $state > 0 ? 'success' : 'gray'),
-                    
+
                 TextColumn::make('created_at')
                     ->label('Creado')
                     ->date('d/m/Y')
@@ -64,32 +64,32 @@ class TablasExpedientesDocs extends BaseWidget
             ->query(function () {
                 if (!$this->expedienteSeleccionado) {
                     // No mostrar nada si no hay expediente seleccionado
-                    return DocumentoExpediente::where('id', 0);
+                    return DocumentoExpediente::where('idDocumento', 0);
                 }
-                
-                return DocumentoExpediente::where('Expediente', $this->expedienteSeleccionado);
+
+                return DocumentoExpediente::where('expediente_id', $this->expedienteSeleccionado);
             })
             ->columns([
                 TextColumn::make('cod_documento')
                     ->label('Código')
                     ->sortable()
                     ->searchable(),
-                    
+
                 TextColumn::make('tipodocumentos.descripcion')
                     ->label('Tipo Documento')
                     ->sortable()
                     ->searchable(),
-                    
+
                 TextColumn::make('descripcion')
                     ->label('Descripción')
                     ->limit(50)
                     ->searchable(),
-                    
+
                 TextColumn::make('fechaincorporacion')
                     ->label('Fecha')
                     ->date('d/m/Y')
                     ->sortable(),
-                    
+
                 TextColumn::make('estado')
                     ->label('Estado')
                     ->badge()
@@ -102,39 +102,93 @@ class TablasExpedientesDocs extends BaseWidget
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('Nuevo Documento')
+                    ->label('Añadir un documento de expediente')
                     ->model(DocumentoExpediente::class)
                     ->schema([
-                        CreateAction::makeForm([
-                            TextInput::make('cod_documento')
-                                ->label('Código Documento')
-                                ->required(),
-                                
-                            Select::make('cod_documento')
-                                ->label('Tipo Documento')
-                                ->relationship('tipodocumentos', 'descripcion')
-                                ->searchable()
-                                ->preload(),
-                                
-                            Textarea::make('descripcion')
-                                ->label('Descripción'),
-                                
-                            DatePicker::make('fechaincorporacion')
-                                ->label('Fecha Incorporación'),
-                                
-                            Select::make('estado')
-                                ->label('Estado')
-                                ->options([
-                                    'pendiente' => 'Pendiente',
-                                    'completado' => 'Completado',
-                                    'aprobado' => 'Aprobado',
-                                    'rechazado' => 'Rechazado',
-                                ]),
-                        ])
+                        Select::make('expediente_id')
+                            ->label('Expediente')
+                            ->relationship('expedientes', 'expediente_id')
+                            ->default(fn () => $this->expedienteSeleccionado)
+                            ->disabled()
+                            ->dehydrated()
+                            ->required(),
+                        Select::make('cod_plan')
+                            ->relationship('planes', 'codigo_plan')
+                            ->label('Código plan')
+                            ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
+                                'expediente_id' => $this->expedienteSeleccionado,
+                            ])['cod_plan'] ?? null)
+                            ->disabled()
+                            ->required(),
+                        TextInput::make('referencia')
+                            ->label('Número obra')
+                            ->readOnly()
+                            ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
+                                'expediente_id' => $this->expedienteSeleccionado,
+                            ])['referencia'] ?? null)
+                            ->required()
+                            ->numeric(),
+                        TextInput::make('subreferencia')
+                            ->label('Subreferencia')
+                            ->readOnly()
+                            ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
+                                'expediente_id' => $this->expedienteSeleccionado,
+                            ])['subreferencia'] ?? null)
+                            ->numeric()
+                            ->default(null),
+                        TextInput::make('ao_ejecucion')
+                            ->label('Año ejecución')
+                            ->readOnly()
+                            ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
+                                'expediente_id' => $this->expedienteSeleccionado,
+                            ])['ao_ejecucion'] ?? null)
+                            ->required()
+                            ->numeric(),
+                        Select::make('cod_documento')
+                            ->label('Tipo Documento')
+                            ->relationship('tipodocumentos', 'nombre')
+                            ->searchable()
+                            ->required()
+                            ->preload(),
+                        Textarea::make('descripcion')
+                            ->label('Descripción'),
+                        DatePicker::make('fechaincorporacion')
+                            ->label('Fecha Incorporación')
+                            ->default(now()),
+                        DatePicker::make('fechaHelp'),
+                        Select::make('estado')
+                            ->label('Estado')
+                            ->relationship('estados', 'nombre')
+                            ->required(),
+                        TextInput::make('csv')
+                            ->required()
+                            ->maxLength(50)
+                            ->default(null),
+                        TextInput::make('nregistro')
+                            ->maxLength(45)
+                            ->default(null),
+                        TextInput::make('nsecuencia')
+                            ->label('Nº secuencia')
+                            ->readOnly()
+                            ->numeric()
+                            ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
+                                'expediente_id' => $this->expedienteSeleccionado,
+                            ])['nsecuencia'] ?? null),
+                        Select::make('team_id')
+                            ->label('Municipio')
+                            ->relationship('team', 'name')
+                            ->default(fn () => Filament::getTenant()?->id),
+                        Select::make('destino')
+                            ->relationship('destinos', 'destino')
+                            ->label('Destino'),
+                        Select::make('procedencia')
+                            ->relationship('procedencias', 'destino')
+                            ->label('Procedencia'),
                     ])
                     ->action(function (array $data) {
                         // Asignar automáticamente el expediente seleccionado
-                        $data['Expediente'] = $this->expedienteSeleccionado;
+                        $data['expediente_id'] = $this->expedienteSeleccionado;
+                        $data = DocumentoExpediente::applyExpedienteDefaults($data);
                         DocumentoExpediente::create($data);
                     })
                     ->disabled(fn () => !$this->expedienteSeleccionado),
@@ -146,19 +200,19 @@ class TablasExpedientesDocs extends BaseWidget
                         TextInput::make('cod_documento')
                             ->label('Código Documento')
                             ->required(),
-                            
+
                         Select::make('cod_documento')
                             ->label('Tipo Documento')
                             ->relationship('tipodocumentos', 'descripcion')
                             ->searchable()
                             ->preload(),
-                            
+
                         Textarea::make('descripcion')
                             ->label('Descripción'),
-                            
+
                         DatePicker::make('fechaincorporacion')
                             ->label('Fecha Incorporación'),
-                            
+
                         Select::make('estado')
                             ->label('Estado')
                             ->options([
@@ -178,8 +232,8 @@ class TablasExpedientesDocs extends BaseWidget
 
     public function getTable(): Table
     {
-      
-        return $this->expedientesTable(Table::make());
+
+        return $this->expedientesTable(Table::make($this));
     }
 
     public function renderizar()

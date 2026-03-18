@@ -17,8 +17,6 @@ class CustomNotification extends DatabaseNotification
     protected $fillable = [
         'id',
         'type',
-        'sender_id',
-        'recipient_id',
         'read_at',
         'data',
         'notifiable_type',
@@ -30,19 +28,15 @@ class CustomNotification extends DatabaseNotification
         'data' => 'array',
 
     ];
-    protected static function boot() { parent::boot(); static::creating(function ($model) { if (!$model->getKey()) { $model->{$model->getKeyName()} = (string) Str::uuid(); } }); }
-    // Relación con el usuario que envía
-    public function sender()
-    {
-        return $this->belongsTo(User::class, 'sender_id');
-    }
-
-    // Relación con el usuario que recibe
-    public function recipient()
-    {
-        return $this->belongsTo(User::class, 'recipient_id');
-    }
-
+    protected static function boot() {
+        parent::boot();
+        static::creating(function ($model)
+        {
+            if (!$model->getKey())
+                { $model->{$model->getKeyName()} = (string) Str::uuid();
+                }
+        });
+     }
     // Marcar como leída
     public function markAsRead(): void
     {

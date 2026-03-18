@@ -27,7 +27,7 @@ use Filament\Facades\Filament;
 class RoleResource extends BaseRoleResource
 {
     protected static ?string $model = Role::class;
-    protected static ?string $tenantOwnershipRelationshipName = '';
+    protected static ?string $tenantOwnershipRelationshipName = 'members';
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
     public static function shouldRegisterNavigation(): bool
 {

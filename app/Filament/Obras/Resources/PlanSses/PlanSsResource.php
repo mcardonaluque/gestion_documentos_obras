@@ -39,7 +39,7 @@ class PlanSsResource extends Resource
     public static function getFormTitle(?string $operation = null): string
 {
     return match ($operation) {
-        'create' => 'Crear Plan de Seguridad y Salud',
+        'create' => 'Añadir Plan de Seguridad y Salud',
         'edit' => 'Editar Plan de Seguridad y Salud' . static::getModel()::find(request()->record)?->id,
         default => 'Plan de Seguridad y Salud',
     };

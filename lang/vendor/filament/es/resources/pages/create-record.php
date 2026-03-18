@@ -2,9 +2,9 @@
 
 return [
 
-    'title' => 'Crear :label',
+    'title' => 'Añadir :label',
 
-    'breadcrumb' => 'Crear',
+    'breadcrumb' => 'Añadir',
 
     'form' => [
 
@@ -15,11 +15,11 @@ return [
             ],
 
             'create' => [
-                'label' => 'Crear',
+                'label' => 'Grabar',
             ],
 
             'create_another' => [
-                'label' => 'Crear y crear otro',
+                'label' => 'Grabar y añadir otro',
             ],
 
         ],
@@ -29,7 +29,7 @@ return [
     'notifications' => [
 
         'created' => [
-            'title' => 'Creado',
+            'title' => 'Añadido',
         ],
 
     ],

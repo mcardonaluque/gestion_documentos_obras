@@ -7,7 +7,9 @@ namespace App\Providers\Filament;
 //use Althinect\FilamentSpatieRolesPermissions\Resources\UserResource;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
+use App\Filament\Auth\Login as CustomLogin;
 use App\Filament\Resources\Users\UserResource;
+use App\Filament\Livewire\PersistentDatabaseNotifications;
 use App\Filament\Widgets\NotificationsWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -15,7 +17,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -27,6 +28,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Support\Enums\Width;
 use App\Filament\Pages\Dashboard as AdminDashboard;
+use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -37,15 +39,16 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->brandName('Planes-Administración')
-            ->login()
-            ->databaseNotifications()
+            ->collapsedSidebarWidth('18rem')
+            ->login(CustomLogin::class)
+            ->databaseNotifications(livewireComponent: PersistentDatabaseNotifications::class)
             ->authGuard('web')
             ->favicon(asset('img/favicon.ico'))
             ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))
             ->brandLogoHeight('2rem')
             ->maxContentWidth(Width::Full)
             ->plugins([
-               // FilamentShieldPlugin::make(),
+                FilamentShieldPlugin::make(),
 
             ])
 
@@ -54,7 +57,7 @@ class AdminPanelProvider extends PanelProvider
                 'primary'=>'rgb(28, 20, 99)',
             ])
             ->resources([UserResource::class,
-                //\BezhanSalleh\FilamentShield\Resources\RoleResource::class,
+                RoleResource::class,
 
 
             ])
@@ -84,7 +87,7 @@ class AdminPanelProvider extends PanelProvider
             ])
            ->authMiddleware([
                 Authenticate::class,
-            ])
-            ->renderHook('panels::head.end', fn () => view('admin-styles'));
+            ]);
+           // ->renderHook('panels::head.end', fn () => view('admin-styles'));
     }
 }

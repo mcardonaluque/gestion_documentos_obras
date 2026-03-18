@@ -8,7 +8,6 @@ use App\Filament\Obras\Resources\Notifications\NotificationResource;
 use App\Models\CustomNotification;
 use App\Services\NotificationService;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 
@@ -18,7 +17,18 @@ class CreateNotification extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        if (! ($data['to_all'] ?? false) && empty($data['team_id']) && empty($data['user_ids'])) {
+        $toAllUsers = (bool) ($data['to_all'] ?? false);
+        $userIds = array_values(array_unique(array_map('intval', $data['user_ids'] ?? [])));
+        $teamId = filled($data['team_id'] ?? null) ? (int) $data['team_id'] : null;
+
+        if ($toAllUsers) {
+            $userIds = [];
+            $teamId = null;
+        } elseif (! empty($userIds)) {
+            $teamId = null;
+        }
+
+        if (! $toAllUsers && empty($teamId) && empty($userIds)) {
             throw ValidationException::withMessages([
                 'user_ids' => 'Selecciona uno o varios usuarios, un equipo o marca "Notificar a todos los usuarios".',
             ]);
@@ -28,10 +38,9 @@ class CreateNotification extends CreateRecord
             title: $data['title'],
             message: $data['message'],
             type: $data['type'],
-            toAllUsers: (bool) ($data['to_all'] ?? false),
-            userIds: $data['user_ids'] ?? [],
-            teamId: $data['team_id'] ?? null,
-            senderId: Auth::id(),
+            toAllUsers: $toAllUsers,
+            userIds: $userIds,
+            teamId: $teamId,
             data: [
                 'origin' => 'notification_resource',
             ],

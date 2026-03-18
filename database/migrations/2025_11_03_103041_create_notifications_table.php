@@ -16,8 +16,6 @@ return new class extends Migration
             $table->string('type');
             $table->morphs('notifiable');
             $table->text('data');
-            $table->foreignId('sender_id')->constrained('users'); // Usuario que envía
-            $table->foreignId('recipient_id')->constrained('users'); // Usuario que recibe
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });

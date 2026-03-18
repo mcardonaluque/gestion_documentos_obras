@@ -18,13 +18,13 @@ class Planseguridadysalud extends Model
     public $timestamps = true;
     use HasFactory;
     public function expediente():BelongsTo{
-        return $this->belongsTo(Expediente::class);
+        return $this->belongsTo(Expediente::class, 'expediente_id', 'expediente_id');
     }
     public function obra():BelongsTo{
-        return $this->belongsTo(DatosDeInicioDeObras::class, 'expediente_id', 'Expediente');
+        return $this->belongsTo(DatosDeInicioDeObras::class, 'expediente_id', 'expediente_id');
     }
     public function ejecucion():BelongsTo{
-        return $this->belongsTo(DatosEjecucionObras::class, 'expediente_id', 'Expediente');
+        return $this->belongsTo(DatosEjecucionObras::class, 'expediente_id', 'expediente_id');
     }
     public function team():BelongsTo{
         return $this->belongsTo(Team::class);

@@ -6,9 +6,9 @@ use App\Events\SystemEventOccurred;
 use App\Filament\Shared\Resources\Expedientes\RelationManagers\DocumentosRelationManager;
 use App\Models\DocumentoGenerico;
 use App\Models\Expediente;
+use App\Models\DocumentoExpediente;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -40,7 +40,7 @@ abstract class ExpedienteResourceBase extends Resource
                     ->disabled()
                     ->required()
                     ->maxLength(510),
-                     TextInput::make('referencia')
+                TextInput::make('referencia')
                     ->disabled()
                     ->required()
                     ->numeric(),
@@ -100,7 +100,7 @@ abstract class ExpedienteResourceBase extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('expediente_id')
                     ->searchable(),
-                TextColumn::make('codigo_plan')
+                TextColumn::make('planes.denominacioin_plan')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('subreferencia')
@@ -148,11 +148,14 @@ abstract class ExpedienteResourceBase extends Resource
                             ->readOnly()
                             ->default(fn ($record) => $record?->expediente_id),
 
-                        TextInput::make('cod_plan')
+                        TextInput::make('Codigo_Plan')
                             ->label('Código plan')
                             ->readOnly()
                             ->default(fn ($record) => $record?->codigo_plan),
-
+                        TextInput::make('planes.denominacion_plan')
+                            ->label('Plan')
+                            ->readOnly()
+                            ->default(fn ($record) => $record?->planes?->denominacion_plan),
                         TextInput::make('numero_obra')
                             ->label('Número obra')
                             ->readOnly()
@@ -201,7 +204,9 @@ abstract class ExpedienteResourceBase extends Resource
                             ->default(now()),
                     ])
                     ->action(function (array $data, $record) {
-                        $nextSecuencia = ((int) ($record->documentos()->max('nsecuencia') ?? 0)) + 1;
+                        $nextSecuencia = ((int) (DocumentoExpediente::query()
+                            ->where('expediente_id', $record->expediente_id)
+                            ->max('nsecuencia') ?? 0)) + 1;
 
                         $documento = $record->documentos()->create([
                             'expediente_id' => $record->expediente_id,

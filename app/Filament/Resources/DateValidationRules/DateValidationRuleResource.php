@@ -1,33 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\DateValidationRules;
 
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\DateValidationRules\Pages\ListDateValidationRules;
+use App\Enums\DateRuleAction;
+use App\Enums\DateRuleCondition;
+use App\Enums\DateRuleOperation;
+use App\Enums\DateRuleType;
 use App\Filament\Resources\DateValidationRules\Pages\CreateDateValidationRule;
 use App\Filament\Resources\DateValidationRules\Pages\EditDateValidationRule;
-use App\Filament\Resources\DateValidationRuleResource\Pages;
-use App\Filament\Resources\DateValidationRuleResource\RelationManagers;
+use App\Filament\Resources\DateValidationRules\Pages\ListDateValidationRules;
 use App\Models\DateValidationRule;
-use Filament\Forms;
-use Filament\Schemas\Schema;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 
 class DateValidationRuleResource extends Resource
 {
     protected static ?string $model = DateValidationRule::class;
+
+    protected static string | \UnitEnum | null $navigationGroup = 'Configuracion';
+
+    protected static ?string $navigationLabel = 'Reglas de fechas';
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -35,55 +40,86 @@ class DateValidationRuleResource extends Resource
     {
         return $schema
             ->components([
-                //
                 TextInput::make('nombre')
+                    ->label('Nombre de la regla')
                     ->required()
-                    ->maxLength(255),
-                Textarea::make('description')
-                    ->maxLength(65535),
-                TextInput::make('modelo')
+                    ->maxLength(160),
+                Textarea::make('descripcion')
+                    ->maxLength(500)
+                    ->columnSpanFull(),
+                TextInput::make('tabla1')
+                    ->label('Tabla principal')
                     ->required()
-                    ->placeholder('Ej: contracts'),
-                TextInput::make('campo')
+                    ->placeholder('Ejemplo: Expedientes')
+                    ->maxLength(120),
+                TextInput::make('campo1')
+                    ->label('Campo fecha principal')
                     ->required()
-                    ->placeholder('Ej: projects.start_date'),
-                TextInput::make('modelo_relacionado')
-                    ->required()
-                    ->placeholder('Ej: contracts'),
-                TextInput::make('campo_relacionado')
-                    ->required()
-                    ->placeholder('Ej: signing_date'),
-                Select::make('validation_type')
-                    ->options([
-                        'after' => 'Después de',
-                        'before' => 'Antes de',
-                        'after_or_equal' => 'Después o igual a',
-                        'before_or_equal' => 'Antes o igual a',
-                        'beetween'  => 'Entre',
-                    ])
+                    ->placeholder('Ejemplo: fechaincorporacion')
+                    ->maxLength(120),
+                TextInput::make('tabla2')
+                    ->label('Tabla comparacion')
+                    ->maxLength(120),
+                TextInput::make('campo2')
+                    ->label('Campo fecha comparacion')
+                    ->maxLength(120),
+                Select::make('condicion')
+                    ->options(DateRuleCondition::options())
                     ->required(),
-                TextInput::make('periodo')
+                TextInput::make('plazo_dias')
+                    ->label('Plazo en dias')
                     ->numeric()
-                    ->nullable(),
+                    ->minValue(1),
+                TextInput::make('aviso_dias')
+                    ->label('Aviso cuando faltan dias')
+                    ->numeric()
+                    ->minValue(0),
+                Select::make('tipo')
+                    ->options(DateRuleType::options())
+                    ->required(),
+                Select::make('accion')
+                    ->options(DateRuleAction::options())
+                    ->required(),
+                Select::make('operacion')
+                    ->options(DateRuleOperation::options())
+                    ->required(),
+                TextInput::make('fase')
+                    ->maxLength(50),
+                TextInput::make('estado')
+                    ->maxLength(20),
+                Textarea::make('mensaje')
+                    ->required()
+                    ->rows(3)
+                    ->columnSpanFull(),
+                Toggle::make('dispara_si_cumple')
+                    ->label('Disparar cuando la condicion SI se cumple')
+                    ->default(false),
                 Toggle::make('activa')
                     ->default(true),
             ]);
-
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                //
-                TextColumn::make('name'),
-                TextColumn::make('field_to_validate'),
-                TextColumn::make('validation_type'),
-                IconColumn::make('active')
+                TextColumn::make('nombre')->searchable()->sortable(),
+                TextColumn::make('tabla1')->label('Tabla')->searchable(),
+                TextColumn::make('campo1')->label('Campo')->searchable(),
+                TextColumn::make('condicion')->badge(),
+                TextColumn::make('tipo')->badge(),
+                TextColumn::make('accion')->badge(),
+                IconColumn::make('activa')
                     ->boolean(),
             ])
             ->filters([
-                //
+                SelectFilter::make('tipo')
+                    ->options(DateRuleType::options()),
+                SelectFilter::make('activa')
+                    ->options([
+                        '1' => 'Activas',
+                        '0' => 'Inactivas',
+                    ]),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -97,9 +133,7 @@ class DateValidationRuleResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array

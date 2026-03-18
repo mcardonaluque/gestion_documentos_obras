@@ -9,8 +9,11 @@ use Spatie\Permission\Models\Role as SpatieRole;
 class Role extends SpatieRole
 {
     //
-    //public function members():BelongsToMany{
-    //    return $this->belongsToMany(User::class);
-    //}
-    
+    public function members():BelongsToMany{
+        return $this->belongsToMany(User::class);
+    }
+     public function team()
+    {
+        return $this->belongsTo(Team::class);
+    }
 }

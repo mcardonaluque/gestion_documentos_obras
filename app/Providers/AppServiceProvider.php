@@ -2,19 +2,17 @@
 
 namespace App\Providers;
 
+use App\Observers\DateRuleObserver;
 use Illuminate\Auth\Events\Attempting;
 use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Auth\Events\Failed;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
-use App\Policies\RolePolicy;
-use App\Policies\PermissionPolicy;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
 use function Illuminate\Log\log;
@@ -29,17 +27,17 @@ class AppServiceProvider extends ServiceProvider
         //Permission::class => PermissionPolicy::class,
         // Otras políticas...
     //];
-   
+
     public function register(): void
     {
         //
-        
+
     }
 
     /**
      * Bootstrap any application services.
      */
-   
+
     public function boot(): void
     {
         //
@@ -58,7 +56,7 @@ class AppServiceProvider extends ServiceProvider
                 'provider' => $event->guard
             ]);
         });
-        
+
         Event::listen(Authenticated::class, function ($event) {
             Log::debug('Usuario autenticado', [
                 'user' => $event->user->toArray(),
@@ -82,6 +80,15 @@ class AppServiceProvider extends ServiceProvider
                     ]
                 );
             });
+        }
+
+        /** @var array<int, class-string<Model>> $models */
+        $models = config('date_rules.observed_models', []);
+
+        foreach ($models as $modelClass) {
+            if (class_exists($modelClass) && is_subclass_of($modelClass, Model::class)) {
+                $modelClass::observe(DateRuleObserver::class);
+            }
         }
     }
 }

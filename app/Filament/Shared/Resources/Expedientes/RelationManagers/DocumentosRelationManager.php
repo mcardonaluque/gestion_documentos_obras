@@ -2,6 +2,7 @@
 
 namespace App\Filament\Shared\Resources\Expedientes\RelationManagers;
 
+use App\Models\DocumentoExpediente;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -29,12 +30,11 @@ class DocumentosRelationManager extends RelationManager
         return $schema
             ->components([
                 Select::make('cod_plan')
-                ->relationship('planes', 'codigo_plan')
+                    ->relationship('planes', 'codigo_plan')
                     ->label('Código plan')
                     ->disabled()
                     ->default(fn () => $this->getOwnerRecord()?->codigo_plan)
-                    ->required()
-                    ->maxLength(45),
+                    ->required(),
                 TextInput::make('referencia')
                     ->label('Número obra')
                     ->readOnly()
@@ -44,8 +44,7 @@ class DocumentosRelationManager extends RelationManager
                 TextInput::make('subreferencia')
                     ->readOnly()
                     ->default(fn () => $this->getOwnerRecord()?->subreferencia)
-                    ->numeric()
-                    ->default(null),
+                    ->numeric(),
                 TextInput::make('ao_ejecucion')
                     ->readOnly()
                     ->default(fn () => $this->getOwnerRecord()?->ao_ejecucion)
@@ -62,8 +61,7 @@ class DocumentosRelationManager extends RelationManager
                 DatePicker::make('fechaHelp'),
                 Select::make('cod_documento')
                     ->relationship('tipodocumentos', 'nombre')
-                    ->required()
-                    ->numeric(),
+                    ->required(),
                 TextInput::make('csv')
                     ->maxLength(50)
                     ->default(null),
@@ -73,12 +71,10 @@ class DocumentosRelationManager extends RelationManager
                 TextInput::make('nsecuencia')
                     ->readOnly()
                     ->default(fn () => ((int) ($this->getOwnerRecord()?->documentos()?->max('nsecuencia') ?? 0)) + 1)
-                    ->numeric()
-                    ->default(null),
+                    ->numeric(),
                 Select::make('estado')
                     ->relationship('estados', 'nombre')
-                    ->required()
-                    ->numeric(),
+                    ->required(),
                 TextInput::make('descripcion')
                     ->maxLength(255)
                     ->default(null),
@@ -114,7 +110,7 @@ class DocumentosRelationManager extends RelationManager
                     ->date()
                     ->sortable(),
                 TextColumn::make('cod_documento')
-                    ->numeric()
+                    ->label('Documento')
                     ->sortable(),
                 TextColumn::make('expediente_id')
                     ->searchable(),
@@ -133,15 +129,9 @@ class DocumentosRelationManager extends RelationManager
                 CreateAction::make()
                     ->mutateDataUsing(function (array $data): array {
                         $ownerRecord = $this->getOwnerRecord();
-
                         $data['expediente_id'] = $ownerRecord?->expediente_id;
-                        $data['cod_plan'] = $ownerRecord?->codigo_plan;
-                        $data['referencia'] = $ownerRecord?->referencia;
-                        $data['subreferencia'] = $ownerRecord?->subreferencia;
-                        $data['ao_ejecucion'] = $ownerRecord?->ao_ejecucion;
-                        $data['nsecuencia'] = ((int) ($ownerRecord?->documentos()?->max('nsecuencia') ?? 0)) + 1;
 
-                        return $data;
+                        return DocumentoExpediente::applyExpedienteDefaults($data);
                     }),
             ])
             ->recordActions([

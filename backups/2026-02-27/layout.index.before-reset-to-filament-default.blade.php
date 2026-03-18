@@ -7,7 +7,7 @@
 <x-filament-panels::layout.base :livewire="$livewire">
     {{-- The sidebar is after the page content in the markup to fix issues with page content overlapping dropdown content from the sidebar. --}}
     <div
-        class="fi-layout flex min-h-screen w-full flex-row-reverse overflow-x-clip"
+        class="flex flex-row w-full min-h-screen fi-layout overflow-x-clip"
     >
         <div
             @if (filament()->isSidebarCollapsibleOnDesktop())
@@ -80,14 +80,14 @@
             {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::FOOTER, scopes: $livewire->getRenderHookScopes()) }}
         </div>
 
-        @if (filament()->hasNavigation())
+        @if (filament()->hasNavigation() && ! filament()->hasTopNavigation())
             <div
                 x-cloak
                 x-data="{}"
                 x-on:click="$store.sidebar.close()"
                 x-show="$store.sidebar.isOpen"
                 x-transition.opacity.300ms
-                class="fi-sidebar-close-overlay fixed inset-0 z-30 bg-gray-950/50 transition duration-500 dark:bg-gray-950/75 lg:hidden"
+                class="fixed inset-0 z-30 transition duration-500 fi-sidebar-close-overlay bg-gray-950/50 dark:bg-gray-950/75 lg:hidden"
             ></div>
 
             <x-filament-panels::sidebar

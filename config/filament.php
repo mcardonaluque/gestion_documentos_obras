@@ -2,7 +2,6 @@
 
 use Filament\Pages\Auth\Login;
 use Filament\Pages\Auth\Register;
-use Filament\Support\Commands\FileGenerators\FileGenerationFlag;
 
 return [
 
@@ -77,9 +76,9 @@ return [
 
     'file_generation' => [
         'flags' => [
-            FileGenerationFlag::EMBEDDED_PANEL_RESOURCE_SCHEMAS, // Define new forms and infolists inside the resource class instead of a separate schema class.
-            FileGenerationFlag::EMBEDDED_PANEL_RESOURCE_TABLES, // Define new tables inside the resource class instead of a separate table class.
-            FileGenerationFlag::PARTIAL_IMPORTS, // Partially import components such as form fields and table columns instead of importing each component explicitly.
+            'embedded_panel_resource_schemas', // Define new forms and infolists inside the resource class instead of a separate schema class.
+            'embedded_panel_resource_tables', // Define new tables inside the resource class instead of a separate table class.
+            'partial_imports', // Partially import components such as form fields and table columns instead of importing each component explicitly.
         ],
     ],
 

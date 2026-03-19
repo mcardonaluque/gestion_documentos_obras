@@ -109,13 +109,13 @@ return [
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'options' => [
+            'options' => array_filter([
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 1002 => false, // <---- desactiva SSL
                 1001 => true, // confía en certificado autofirmado
+            ] + (defined('PDO::SQLSRV_ATTR_QUERY_TIMEOUT') ? [
                 PDO::SQLSRV_ATTR_QUERY_TIMEOUT => 30,
-
-            ],
+            ] : [])),
             //'encrypt' => env('DB_ENCRYPT', 'no'),
             //'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
 

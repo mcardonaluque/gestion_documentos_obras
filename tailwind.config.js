@@ -1,3 +1,4 @@
+use import;
 import forms from '@tailwindcss/forms'
 import typography from '@tailwindcss/typography'
 import preset from './vendor/filament/support/tailwind.config.preset'

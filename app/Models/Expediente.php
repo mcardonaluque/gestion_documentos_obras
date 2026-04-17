@@ -4,8 +4,15 @@
     use Illuminate\Database\Eloquent\Factories\HasFactory;
     use Illuminate\Database\Eloquent\Model;
     use Illuminate\Database\Eloquent\Relations\BelongsTo;
+    use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 
+    /**
+     * Modelo de expediente administrativo.
+     *
+     * Actúa como eje de agregación del dominio, enlazando la información de
+     * inicio, ejecución, cesión, documentos, importes y asignaciones de usuario.
+     */
     class Expediente extends Model
     {
         use HasFactory;
@@ -17,6 +24,7 @@
 
         protected $keyType = 'string';
 
+        /** Ficha de inicio de obra asociada al expediente. */
         public function obraInicio(){
             return $this->hasOne (DatosDeInicioDeObras::class, 'expediente_id', 'expediente_id');
         }
@@ -32,10 +40,12 @@
             return $this->hasOne(ObraCedida::class, 'expediente_id', 'expediente_id');
 
         }
+        /** Documentos incorporados al expediente durante su ciclo de vida. */
         public function documentos(){
             return $this->HasMany(DocumentoExpediente::class, 'expediente_id', 'expediente_id');
 
         }
+        /** Team o ayuntamiento propietario del expediente. */
         public function team(): BelongsTo
         {
             return $this->belongsTo(Team::class);
@@ -63,4 +73,17 @@
         public function planes(): BelongsTo{
             return $this->belongsTo(Planes::class,'codigo_plan ','Codigo_Plan');
     }
+
+        /**
+         * @return BelongsToMany<User, self>
+         */
+        /**
+         * Usuarios tramitadores asignados expresamente al expediente.
+         */
+        public function assignedUsers(): BelongsToMany
+        {
+            return $this->belongsToMany(User::class, 'expediente_user_assignments', 'expediente_id', 'user_id', 'expediente_id', 'id')
+                ->withPivot(['assigned_by', 'team_id'])
+                ->withTimestamps();
+        }
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -7,42 +9,92 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int|string $id
+ * @property string $nombre
+ * @property bool $con_plantilla
+ * @property string|null $plantilla
+ * @property string|null $ruta_plantilla
+ */
 class DocumentoGenerico extends Model
 {
     use HasFactory;
-  
-    protected $connection='Obras';
-    protected $table='documento_genericos';
-    protected $primaryKey='id';
-    protected $foreignKey='expediente_id';
+
+    protected $connection = 'Obras';
+
+    protected $table = 'documento_genericos';
+
+    protected $primaryKey = 'id';
+
+    protected $foreignKey = 'expediente_id';
+
     public $incrementing = false;
+
     public $timestamps = false;
+
     protected $keyType = 'string';
-    protected $fillable=['nombre','fase_doc','fase_siguiente','cod_tipo_doc','descripcion','generado','con_plantilla','plantilla','rutaplantilla','fasesiguiente','cod_destino','cod_origen','obligatorio', 'cod_estado'];
+
+    /**
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'nombre',
+        'fase_doc',
+        'fase_siguiente',
+        'cod_tipo_doc',
+        'descripcion',
+        'generado',
+        'con_plantilla',
+        'plantilla',
+        'ruta_plantilla',
+        'fasesiguiente',
+        'cod_destino',
+        'cod_origen',
+        'obligatorio',
+        'cod_estado',
+    ];
+
+    /**
+     * @var array<string, string>
+     */
     protected $casts = [
         'con_plantilla' => 'boolean',
     ];
 
-    public function fasedoc(){
-        return $this->belongsTo(FaseDocumento::class,'fase_doc','cod_fase');
+    public function fasedoc(): BelongsTo
+    {
+        return $this->belongsTo(FaseDocumento::class, 'fase_doc', 'cod_fase');
     }
-    public function fasedocsig(){
-        return $this->belongsTo(FaseDocumento::class,'fase_siguiente','cod_fase');
+
+    public function fasedocsig(): BelongsTo
+    {
+        return $this->belongsTo(FaseDocumento::class, 'fase_siguiente', 'cod_fase');
     }
-   
-   public function destino(): BelongsTo
+
+    public function destino(): BelongsTo
     {
         return $this->belongsTo(DestinoDeDocumentos::class);
     }
-    public function tipodoc(){
-          return $this->belongsTo(TipoDocumento::class,'cod_tipo_doc','id');
-     }
-    public function documtoexpediente():HasMany{
-        return $this->hasMany (DocumentoExpediente::class,'cod_documento','id');
-    } 
-    public function estados():BelongsTo
+
+    public function tipodoc(): BelongsTo
     {
-        return $this->belongsTo(TablaDeEstados::class, 'cod_estado', 'cod_estado' );
+        return $this->belongsTo(TipoDocumento::class, 'cod_tipo_doc', 'id');
     }
-} 
+
+    public function documtoexpediente(): HasMany
+    {
+        return $this->hasMany(DocumentoExpediente::class, 'cod_documento', 'id');
+    }
+
+    public function estados(): BelongsTo
+    {
+        return $this->belongsTo(TablaDeEstados::class, 'cod_estado', 'cod_estado');
+    }
+
+    public function variables(): HasMany
+    {
+        return $this->hasMany(DocumentoGenericoVariable::class, 'documento_generico_id', 'id');
+    }
+}
+
 

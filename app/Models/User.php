@@ -27,7 +27,7 @@ class User extends Authenticatable implements FilamentUser , HasTenants
     use HasFactory, Notifiable, HasRoles, HasPanelShield, HasPermissions;
     protected $connection = 'Obras';
 
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -65,8 +65,8 @@ class User extends Authenticatable implements FilamentUser , HasTenants
     {
         $this->attributes['name'] = trim($value);
     }
-   
- 
+
+
     public function getTenants(Panel $panel): array|Collection
     {
         return $this->team;
@@ -119,6 +119,16 @@ class User extends Authenticatable implements FilamentUser , HasTenants
         return $this->morphMany(CustomNotification::class, 'notifiable')->orderBy('created_at', 'desc');
     }
 
+    /**
+     * @return BelongsToMany<Expediente, self>
+     */
+    public function assignedExpedientes(): BelongsToMany
+    {
+        return $this->belongsToMany(Expediente::class, 'expediente_user_assignments', 'user_id', 'expediente_id', 'id', 'expediente_id')
+            ->withPivot(['assigned_by', 'team_id'])
+            ->withTimestamps();
+    }
+
     public function unreadNotifications(): MorphMany
     {
         return $this->morphMany(CustomNotification::class, 'notifiable')
@@ -126,6 +136,6 @@ class User extends Authenticatable implements FilamentUser , HasTenants
                     ->orderBy('created_at', 'desc');
     }
 
-  
-   
+
+
 }

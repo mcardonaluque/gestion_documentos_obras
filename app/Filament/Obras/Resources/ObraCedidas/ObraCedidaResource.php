@@ -10,23 +10,29 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use App\Filament\Obras\Resources\ObraCedidas\Pages\ListObraCedidas;
 use App\Filament\Obras\Resources\ObraCedidas\Pages\CreateObraCedida;
 use App\Filament\Obras\Resources\ObraCedidas\Pages\EditObraCedida;
 use App\Filament\Obras\Resources\ObraCedidaResource\Pages;
-use App\Filament\Obras\Resources\ObraCedidaResource\RelationManagers;
+use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
+use App\Filament\Traits\CommonFilters;
+use App\Filament\Traits\MunicipiosFilter;
+use App\Filament\Traits\ZonasFilter;
 use App\Models\ObraCedida;
 use Filament\Forms;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ObraCedidaResource extends Resource
 {
+    use CommonFilters;
+    use MunicipiosFilter;
+    use ZonasFilter;
+    use HasAssignedExpedienteVisibility;
+
     protected static ?string $model = ObraCedida::class;
     protected static ?string $modelLabel = 'Obra Cedida';
     protected static ?string $pluralModelLabel = 'Obras Cedidas';
@@ -152,8 +158,11 @@ class ObraCedidaResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                self::assignedExpedientesFilter(),
+                ...self::getCommonFilters(),
+                self::getMunicipioFromInicioObrasFilter(),
+                self::getZonaFromInicioObrasFilter(),
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 EditAction::make(),
             ])

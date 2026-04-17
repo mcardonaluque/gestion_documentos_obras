@@ -12,6 +12,12 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Job especializado en el envío masivo de avisos derivados de reglas de fechas.
+ *
+ * Consume una colección serializable de mensajes ya preparados y crea las
+ * notificaciones persistentes para cada usuario destinatario.
+ */
 final class DispatchDateRuleNotificationsJob implements ShouldQueue
 {
     use Dispatchable;
@@ -27,6 +33,9 @@ final class DispatchDateRuleNotificationsJob implements ShouldQueue
     ) {
     }
 
+    /**
+     * Inserta en base de datos las notificaciones generadas por validaciones temporales.
+     */
     public function handle(): void
     {
         foreach ($this->messages as $message) {

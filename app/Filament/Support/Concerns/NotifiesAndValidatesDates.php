@@ -16,9 +16,10 @@ use Filament\Notifications\Notification;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Trait util para recursos/paginas Filament que necesiten:
- * - enviar notificaciones de forma uniforme;
- * - aplicar controles de fechas en acciones personalizadas.
+ * Trait utilitario para páginas y Resources de Filament con reglas temporales.
+ *
+ * Agrupa operaciones repetidas de validación, persistencia controlada y
+ * notificación de incidencias relacionadas con fechas del dominio.
  */
 trait NotifiesAndValidatesDates
 {

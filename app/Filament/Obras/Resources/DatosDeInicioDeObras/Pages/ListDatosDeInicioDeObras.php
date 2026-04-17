@@ -12,7 +12,7 @@ class ListDatosDeInicioDeObras extends ListRecords
     public function getTabs(): array
 {
     $añoActual=now()->year;
-    $añoAnterior2 = now()->subYears(10)->year;
+    $añoAnterior2 = now()->subYears(5)->year;
     $Tabs['all'] = \Filament\Schemas\Components\Tabs\Tab::make('Todos')
         ->label('Todos')
         ->icon('heroicon-o-rectangle-stack')

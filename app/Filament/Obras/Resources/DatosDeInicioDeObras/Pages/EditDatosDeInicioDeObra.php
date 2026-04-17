@@ -3,6 +3,7 @@
 namespace App\Filament\Obras\Resources\DatosDeInicioDeObras\Pages;
 
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\DatosDeInicioDeObrasResource;
+use App\Services\Importes\ImportesManagementRepository;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -47,6 +48,38 @@ class EditDatosDeInicioDeObra extends EditRecord
                 'codigo_municipio' => $record->ayuda->codigo_municipio,
             ];
         }
+
+        $expedienteId = (string) ($record?->expediente_id ?? $data['expediente_id'] ?? '');
+
+        if ($expedienteId !== '') {
+            $importesState = app(ImportesManagementRepository::class)->load($expedienteId);
+
+            $payload = [
+                'stage' => (string) ($importesState['stage_hint'] ?? 'inicio'),
+                'master' => is_array($importesState['master'] ?? null) ? $importesState['master'] : [],
+                'rows' => is_array($importesState['rows'] ?? null) ? $importesState['rows'] : [],
+            ];
+
+            $data = [
+                ...$data,
+                ...$payload,
+                'importes_management' => $payload,
+            ];
+        }
+
+        return $data;
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        [$data, $importesState] = DatosDeInicioDeObrasResource::extractImportesManagementStateFromData($data);
+
+        DatosDeInicioDeObrasResource::validateImportesManagementState($importesState);
+        DatosDeInicioDeObrasResource::persistImportesManagementState(
+            (string) ($this->getRecord()?->expediente_id ?? $data['expediente_id'] ?? ''),
+            $importesState,
+        );
+
         return $data;
     }
 }

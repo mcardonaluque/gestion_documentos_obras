@@ -3,6 +3,7 @@
 namespace App\Filament\Shared\Resources\Expedientes;
 
 use App\Events\SystemEventOccurred;
+use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
 use App\Filament\Shared\Resources\Expedientes\RelationManagers\DocumentosRelationManager;
 use App\Models\DocumentoGenerico;
 use App\Models\Expediente;
@@ -23,6 +24,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 abstract class ExpedienteResourceBase extends Resource
 {
+    use HasAssignedExpedienteVisibility;
+
     protected static ?string $model = Expediente::class;
 
     protected static ?string $tenantOwnershipRelationshipName = 'team';
@@ -135,7 +138,7 @@ abstract class ExpedienteResourceBase extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+                self::assignedExpedientesFilter(),
             ])
             ->recordActions([
                 Action::make('subirDocumento')

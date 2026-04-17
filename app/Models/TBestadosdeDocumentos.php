@@ -10,10 +10,10 @@ class TBestadosdeDocumentos extends Model
     //
     use HasFactory;
     protected $connection='Obras';
-   protected $table='TBestadodeDocumentos';
-   protected $primaryKey='id';  
-   
-   public $incrementing = true;
+   protected $table='TBEstadodeDocumentos';
+   protected $primaryKey='id';
+
+                                                                                                                                                                                                                                                                                           public $incrementing = true;
 
    public function documentos(){
     return $this->hasMany (DocumentoExpediente::class,'id','estado');

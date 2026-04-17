@@ -9,9 +9,19 @@ use App\Models\EventLog;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Listener asíncrono encargado de materializar eventos de sistema.
+ *
+ * Su responsabilidad es:
+ * - registrar auditoría del evento
+ * - delegar la distribución de notificaciones a un job de cola
+ */
 class HandleSystemEventNotifications implements ShouldQueue
 {
-    public function handle(SystemEventOccurred $event)
+    /**
+     * Procesa el evento emitido por el dominio y genera su rastro operativo.
+     */
+    public function handle(SystemEventOccurred $event): void
     {
         $entityClass = $event->entity ? get_class($event->entity) : null;
         $entityId = $event->entity?->getKey();

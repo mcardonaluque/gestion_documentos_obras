@@ -136,6 +136,7 @@ class ObrasPanelProvider extends PanelProvider
             //->sidebarCollapsibleOnDesktop();;
             ->globalSearch(false)
             ->renderHook('panels::head.end', fn () => view('obras-styles'))
+            ->renderHook('panels::head.end', fn () => view('filament-table-compact-styles'))
             ->topNavigation();
 
 

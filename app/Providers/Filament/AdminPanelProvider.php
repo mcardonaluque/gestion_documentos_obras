@@ -87,7 +87,8 @@ class AdminPanelProvider extends PanelProvider
             ])
            ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->renderHook('panels::head.end', fn () => view('filament-table-compact-styles'));
            // ->renderHook('panels::head.end', fn () => view('admin-styles'));
     }
 }

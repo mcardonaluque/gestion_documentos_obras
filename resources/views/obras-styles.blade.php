@@ -411,8 +411,14 @@
                 <a href="/obras/notifications" class="custom-submenu-item">
                     📢 Notificaciones
                 </a>
+                @if(auth()->user()->hasRole('super_admin') || auth()->user()->hasAnyRole(['Abogado', 'abogado']))
+                <a href="/obras/expediente-user-assignments" class="custom-submenu-item">
+                    👤 Asignación de Expedientes
+                </a>
+                @endif
 
             </div>
+
         </div>
     </nav>
 </div>

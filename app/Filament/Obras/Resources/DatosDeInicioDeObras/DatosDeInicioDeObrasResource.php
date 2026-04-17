@@ -9,7 +9,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Radio;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Forms\Components\DatePicker;
-use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\EditAction;
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\Pages\ListDatosDeInicioDeObras;
@@ -20,31 +19,40 @@ use App\Filament\Obras\Resources\DatosDeInicioDeObras\Pages\ViewInicioDeObra;
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\ImportesPorOrganismoRelationManager;
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\AyudaRelationManager;
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\DocumentosRelationManager;
+use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
+use App\Filament\Obras\Resources\Concerns\HasWordTemplatePrinting;
 use App\Filament\Traits\ZonasFilter;
 use App\Forms\Components\ImportesInfo;
+use App\Forms\Components\ImportesManagement;
 use App\Models\DatosDeInicioDeObras;
+use App\Services\Importes\ImportesManagementRepository;
 use Filament\Forms;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource as BaseResource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use PhpOffice\PhpWord\TemplateProcessor;
-use Dompdf\Dompdf;
-use Illuminate\Support\Facades\DB;
-use Filament\Notifications\Notification;
 use App\Forms\Components\ObraGeneralInfo;
 use Filament\Tables\Enums\FiltersLayout;
 use App\Filament\Traits\CommonFilters;
 use App\Filament\Traits\MunicipiosFilter;
 //use Filament\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Filters\QueryBuilder;
+use Illuminate\Validation\ValidationException;
 
+/**
+ * Resource Filament para la gestión operativa de inicios de obra.
+ *
+ * Reúne la edición de datos generales, ayuda técnica, fechas clave, importes
+ * por organismo y acciones documentales sobre el expediente de obra.
+ */
 class DatosDeInicioDeObrasResource extends BaseResource
 {
     use MunicipiosFilter;
     use CommonFilters;
     use ZonasFilter;
+    use HasAssignedExpedienteVisibility;
+    use HasWordTemplatePrinting;
     protected static ?string $model = DatosDeInicioDeObras::class;
     protected static ?string $tenantOwnershipRelationshipName = 'team';
     /**protected static ?int $navigationSort = 1;
@@ -61,11 +69,14 @@ class DatosDeInicioDeObrasResource extends BaseResource
         'expediente_id',
     ];
 
+    /**
+     * Personaliza la consulta base del listado para limitar años y añadir joins de apoyo.
+     */
     public static function getEloquentQuery(): Builder
     {
         $añoActual = now()->year;
 
-        $añoAnterior2 = now()->subYears(10)->year;
+        $añoAnterior2 = now()->subYears(5)->year;
 
 
         return parent::getEloquentQuery()
@@ -79,6 +90,9 @@ class DatosDeInicioDeObrasResource extends BaseResource
             //->where('codigo_municipio','=', )
 
     }
+    /**
+     * Define el formulario principal del recurso, agrupado por bloques funcionales.
+     */
     public static function form(Schema $schema): Schema
     {
     //$record=$schema->getRecord();
@@ -96,6 +110,10 @@ class DatosDeInicioDeObrasResource extends BaseResource
                 ->label('Importes de la Obra')
                 ->columnSpan(1)
                 ->setImportesDataOrganismo($record?->importesPorOrganismo),
+            ImportesManagement::make('importes_management')
+                ->label('Gestión de importes por organismo')
+                ->columnSpanFull()
+                ->setImportesContext((string) ($record?->expediente_id ?? '')),
            /* Forms\Components\Select::make('municipio')
                 ->label('Municipio')
                 ->relationship('municipios', 'nombre_municipio')
@@ -255,54 +273,16 @@ class DatosDeInicioDeObrasResource extends BaseResource
                     ->label('Petición Repl. Previo')
                     ->reactive()
                     ->suffixAction(
-                        Action::make('Imprimir Notificación')
-                            ->icon('heroicon-m-envelope')
-                            ->visible(fn ($get) => !empty($get('fecha_pet_acta_replanteo')))
-                            ->action(function ($record, $get)
-                            {
-                                // 1. Obtener datos del procedimiento almacenado
-                                //dd($record);
-                                if (empty($get('fecha_pet_acta_replanteo'))) {
-                                    Notification::make()
-                                        ->title('Error de validación')
-                                        ->body('Debe completar la fecha de notificación primero')
-                                        ->danger()
-                                        ->send();
-                                    return;
-                                }
-                                $datos =  DB::select('EXECUTE dbo.PA_R_DatosListados @Plan=?,@Num=?,@SubRef=?,@AoEje=?', [(string)$record->Codigo_Plan, $record->numero_obra,$record->subreferencia,$record->ao_ejecucion])[0];
-
-                                //dd($datos);
-                                // 2. Procesar plantilla Word
-                                $templatePath = storage_path('app\Modelos_Doc\Petición Ayuda Técnica.dotx');
-
-                                $template = new TemplateProcessor($templatePath);
-
-                                // Reemplazar variables
-                                $template->setValue('WD_DEFIPLAN', $datos->denominacion_plan);
-                                $template->setValue('WD_LOCALIDAD', $datos->nombre_municipio);
-                                $template->setValue('WD_IMPORTEAPROBADO', $datos->importe_aprobado);
-                                $template->setValue('WD_FORMAEJE', $datos->DEN_CONTRATA);
-
-                                // 3. Guardar Word temporal
-                                $tempWord = tempnam('C:\\', 'word_') . '.docx';
-
-                                $template->saveAs($tempWord);
-
-                                // 4. Convertir a PDF usando LibreOffice
-
-                                $tempPdf = tempnam('C:\\', 'pdf_') . '.pdf';
-
-                                $command = '"C:\Program Files\LibreOffice\program\soffice.exe" --headless --convert-to pdf --outdir ' . dirname($tempPdf) . " " . $tempWord;
-                               // dd($command);
-                               $pdfFile = str_replace('.docx', '.pdf', $tempWord);
-                                shell_exec($command);
-                                //dd($tempPdf);
-                                // 5. Descargar y limpiar
-                                return response()->download($pdfFile, 'documento_final.pdf')
-                                    ->deleteFileAfterSend(true);
-                            })
-                            ->requiresConfirmation())
+                        self::makeWordPrintAction(
+                            name: 'imprimir_notificacion',
+                            label: 'Imprimir Notificación',
+                            icon: 'heroicon-m-envelope',
+                            documentName: 'Petición Ayuda Técnica',
+                            requiredStatePath: 'fecha_pet_acta_replanteo',
+                            requiredMessage: 'Debe completar la fecha de notificación primero',
+                            fallbackTemplatePath: 'Modelos_Doc\\Petición Ayuda Técnica.dotx',
+                            downloadBaseName: 'peticion-ayuda-tecnica',
+                        ))
                     ->required(),
                 DatePicker::make('fecha_acta_replanteo_previo')
                     ->nullable()
@@ -371,6 +351,9 @@ class DatosDeInicioDeObrasResource extends BaseResource
             ]);
     }
 
+    /**
+     * Configura la tabla de consulta con columnas descriptivas y filtros reutilizables.
+     */
     public static function table(Table $table): Table
     {
 
@@ -491,7 +474,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
             ])
 
             ->filters([
-                //
+            self::assignedExpedientesFilter(),
             ...self::getCommonFilters(),
             self::getMunicipioFromInicioObrasFilter(),
             self::getZonaFromInicioObrasFilter(),
@@ -507,6 +490,9 @@ class DatosDeInicioDeObrasResource extends BaseResource
 
     }
 
+    /**
+     * Devuelve los relation managers asociados a importes, ayuda técnica y documentos.
+     */
     public static function getRelations(): array
     {
         return [
@@ -530,6 +516,65 @@ class DatosDeInicioDeObrasResource extends BaseResource
             }) // Busca en el campo "nombre" de la relación "municipio"*/
             ;
     }
+    /**
+     * @return array{0: array<string, mixed>, 1: array{stage: string|null, master: array<string, mixed>, rows: array<int, array<string, mixed>>}}
+     */
+    public static function extractImportesManagementStateFromData(array $data): array
+    {
+        $nestedState = is_array($data['importes_management'] ?? null) ? $data['importes_management'] : [];
+
+        $state = [
+            'stage' => isset($nestedState['stage'])
+                ? (string) $nestedState['stage']
+                : (isset($data['stage']) ? (string) $data['stage'] : null),
+            'master' => is_array($nestedState['master'] ?? null)
+                ? $nestedState['master']
+                : (is_array($data['master'] ?? null) ? $data['master'] : []),
+            'rows' => is_array($nestedState['rows'] ?? null)
+                ? $nestedState['rows']
+                : (is_array($data['rows'] ?? null) ? $data['rows'] : []),
+        ];
+
+        unset($data['importes_management'], $data['stage'], $data['master'], $data['rows']);
+
+        return [$data, $state];
+    }
+
+    public static function validateImportesManagementState(array $state): void
+    {
+        $rows = is_array($state['rows'] ?? null) ? $state['rows'] : [];
+
+        if ($rows === []) {
+            return;
+        }
+
+        $errors = ImportesManagement::percentageErrors($rows);
+
+        if ($errors === []) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'rows' => implode(' · ', array_values($errors)),
+        ]);
+    }
+
+    public static function persistImportesManagementState(?string $expedienteId, array $state): void
+    {
+        if (blank($expedienteId)) {
+            return;
+        }
+
+        $master = is_array($state['master'] ?? null) ? $state['master'] : [];
+        $rows = is_array($state['rows'] ?? null) ? $state['rows'] : [];
+
+        if ($master === [] && $rows === []) {
+            return;
+        }
+
+        app(ImportesManagementRepository::class)->save((string) $expedienteId, $master, $rows);
+    }
+
     public static function getPages(): array
     {
         return [

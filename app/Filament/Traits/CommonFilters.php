@@ -5,15 +5,23 @@ namespace App\Filament\Traits;  // ← Namespace específico para traits
 use App\Models\Planes;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\QueryFilter;
-use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Enums\FiltersLayout;
 use App\Models\DatosDeInicioDeObras;
 use Filament\Tables\Filters\Filter;
 
-trait CommonFilters  // ← Definición del trait
+/**
+ * Trait con filtros comunes reutilizables en listados Filament de obras y expedientes.
+ *
+ * Centraliza criterios frecuentes como plan, referencia, subreferencia, año de
+ * ejecución y expediente, reduciendo duplicidad entre Resources.
+ */
+trait CommonFilters
 {
+    /**
+     * Devuelve la colección de filtros base que pueden compartirse entre Resources.
+     *
+     * @return array<int, \Filament\Tables\Filters\BaseFilter>
+     */
     public static function getCommonFilters(): array
     {
         return [
@@ -25,7 +33,7 @@ trait CommonFilters  // ← Definición del trait
                 //->relationship('planes', 'denominacion_plan')
                 /*->getOptionLabelFromRecordUsing(fn ($record) =>
                     //$plan = \App\Models\Planes::where('codigo_plan', $value)->first();
-                    "{$record->codigo_plan} - {$record->denominacion_plan}" 
+                    "{$record->codigo_plan} - {$record->denominacion_plan}"
                 )*/
                 ->options(
                     Planes::all()
@@ -39,15 +47,15 @@ trait CommonFilters  // ← Definición del trait
                   TextInput::make('numero_obra')
                     ->label('Referencia'),
                   TextInput::make('subreferencia')
-                    ->label('Subreferencia'),     
+                    ->label('Subreferencia'),
                 ])  ->columns(2)
                 ->query(function (Builder $query, array $data) {
-                   
+
                     return $query
                         ->when($data['numero_obra'], fn($query) => $query->where('numero_obra', '=', $data['numero_obra']))
                         ->when($data['subreferencia'], fn($query) => $query->where('subreferencia', '=', $data['subreferencia']));
-                                   
-                    }),    
+
+                    }),
             SelectFilter::make('ao_ejecucion')
             ->options(function () {
                 // Obtener años únicos de la base de datos
@@ -60,9 +68,9 @@ trait CommonFilters  // ← Definición del trait
                     ->toArray();
                 })
                 ->label('Año de Ejecución'),
-                
+
                 SelectFilter::make('Expediente')
-                    
+
                 ->optionsLimit(500)
                 ->label('Expediente')
                 ->relationship( 'expediente', 'expediente_id',modifyQueryUsing: function (Builder $query) {
@@ -70,7 +78,7 @@ trait CommonFilters  // ← Definición del trait
                     ->orderBy('ao_ejecucion', 'desc')
                     ->limit(500); // TOP 500
                 } ),
-                
-            ];   
+
+            ];
     }
 }

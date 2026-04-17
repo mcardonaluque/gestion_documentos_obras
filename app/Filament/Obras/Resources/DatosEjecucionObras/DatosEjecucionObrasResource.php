@@ -18,6 +18,7 @@ use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\ImportesP
 use App\Filament\Obras\Resources\DatosEjecucionObras\RelationManagers\ActaRecepcionRelationManager;
 use App\Filament\Obras\Resources\DatosEjecucionObras\RelationManagers\ActaReplanteoRelationManager;
 use App\Filament\Obras\Resources\DatosEjecucionObras\RelationManagers\CertificacionesRelationManager;
+use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
 use App\Models\DatosEjecucionObras;
 use Filament\Forms;
 use Filament\Schemas\Schema;
@@ -32,6 +33,7 @@ use App\Filament\Traits\MunicipiosFilter;
 class DatosEjecucionObrasResource extends Resource
 {
     use MunicipiosFilter;
+    use HasAssignedExpedienteVisibility;
     protected static ?string $model = DatosEjecucionObras::class;
 
     protected static ?string $tenantOwnershipRelationshipName = 'team';
@@ -142,7 +144,7 @@ class DatosEjecucionObrasResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                self::assignedExpedientesFilter(),
                 ...self::getCommonFilters(),
                 self::getMunicipioFromInicioObrasFilter(),
             ],layout: FiltersLayout::AboveContent)

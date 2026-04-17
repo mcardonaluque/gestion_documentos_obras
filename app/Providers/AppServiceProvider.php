@@ -17,10 +17,19 @@ use Spatie\Permission\Models\Permission;
 
 use function Illuminate\Log\log;
 
+/**
+ * Proveedor principal de servicios de la aplicación.
+ *
+ * Centraliza el arranque de comportamientos globales como:
+ * - registro de assets de Filament
+ * - trazas de autenticación
+ * - logging de consultas SQL en entorno de desarrollo
+ * - registro dinámico de observers de validación de fechas
+ */
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * Registra servicios y bindings globales en el contenedor.
      */
     //protected $policies = [
    //     Role::class => RolePolicy::class,
@@ -35,12 +44,13 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap any application services.
+     * Inicializa la infraestructura compartida durante el arranque.
+     *
+     * En esta fase se registran assets, listeners de login y observers
+     * asociados a los modelos configurados en date_rules.
      */
-
     public function boot(): void
     {
-        //
        // Role::on('Obras')->getConnection()->reconnect();
        // Permission::on('Obras')->getConnection()->reconnect();
 

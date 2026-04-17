@@ -15,13 +15,17 @@ use App\Models\DatosEjecucionObras;
 use App\Models\DocumentoExpediente;
 use App\Models\Proyecto;
 use App\Models\ObraCedida;
+use App\Services\Assignments\ExpedienteAssignmentVisibilityService;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Model;
+use App\Filament\Traits\CommonFilters;
 
 class UltimasObrasTableWidget extends BaseWidget
 {
+    use CommonFilters;
     protected static ?string $heading = 'Últimas Obras';
 
     protected int | string | array $columnSpan = 'full'; // ocupa todo el ancho
@@ -30,10 +34,12 @@ class UltimasObrasTableWidget extends BaseWidget
     {
         return $table
             ->query(
-                DatosDeInicioDeObras::query()
+                app(ExpedienteAssignmentVisibilityService::class)->scopeToCurrentUserAssigned(
+                    DatosDeInicioDeObras::query()
                     ->where('Codigo_Plan', '<>', '')
                     ->whereNotNull('expediente_id')
                     ->where('expediente_id', '<>', '')
+                )
                     // ajusta si usas otra columna de fecha
                     //->limit(500)
 
@@ -96,6 +102,8 @@ class UltimasObrasTableWidget extends BaseWidget
 
             ])
             //->paginated(true)
+            ->filters(self::getCommonFilters())
+            ->filtersLayout(FiltersLayout::AboveContent)
             ->defaultSort('ao_ejecucion', 'desc')
 
             //->selectable()

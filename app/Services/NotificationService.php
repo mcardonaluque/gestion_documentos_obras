@@ -8,8 +8,20 @@ use App\Notifications\GenericDatabaseNotification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
+/**
+ * Servicio de envío de notificaciones internas.
+ *
+ * Resuelve destinatarios por usuario, equipo o difusión global y crea
+ * registros persistentes compatibles con la interfaz de Filament.
+ */
 class NotificationService
 {
+    /**
+     * Envía una notificación a uno o varios destinatarios resueltos por criterios.
+     *
+     * @param array<int, int> $userIds
+     * @param array<string, mixed> $data
+     */
     public static function sendByTargets(
         string $title,
         string $message,
@@ -45,6 +57,11 @@ class NotificationService
         return $notifications;
     }
 
+    /**
+     * Atajo para enviar una notificación a un único usuario.
+     *
+     * @param array<string, mixed> $data
+     */
     public static function sendToUser(
         User $recipient,
         string $title,
@@ -63,6 +80,11 @@ class NotificationService
         )->first();
     }
 
+    /**
+     * Resuelve el conjunto final de usuarios destinatarios.
+     *
+     * @param array<int, int> $userIds
+     */
     protected static function resolveRecipients(bool $toAllUsers, array $userIds, ?int $teamId): Collection
     {
         if ($toAllUsers) {

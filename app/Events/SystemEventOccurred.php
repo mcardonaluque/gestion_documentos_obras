@@ -6,6 +6,12 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Evento genérico de sistema.
+ *
+ * Se utiliza para notificar acciones relevantes del dominio sin acoplar
+ * el código emisor a la capa de almacenamiento, auditoría o notificación.
+ */
 class SystemEventOccurred
 {
     use Dispatchable, SerializesModels;
@@ -20,6 +26,12 @@ class SystemEventOccurred
     public ?Model $entity; // expediente o documento
     public array $meta;    // datos extra
 
+    /**
+     * Crea una nueva notificación de dominio desacoplada.
+     *
+     * @param array<int, int> $userIds Usuarios destinatarios directos.
+     * @param array<string, mixed> $meta Metadatos adicionales para auditoría o UI.
+     */
     public function __construct(
         string $eventType,
         string $title,

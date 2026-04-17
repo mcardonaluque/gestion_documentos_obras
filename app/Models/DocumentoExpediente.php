@@ -9,6 +9,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use function GuzzleHttp\describe_type;
 use function Psy\debug;
 
+/**
+ * Modelo que representa un documento concreto incorporado a un expediente.
+ *
+ * Contiene tanto metadatos de registro como referencias al catálogo de
+ * documentos genéricos y a la obra o expediente al que pertenece.
+ */
 class DocumentoExpediente extends Model
 {
     use HasFactory;
@@ -67,6 +73,9 @@ class DocumentoExpediente extends Model
         return $this->belongsTo(Planes::class, 'Codigo_Plan', 'codigo_plan');
     }
 
+    /**
+     * Calcula la siguiente secuencia documental disponible para un expediente.
+     */
     public static function nextSequenceForExpediente(?string $expedienteId): int
     {
         if (blank($expedienteId)) {
@@ -80,6 +89,12 @@ class DocumentoExpediente extends Model
         return ((int) ($lastSequence ?? 0)) + 1;
     }
 
+    /**
+     * Rellena automáticamente los metadatos documentales a partir del expediente indicado.
+     *
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     public static function applyExpedienteDefaults(array $data): array
     {
         $expedienteId = $data['expediente_id'] ?? null;

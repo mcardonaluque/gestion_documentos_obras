@@ -27,8 +27,7 @@ use App\Filament\Obras\Resources\DatosDeInicioDeObras\DatosDeInicioDeObrasResour
 use App\Filament\Obras\Resources\DatosEjecucionObras\DatosEjecucionObrasResource;
 use App\Filament\Obras\Resources\ImportesDeObras\ImportesDeObrasResource;
 use App\Filament\Obras\Resources\ImportesPorOrganismos\ImportesPorOrganismoResource;
-use App\Filament\Obras\Resources\PlanseguridadysaludResource;
-Use App\Filament\Widgets\UltimasObrasTableWidget;
+use App\Filament\Widgets\UltimasObrasTableWidget;
 
 class PlanesPanelProvider extends PanelProvider
 {
@@ -86,6 +85,7 @@ class PlanesPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->renderHook('panels::head.end', fn () => view('filament-table-compact-styles'))
             ->topNavigation();
 
     }

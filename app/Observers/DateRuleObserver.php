@@ -12,6 +12,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Observer transversal para validación de reglas de fechas.
+ *
+ * Intercepta operaciones de guardado en modelos observados para evaluar
+ * restricciones temporales, registrar resultados y emitir notificaciones.
+ */
 final class DateRuleObserver
 {
     /**
@@ -26,6 +32,9 @@ final class DateRuleObserver
     ) {
     }
 
+    /**
+     * Ejecuta validaciones bloqueantes antes de persistir el modelo.
+     */
     public function saving(Model $model): void
     {
         $dirtyFields = $this->resolveDirtyFields($model);
@@ -44,6 +53,9 @@ final class DateRuleObserver
         }
     }
 
+    /**
+     * Registra y comunica las reglas evaluadas después del guardado.
+     */
     public function saved(Model $model): void
     {
         $objectId = spl_object_id($model);

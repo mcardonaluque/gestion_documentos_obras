@@ -11,6 +11,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Livewire;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -62,6 +63,11 @@ class DocumentosRelationManager extends RelationManager
                 Select::make('cod_documento')
                     ->relationship('tipodocumentos', 'nombre')
                     ->required(),
+                TextInput::make('archivo')
+                    ->label('Ruta o URL del PDF')
+                    ->placeholder('X:\\docs\\expediente_ie\\nombrearchivo.pdf o https://...')
+                    ->maxLength(1000)
+                    ->default(null),
                 TextInput::make('csv')
                     ->maxLength(50)
                     ->default(null),
@@ -84,6 +90,10 @@ class DocumentosRelationManager extends RelationManager
                 Select::make('procedencia')
                     ->relationship('procedencias', 'destino')
                     ->label('Procedencia'),
+                Livewire::make(\App\Filament\Widgets\DocumentoPdfViewerWidget::class, [
+                    'compact' => true,
+                ])
+                    ->columnSpanFull(),
             ]);
     }
 

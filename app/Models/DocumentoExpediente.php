@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 use function GuzzleHttp\describe_type;
 use function Psy\debug;
@@ -38,6 +39,7 @@ class DocumentoExpediente extends Model
         'nsecuencia',
         'estado',
         'descripcion',
+        'archivo',
         'team_id',
         'destino',
         'procedencia',
@@ -71,6 +73,96 @@ class DocumentoExpediente extends Model
     }
     public function planes(): BelongsTo{
         return $this->belongsTo(Planes::class, 'Codigo_Plan', 'codigo_plan');
+    }
+
+    /**
+     * Devuelve la ruta o URL utilizable del PDF asociado al documento.
+     */
+    public function getPdfSourceAttribute(): ?string
+    {
+        $value = trim((string) ($this->archivo ?? $this->csv ?? ''));
+
+        return $value !== '' ? $value : null;
+    }
+
+    /**
+     * Indica si el documento dispone de un origen PDF informado.
+     */
+    public function hasPdfSource(): bool
+    {
+        $source = $this->pdf_source;
+
+        return filled($source) && (Str::endsWith(Str::lower($source), '.pdf') || filter_var($source, FILTER_VALIDATE_URL));
+    }
+
+    /**
+     * URL interna de previsualización del documento, si existe registro persistido.
+     */
+    public function getPdfPreviewUrlAttribute(): ?string
+    {
+        if (! $this->exists || ! $this->getKey() || ! $this->pdf_source) {
+            return null;
+        }
+
+        return route('documentos.pdf.preview', ['documento' => $this->getKey()]);
+    }
+
+    /**
+     * URL interna de descarga del PDF, si existe registro persistido.
+     */
+    public function getPdfDownloadUrlAttribute(): ?string
+    {
+        if (! $this->exists || ! $this->getKey() || ! $this->pdf_source) {
+            return null;
+        }
+
+        return route('documentos.pdf.download', ['documento' => $this->getKey()]);
+    }
+
+    /**
+     * Indica si el origen del documento es una URL externa válida.
+     */
+    public function isPdfUrl(): bool
+    {
+        return filled($this->pdf_source) && filter_var($this->pdf_source, FILTER_VALIDATE_URL);
+    }
+
+    /**
+     * Resuelve la ruta física del PDF si está disponible en el servidor.
+     */
+    public function resolvePdfPath(): ?string
+    {
+        $path = $this->pdf_source;
+
+        if (blank($path) || $this->isPdfUrl()) {
+            return null;
+        }
+
+        $path = trim((string) $path, " \t\n\r\0\x0B\"'");
+
+        $candidates = [];
+
+        if ((bool) preg_match('/^[A-Za-z]:[\\\\\/]/', $path) || str_starts_with($path, '\\\\')) {
+            $candidates[] = $path;
+        }
+
+        $relativePath = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
+
+        $candidates = array_merge($candidates, [
+            $path,
+            base_path($relativePath),
+            public_path($relativePath),
+            storage_path('app' . DIRECTORY_SEPARATOR . $relativePath),
+            storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $relativePath),
+        ]);
+
+        foreach (array_unique($candidates) as $candidate) {
+            if (is_string($candidate) && is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -1,25 +1,35 @@
 <?php
 
+use App\Http\Controllers\DocumentoPdfController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Ruta protegida para previsualizar el PDF de un documento del expediente.
+// Acepta tanto enlaces externos como rutas físicas resolubles en el servidor.
+Route::middleware('auth')->get('/documentos-expediente/{documento}/pdf', [DocumentoPdfController::class, 'show'])
+    ->name('documentos.pdf.preview');
+
+Route::middleware('auth')->get('/documentos-expediente/{documento}/pdf/download', [DocumentoPdfController::class, 'download'])
+    ->name('documentos.pdf.download');
+
 Route::get('/check-filament-notifications', function() {
     $user = auth()->user();
-    
+
     // 1. Ver notificaciones del modelo estándar
     $standardNotifications = $user->notifications;
-    
+
     // 2. Ver notificaciones de tu modelo personalizado
     $customNotifications = \App\Models\CustomNotification::where('notifiable_id', $user->id)
         ->orWhere('notifiable_id', $user->id)
         ->get();
-    
+
     // 3. Ver estructura de datos
     $sampleStandard = $standardNotifications->first();
     $sampleCustom = $customNotifications->first();
-    
+
     return [
         'user_id' => $user->id,
         'standard_count' => $standardNotifications->count(),

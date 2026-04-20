@@ -4,6 +4,7 @@ namespace App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
+use Filament\Schemas\Components\Livewire;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
@@ -16,8 +17,6 @@ use Filament\Schemas\Schema;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DocumentoExpedienteRelationManager extends RelationManager
 {
@@ -62,6 +61,11 @@ class DocumentoExpedienteRelationManager extends RelationManager
             TextInput::make('coddcoumento')
                 ->required()
                 ->numeric(),
+            TextInput::make('archivo')
+                ->label('Ruta o URL del PDF')
+                ->placeholder('X:\\docs\\expediente_ie\\nombrearchivo.pdf o https://...')
+                ->maxLength(1000)
+                ->default(null),
             TextInput::make('csv')
                 ->maxLength(50)
                 ->default(null),
@@ -81,6 +85,10 @@ class DocumentoExpedienteRelationManager extends RelationManager
                 ->numeric(),
             TextInput::make('procedencia')
                 ->numeric(),
+            Livewire::make(\App\Filament\Widgets\DocumentoPdfViewerWidget::class, [
+                'compact' => true,
+            ])
+                ->columnSpanFull(),
             ]);
     }
 

@@ -64,4 +64,29 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-"# gestion_documentos_obras" 
+
+## Visor de documentos PDF
+
+El proyecto incorpora un visor de PDF en la tabla de documentos del expediente.
+
+### Funcionamiento
+
+- El campo archivo del documento puede contener una ruta física de Windows.
+- También puede contener una URL completa accesible desde navegador.
+- La acción Ver PDF abre una vista previa embebida dentro del modal de Filament.
+- Si el valor es una URL, la aplicación redirige al recurso externo.
+- Si el valor es una ruta local, el sistema intenta resolverla y servir el fichero en línea.
+
+### Formato admitido en archivo
+
+- X:\docs\expediente_ie\nombrearchivo.pdf
+- https://servidor/ruta/documento.pdf
+
+### Componentes implicados
+
+- Widget de tabla de documentos
+- Vista modal con iframe para la previsualización
+- Controlador HTTP para resolver y servir el PDF
+- Ruta protegida bajo autenticación
+
+"# gestion_documentos_obras"

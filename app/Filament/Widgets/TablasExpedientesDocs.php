@@ -9,6 +9,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\DatePicker;
+use Filament\Schemas\Components\Livewire;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use App\Models\Expediente;
@@ -160,6 +161,11 @@ class TablasExpedientesDocs extends BaseWidget
                             ->label('Estado')
                             ->relationship('estados', 'nombre')
                             ->required(),
+                        TextInput::make('archivo')
+                            ->label('Ruta o URL del PDF')
+                            ->placeholder('X:\\docs\\expediente_ie\\nombrearchivo.pdf o https://...')
+                            ->maxLength(1000)
+                            ->default(null),
                         TextInput::make('csv')
                             ->required()
                             ->maxLength(50)
@@ -221,6 +227,14 @@ class TablasExpedientesDocs extends BaseWidget
                                 'aprobado' => 'Aprobado',
                                 'rechazado' => 'Rechazado',
                             ]),
+                        TextInput::make('archivo')
+                            ->label('Ruta o URL del PDF')
+                            ->placeholder('X:\\docs\\expediente_ie\\nombrearchivo.pdf o https://...')
+                            ->maxLength(1000),
+                        Livewire::make(\App\Filament\Widgets\DocumentoPdfViewerWidget::class, [
+                            'compact' => true,
+                        ])
+                            ->columnSpanFull(),
                     ]),
                 DeleteAction::make(),
             ])

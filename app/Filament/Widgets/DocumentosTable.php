@@ -9,6 +9,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\DatePicker;
+use Filament\Schemas\Components\Livewire;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Schemas\Components\Section;
@@ -18,8 +19,14 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Livewire\Attributes\On;
 use Filament\Facades\Filament;
-use Illuminate\Support\HtmlString;
 
+/**
+ * Widget principal de documentos del expediente.
+ *
+ * Además del alta y edición de metadatos, incorpora un visor PDF integrado
+ * que permite abrir documentos almacenados mediante una ruta local del servidor
+ * o mediante una URL externa informada en el campo archivo.
+ */
 class DocumentosTable extends BaseWidget
 {
     public ?string $expedienteSeleccionado = null;
@@ -76,6 +83,13 @@ class DocumentosTable extends BaseWidget
                     ->label('Descripción')
                     ->limit(50)
                     ->searchable(),
+
+                // Indica de forma visual si el registro dispone de un PDF enlazado.
+                TextColumn::make('archivo')
+                    ->label('PDF')
+                    ->formatStateUsing(fn ($state, $record) => filled($state ?: ($record->csv ?? null)) ? 'Disponible' : 'Sin archivo')
+                    ->badge()
+                    ->color(fn ($state, $record) => filled($state ?: ($record->csv ?? null)) ? 'success' : 'gray'),
 
                 TextColumn::make('fechaincorporacion')
                     ->label('Fecha')
@@ -156,9 +170,15 @@ class DocumentosTable extends BaseWidget
                         ->label('Estado')
                         ->relationship('estados', 'nombre')
                         ->required(),
+                // Campo documental principal para el visor PDF.
+                TextInput::make('archivo')
+                    ->label('Ruta o URL del PDF')
+                    ->placeholder('X:\\docs\\expediente_ie\\nombrearchivo.pdf o https://...')
+                    ->maxLength(1000)
+                    ->helperText('Admite una ruta física del servidor o un enlace web al PDF.')
+                    ->default(null),
                 TextInput::make('csv')
-                    ->required()
-                    ->maxLength(50)
+                    ->maxLength(255)
                     ->default(null),
                 TextInput::make('nregistro')
                     ->maxLength(45)
@@ -240,14 +260,27 @@ class DocumentosTable extends BaseWidget
                                 'aprobado' => 'Aprobado',
                                 'rechazado' => 'Rechazado',
                             ]),
+
+                        TextInput::make('archivo')
+                            ->label('Ruta o URL del PDF')
+                            ->placeholder('X:\\docs\\expediente_ie\\nombrearchivo.pdf o https://...')
+                            ->maxLength(1000)
+                            ->helperText('Admite una ruta física del servidor o un enlace web al PDF.'),
+
+                        Livewire::make(\App\Filament\Widgets\DocumentoPdfViewerWidget::class, [
+                            'compact' => true,
+                        ])
+                            ->columnSpanFull(),
                     ]),
+                // Acción de consulta con visor embebido del PDF asociado.
                 ViewAction::make('Ver Documento')
-                    ->label('Ver Documento')
+                    ->label('Ver PDF')
                     ->icon('heroicon-o-folder-open')
                     ->modalWidth('7xl')
                     ->modalHeading(fn ($record) => "Documento {$record->descripcion} del expediente {$record->expediente_id}")
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Cerrar')
+                    /*
                     ->modalContent(function ($record): HtmlString {
                         $descripcion = filled($record->descripcion)
                             ? $record->descripcion
@@ -296,6 +329,10 @@ class DocumentosTable extends BaseWidget
 
                         return new HtmlString($html);
                     })
+                    */
+                    ->modalContent(fn ($record) => view('filament.widgets.documento-detalle-modal', [
+                        'record' => $record,
+                    ]))
             ])
             ->emptyStateHeading($this->expedienteSeleccionado ? 'No hay documentos' : 'Selecciona un expediente')
             ->emptyStateDescription($this->expedienteSeleccionado ? 'Agrega el primer documento' : 'Haz click en un expediente de la tabla superior')

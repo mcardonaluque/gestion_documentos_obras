@@ -10,6 +10,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -125,6 +126,13 @@ abstract class DocumentoexpedienteResourceBase extends Resource
                     ->placeholder('X:\\docs\\expediente_ie\\nombrearchivo.pdf o https://...')
                     ->maxLength(1000)
                     ->default(null),
+                FileUpload::make('archivo')
+                            ->label('Archivo PDF')
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->maxSize(10240)
+                            ->directory('documentos-expedientes')
+                            ->preserveFilenames()
+                            ->required(),
                 TextInput::make('csv')
                     ->required()
                     ->maxLength(50)

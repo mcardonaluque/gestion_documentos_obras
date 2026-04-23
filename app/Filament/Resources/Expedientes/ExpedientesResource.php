@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Expedientes;
 
+use App\Filament\Traits\CommonFilters;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\EditAction;
@@ -11,18 +12,18 @@ use App\Filament\Resources\Expedientes\Pages\ListExpedientes;
 use App\Filament\Resources\Expedientes\Pages\CreateExpedientes;
 use App\Filament\Resources\Expedientes\Pages\EditExpedientes;
 use App\Filament\Resources\ExpedientesResource\Pages;
-use App\Filament\Resources\ExpedientesResource\RelationManagers;
 use App\Models\Expediente;
 use Filament\Forms;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ExpedientesResource extends Resource
 {
+    use CommonFilters;
+
     protected static ?string $model = Expediente::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -101,8 +102,12 @@ class ExpedientesResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                ...self::getCommonFilters(),
             ])
+            ->filtersLayout(FiltersLayout::AboveContent)
+            ->filtersFormColumns(4)
+            ->deferFilters(false)
+            ->defaultSort('ao_ejecucion', 'desc')
             ->recordActions([
                 EditAction::make(),
             ])

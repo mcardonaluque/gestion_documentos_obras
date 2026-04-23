@@ -1,19 +1,20 @@
 <?php
-// app/Filament/Traits/CommonFilters.php
 
-namespace App\Filament\Traits;  // ← Namespace específico para traits
+namespace App\Filament\Traits;
+
+use App\Models\DatosDeInicioDeObras;
+use App\Models\Expediente;
 use App\Models\Planes;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\DatosDeInicioDeObras;
-use Filament\Tables\Filters\Filter;
 
 /**
  * Trait con filtros comunes reutilizables en listados Filament de obras y expedientes.
  *
- * Centraliza criterios frecuentes como plan, referencia, subreferencia, año de
- * ejecución y expediente, reduciendo duplicidad entre Resources.
+ * Adapta automáticamente el nombre de los campos según el modelo del Resource
+ * para que la misma colección de filtros funcione tanto en obras como en expedientes.
  */
 trait CommonFilters
 {
@@ -24,61 +25,71 @@ trait CommonFilters
      */
     public static function getCommonFilters(): array
     {
+        $modelClass = static::$model ?? DatosDeInicioDeObras::class;
+        $planColumn = is_a($modelClass, Expediente::class, true) ? 'codigo_plan' : 'Codigo_Plan';
+        $referenceColumn = is_a($modelClass, Expediente::class, true) ? 'referencia' : 'numero_obra';
+
         return [
-            SelectFilter::make('Codigo_Plan')
+            SelectFilter::make($planColumn)
                 ->label('Plan')
                 ->searchable()
                 ->preload()
                 ->optionsLimit(500)
-                //->relationship('planes', 'denominacion_plan')
-                /*->getOptionLabelFromRecordUsing(fn ($record) =>
-                    //$plan = \App\Models\Planes::where('codigo_plan', $value)->first();
-                    "{$record->codigo_plan} - {$record->denominacion_plan}"
-                )*/
                 ->options(
-                    Planes::all()
+                    Planes::query()
+                        ->orderBy('codigo_plan')
+                        ->get()
                         ->mapWithKeys(fn ($record) => [
                             $record->codigo_plan => "{$record->codigo_plan} - {$record->denominacion_plan}",
                         ])
                         ->toArray()
                 ),
+
             Filter::make('busqueda')
+                ->label('Búsqueda rápida')
                 ->schema([
-                  TextInput::make('numero_obra')
-                    ->label('Referencia'),
-                  TextInput::make('subreferencia')
-                    ->label('Subreferencia'),
-                ])  ->columns(2)
-                ->query(function (Builder $query, array $data) {
-
+                    TextInput::make('referencia')
+                        ->label('Referencia'),
+                    TextInput::make('subreferencia')
+                        ->label('Subreferencia'),
+                    TextInput::make('expediente_id')
+                        ->label('Expediente'),
+                ])
+                ->columns(3)
+                ->query(function (Builder $query, array $data) use ($referenceColumn): Builder {
                     return $query
-                        ->when($data['numero_obra'], fn($query) => $query->where('numero_obra', '=', $data['numero_obra']))
-                        ->when($data['subreferencia'], fn($query) => $query->where('subreferencia', '=', $data['subreferencia']));
+                        ->when(filled($data['referencia'] ?? null), fn (Builder $query): Builder => $query->where($referenceColumn, '=', $data['referencia']))
+                        ->when(filled($data['subreferencia'] ?? null), fn (Builder $query): Builder => $query->where('subreferencia', '=', $data['subreferencia']))
+                        ->when(filled($data['expediente_id'] ?? null), fn (Builder $query): Builder => $query->where('expediente_id', 'like', '%' . $data['expediente_id'] . '%'));
+                }),
 
-                    }),
             SelectFilter::make('ao_ejecucion')
-            ->options(function () {
-                // Obtener años únicos de la base de datos
-                return DatosDeInicioDeObras::query()
-                    ->select('ao_ejecucion')
-                    ->distinct()
-                    ->whereNotNull('ao_ejecucion')
-                    ->orderBy('ao_ejecucion', 'desc')
-                    ->pluck('ao_ejecucion', 'ao_ejecucion')
-                    ->toArray();
-                })
-                ->label('Año de Ejecución'),
+                ->label('Año de Ejecución')
+                ->options(function () use ($modelClass): array {
+                    return $modelClass::query()
+                        ->select('ao_ejecucion')
+                        ->distinct()
+                        ->whereNotNull('ao_ejecucion')
+                        ->orderBy('ao_ejecucion', 'desc')
+                        ->pluck('ao_ejecucion', 'ao_ejecucion')
+                        ->toArray();
+                }),
 
-                SelectFilter::make('Expediente')
-
-                ->optionsLimit(500)
+            SelectFilter::make('expediente_id')
                 ->label('Expediente')
-                ->relationship( 'expediente', 'expediente_id',modifyQueryUsing: function (Builder $query) {
-                    $query->select('expediente_id')
-                    ->orderBy('ao_ejecucion', 'desc')
-                    ->limit(500); // TOP 500
-                } ),
-
-            ];
+                ->searchable()
+                ->preload()
+                ->optionsLimit(500)
+                ->options(function () use ($modelClass): array {
+                    return $modelClass::query()
+                        ->select('expediente_id', 'ao_ejecucion')
+                        ->whereNotNull('expediente_id')
+                        ->orderBy('ao_ejecucion', 'desc')
+                        ->limit(500)
+                        ->get()
+                        ->pluck('expediente_id', 'expediente_id')
+                        ->toArray();
+                }),
+        ];
     }
 }

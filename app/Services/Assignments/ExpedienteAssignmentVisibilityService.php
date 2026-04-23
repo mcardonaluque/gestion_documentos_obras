@@ -47,7 +47,7 @@ class ExpedienteAssignmentVisibilityService
             return $query;
         }
 
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasGlobalAyuntamientosAccess()) {
             return $query;
         }
 

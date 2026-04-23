@@ -2,15 +2,20 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Traits\CommonFilters;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\Action;
 use App\Models\Expediente;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Support\Facades\Auth;
 
 class ExpedientesTable extends BaseWidget
 {
+    use CommonFilters;
+
     public ?string $expedienteSeleccionado = null;
     protected static ?string $heading = 'Expedientes';
 
@@ -18,9 +23,19 @@ class ExpedientesTable extends BaseWidget
 
     public function table(Table $table): Table
     {
-        return $table
+        $query = Expediente::query()
+            ->with(['estados', 'documentos', 'municipios']);
 
-            ->query(Expediente::query()->where('team_id', filament()->getTenant()->id))
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
+        if (! $user?->hasGlobalAyuntamientosAccess()) {
+            $query->where('team_id', filament()->getTenant()->id);
+        }
+
+        return $table
+            ->query($query)
+            ->defaultSort('ao_ejecucion', 'desc')
             ->columns([
                 TextColumn::make('expediente_id')
                     ->label('Expediente')
@@ -47,6 +62,10 @@ class ExpedientesTable extends BaseWidget
                     ->date('d/m/Y')
                     ->sortable(),
             ])
+            ->filters(self::getCommonFilters())
+            ->filtersLayout(FiltersLayout::AboveContent)
+            ->filtersFormColumns(4)
+            ->deferFilters(false)
             ->recordActions([
                 Action::make('seleccionar')
                     ->label(function (Expediente $record){

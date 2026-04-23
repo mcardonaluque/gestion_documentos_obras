@@ -5,11 +5,14 @@ namespace App\Filament\Shared\Resources\Expedientes;
 use App\Events\SystemEventOccurred;
 use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
 use App\Filament\Shared\Resources\Expedientes\RelationManagers\DocumentosRelationManager;
+use App\Filament\Traits\CommonFilters;
 use App\Models\DocumentoGenerico;
 use App\Models\Expediente;
 use App\Models\DocumentoExpediente;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -19,12 +22,16 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 abstract class ExpedienteResourceBase extends Resource
 {
     use HasAssignedExpedienteVisibility;
+    use CommonFilters;
 
     protected static ?string $model = Expediente::class;
 
@@ -139,7 +146,11 @@ abstract class ExpedienteResourceBase extends Resource
             ])
             ->filters([
                 self::assignedExpedientesFilter(),
+                ...self::getCommonFilters(),
             ])
+            ->filtersLayout(FiltersLayout::AboveContent)
+            ->filtersFormColumns(4)
+            ->deferFilters(false)
             ->recordActions([
                 Action::make('subirDocumento')
                     ->label('Subir Documento')
@@ -258,8 +269,10 @@ abstract class ExpedienteResourceBase extends Resource
                         'documentos' => $record->documentos,
                     ])),
             ])
-            ->defaultSort('expediente_id', 'asc')
-            ->modifyQueryUsing(fn (Builder $query) => $query->withCount('documentos')->with('documentos'))
+            ->defaultSort('ao_ejecucion', 'desc')
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->withCount('documentos')
+                ->with('documentos'))
                         ->recordUrl(fn ($record): string => static::getUrl('view', ['record' => $record]))
             ->toolbarActions([
                   BulkActionGroup::make([
@@ -278,5 +291,20 @@ abstract class ExpedienteResourceBase extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with('documentos');
+    }
+
+    public static function scopeEloquentQueryToTenant(Builder $query, ?Model $tenant): Builder
+    {
+        $user = Auth::user();
+
+        if (
+            $user instanceof User
+            && $user->hasGlobalAyuntamientosAccess()
+            && Filament::getCurrentPanel()?->getId() === 'ayuntamientos'
+        ) {
+            return $query;
+        }
+
+        return parent::scopeEloquentQueryToTenant($query, $tenant);
     }
 }

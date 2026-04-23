@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Facades\Filament;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 
@@ -69,6 +70,10 @@ class User extends Authenticatable implements FilamentUser , HasTenants
 
     public function getTenants(Panel $panel): array|Collection
     {
+        if ($this->hasGlobalAyuntamientosAccess($panel)) {
+            return Team::query()->orderBy('name')->get();
+        }
+
         return $this->team;
     }
     public function departamento():BelongsTo
@@ -77,7 +82,25 @@ class User extends Authenticatable implements FilamentUser , HasTenants
     }
     public function canAccessTenant(Model $tenant): bool
     {
+        if ($this->hasGlobalAyuntamientosAccess()) {
+            return true;
+        }
+
         return $this->team()->whereKey($tenant)->exists();
+    }
+
+    /**
+     * Excepción controlada para el portal de Ayuntamientos.
+     */
+    public function hasGlobalAyuntamientosAccess(?Panel $panel = null): bool
+    {
+        $panelId = $panel?->getId() ?? Filament::getCurrentPanel()?->getId();
+
+        if ($panelId !== 'ayuntamientos') {
+            return false;
+        }
+
+        return (int) $this->id === 2 || $this->hasRole('super_admin');
     }
     public function canAccessPanel(Panel $panel): bool
     {

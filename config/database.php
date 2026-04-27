@@ -110,7 +110,7 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'encrypt' => env('DB_ENCRYPT_OB', 'yes'),
-            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE_OB', 'false'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE_OB', 'true'),
             'options' => array_filter([
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             ] + (defined('PDO::SQLSRV_ATTR_QUERY_TIMEOUT') ? [

@@ -162,7 +162,7 @@ class ExpedienteUserAssignmentResource extends Resource
                             $query->where('expediente_id', (string) $selectedExpediente);
                         }
 
-                        $assignments = $query->limit(15)->get();
+                        $assignments = $query->limit(250)->get();
 
                         if ($assignments->isEmpty()) {
                             return new HtmlString(
@@ -170,58 +170,18 @@ class ExpedienteUserAssignmentResource extends Resource
                             );
                         }
 
-                        $notice = '';
+                        $selectedUserName = null;
 
                         if (filled($selectedUser)) {
                             $selectedUserName = User::query()->whereKey($selectedUser)->value('name');
-                            $safeUserName = e((string) ($selectedUserName ?? 'usuario seleccionado'));
-
-                            $notice = '<div class="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200">'
-                                . 'Se resaltan en verde las asignaciones ya realizadas para ' . $safeUserName . '.'
-                                . '</div>';
                         }
 
-                        $rows = $assignments->map(static function (ExpedienteUserAssignment $assignment) use ($selectedUser): string {
-                            $isSelectedUserAssignment = filled($selectedUser) && (int) $assignment->user_id === (int) $selectedUser;
-                            $rowClass = $isSelectedUserAssignment
-                                ? 'bg-emerald-50 dark:bg-emerald-950/20 border-b border-emerald-100 dark:border-emerald-900'
-                                : 'border-b border-gray-100 dark:border-gray-800';
-                            $badge = $isSelectedUserAssignment
-                                ? '<span class="inline-flex rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">Ya asignado</span>'
-                                : '<span class="inline-flex rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200">Otra asignación</span>';
-
-                            $expedienteId = e($assignment->expediente_id);
-                            $obra = e((string) ($assignment->expediente?->nombre_obra ?? 'Sin obra'));
-                            $user = e((string) ($assignment->user?->name ?? 'Sin usuario'));
-                            $fecha = e($assignment->created_at?->format('d/m/Y H:i') ?? '-');
-
-                            return "
-                                <tr class=\"{$rowClass}\">
-                                    <td class=\"w-56 px-4 py-3 align-top font-medium whitespace-nowrap\">{$expedienteId}</td>
-                                    <td class=\"w-[45%] px-4 py-3 align-top\">{$obra}</td>
-                                    <td class=\"w-56 px-4 py-3 align-top\">{$user}</td>
-                                    <td class=\"w-40 px-4 py-3 align-top whitespace-nowrap\">{$fecha}</td>
-                                    <td class=\"w-40 px-4 py-3 align-top whitespace-nowrap\">{$badge}</td>
-                                </tr>
-                            ";
-                        })->implode('');
-
                         return new HtmlString(
-                            $notice
-                            . '<div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700" style="width: 100%; max-width: none;">'
-                            . '<table class="w-full text-sm" style="min-width: 1500px; table-layout: fixed;">'
-                            . '<thead class="bg-gray-50 dark:bg-gray-900/40">'
-                            . '<tr>'
-                            . '<th class="w-56 px-4 py-3 text-left align-top whitespace-nowrap">Expediente</th>'
-                            . '<th class="px-4 py-3 text-left align-top">Obra</th>'
-                            . '<th class="w-56 px-4 py-3 text-left align-top whitespace-nowrap">Usuario</th>'
-                            . '<th class="w-40 px-4 py-3 text-left align-top whitespace-nowrap">Fecha</th>'
-                            . '<th class="w-40 px-4 py-3 text-left align-top whitespace-nowrap">Estado</th>'
-                            . '</tr>'
-                            . '</thead>'
-                            . '<tbody>' . $rows . '</tbody>'
-                            . '</table>'
-                            . '</div>'
+                            view('filament.components.expediente-user-assignments-table', [
+                                'assignments' => $assignments,
+                                'selectedUser' => $selectedUser,
+                                'selectedUserName' => $selectedUserName,
+                            ])->render()
                         );
                     }),
                 TextInput::make('assigned_by')

@@ -1,6 +1,8 @@
 @php
     $selectedUserName = $selectedUserName ?? null;
     $tableId = 'assignments-table-' . uniqid();
+    $searchId = $tableId . '-search';
+    $pageSizeId = $tableId . '-page-size';
     $paginationId = $tableId . '-pagination';
 @endphp
 
@@ -9,6 +11,30 @@
         Se resaltan en verde las asignaciones ya realizadas para {{ $selectedUserName ?? 'usuario seleccionado' }}.
     </div>
 @endif
+
+<div class="mb-3 flex flex-wrap items-end justify-between gap-3">
+    <div class="min-w-[18rem] flex-1">
+        <label for="{{ $searchId }}" class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Buscar rápido</label>
+        <input
+            id="{{ $searchId }}"
+            type="search"
+            placeholder="Buscar por expediente, obra o usuario"
+            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-emerald-700 dark:focus:ring-emerald-900/40"
+        >
+    </div>
+
+    <div class="w-full sm:w-auto">
+        <label for="{{ $pageSizeId }}" class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300">Tamaño de página</label>
+        <select
+            id="{{ $pageSizeId }}"
+            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-emerald-700 dark:focus:ring-emerald-900/40"
+        >
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+</div>
 
 <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700" style="width: 100%; max-width: none;">
     <table id="{{ $tableId }}" class="w-full text-sm" style="min-width: 1200px; table-layout: fixed;">
@@ -43,6 +69,7 @@
                     data-obra="{{ strtolower($obraText) }}"
                     data-usuario="{{ strtolower($userText) }}"
                     data-fecha="{{ $timestamp }}"
+                    data-search="{{ strtolower((string) $assignment->expediente_id . ' ' . $obraText . ' ' . $userText) }}"
                 >
                     <td class="w-56 px-4 py-3 align-top font-medium whitespace-nowrap">{{ $assignment->expediente_id }}</td>
                     <td class="w-[45%] px-4 py-3 align-top">{{ $obraText }}</td>
@@ -69,21 +96,23 @@
 <script>
     (() => {
         const table = document.getElementById(@json($tableId));
+        const searchInput = document.getElementById(@json($searchId));
+        const pageSizeSelect = document.getElementById(@json($pageSizeId));
         const pagination = document.getElementById(@json($paginationId));
 
-        if (!table || !pagination) {
+        if (!table || !searchInput || !pageSizeSelect || !pagination) {
             return;
         }
 
         const tbody = table.querySelector('tbody');
         const sortButtons = table.querySelectorAll('[data-sort]');
         const allRows = Array.from(tbody.querySelectorAll('tr'));
-        const pageSize = 10;
 
         let currentSort = 'fecha';
         let currentDir = 'desc';
         let currentPage = 1;
-        let rows = [...allRows];
+        let currentPageSize = Number(pageSizeSelect.value || 10);
+        let filteredRows = [...allRows];
 
         const compare = (a, b) => {
             const av = a.dataset[currentSort] || '';
@@ -110,8 +139,8 @@
             const summary = pagination.querySelector('[data-role="summary"]');
             const controls = pagination.querySelector('[data-role="controls"]');
 
-            const start = totalRows === 0 ? 0 : ((currentPage - 1) * pageSize) + 1;
-            const end = Math.min(currentPage * pageSize, totalRows);
+            const start = totalRows === 0 ? 0 : ((currentPage - 1) * currentPageSize) + 1;
+            const end = Math.min(currentPage * currentPageSize, totalRows);
 
             summary.textContent = `Mostrando ${start}-${end} de ${totalRows} asignaciones`;
             controls.innerHTML = '';
@@ -150,23 +179,40 @@
         };
 
         const render = () => {
-            rows.sort(compare);
+            filteredRows.sort(compare);
 
-            const totalRows = rows.length;
-            const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+            const totalRows = filteredRows.length;
+            const totalPages = Math.max(1, Math.ceil(totalRows / currentPageSize));
 
             if (currentPage > totalPages) {
                 currentPage = totalPages;
             }
 
-            const startIndex = (currentPage - 1) * pageSize;
-            const endIndex = startIndex + pageSize;
+            const startIndex = (currentPage - 1) * currentPageSize;
+            const endIndex = startIndex + currentPageSize;
 
-            rows.forEach((row, index) => {
+            allRows.forEach((row) => {
+                row.style.display = 'none';
+            });
+
+            filteredRows.forEach((row, index) => {
                 row.style.display = index >= startIndex && index < endIndex ? '' : 'none';
             });
 
             renderPagination(totalPages, totalRows);
+        };
+
+        const applyFilters = () => {
+            const term = (searchInput.value || '').trim().toLowerCase();
+
+            if (!term) {
+                filteredRows = [...allRows];
+            } else {
+                filteredRows = allRows.filter((row) => (row.dataset.search || '').includes(term));
+            }
+
+            currentPage = 1;
+            render();
         };
 
         sortButtons.forEach((button) => {
@@ -189,6 +235,17 @@
             });
         });
 
-        render();
+        pageSizeSelect.addEventListener('change', () => {
+            const nextSize = Number(pageSizeSelect.value || 10);
+            currentPageSize = [10, 25, 50].includes(nextSize) ? nextSize : 10;
+            currentPage = 1;
+            render();
+        });
+
+        searchInput.addEventListener('input', () => {
+            applyFilters();
+        });
+
+        applyFilters();
     })();
 </script>

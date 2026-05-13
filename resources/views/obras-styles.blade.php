@@ -341,7 +341,7 @@
         </div>
            <!-- Tab Inicio -->
            <div class="custom-tab" data-tab="Cesión">
-            🚀 Cesión
+            💸 Cesión
             <div class="custom-submenu">
                 <a href="/obras/obra-cedidas" class="custom-submenu-item">
                     📦 Cesión de Obras
@@ -366,7 +366,7 @@
                     👷‍♀️ Acta de replanteo
                 </a>
                 <a href="/obras/plan-sses" class="custom-submenu-item">
-                    🛡️ Planes de Seguridad y Salud
+                    ⛑️ Planes de Seguridad y Salud
                 </a>
 
                 <a href="/obras/actaderecepcions" class="custom-submenu-item">
@@ -411,6 +411,10 @@
                 <a href="/obras/notifications" class="custom-submenu-item">
                     📢 Notificaciones
                 </a>
+                <a href="/obras/contratistas" class="custom-submenu-item">
+                    👷 Contratistas
+                </a>
+
                 @if(auth()->user()->hasRole('super_admin') || auth()->user()->hasAnyRole(['Abogado', 'abogado']))
                 <a href="/obras/expediente-user-assignments" class="custom-submenu-item">
                     👤 Asignación de Expedientes

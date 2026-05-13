@@ -15,12 +15,14 @@ use App\Models\DatosEjecucionObras;
 use App\Models\DocumentoExpediente;
 use App\Models\Proyecto;
 use App\Models\ObraCedida;
+use App\Models\User;
 use App\Services\Assignments\ExpedienteAssignmentVisibilityService;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use App\Filament\Traits\CommonFilters;
 
 class UltimasObrasTableWidget extends BaseWidget
@@ -32,18 +34,26 @@ class UltimasObrasTableWidget extends BaseWidget
     public ?string $obraSeleccionadaId = null;
     public function table(Table $table): Table
     {
-        return $table
-            ->query(
-                app(ExpedienteAssignmentVisibilityService::class)->scopeToCurrentUserAssigned(
-                    DatosDeInicioDeObras::query()
-                    ->where('Codigo_Plan', '<>', '')
-                    ->whereNotNull('expediente_id')
-                    ->where('expediente_id', '<>', '')
-                )
-                    // ajusta si usas otra columna de fecha
-                    //->limit(500)
+        $baseQuery = DatosDeInicioDeObras::query()
+            ->where('Codigo_Plan', '<>', '')
+            ->whereNotNull('expediente_id')
+            ->where('expediente_id', '<>', '');
 
-            )
+        $authUser = Auth::user();
+
+        if (! $authUser instanceof User) {
+            $query = $baseQuery->whereRaw('1 = 0');
+        } else {
+            $canSeeAllExpedientes = $authUser->hasRole('super_admin')
+                || $authUser->hasAnyRole(['Abogado', 'abogado']);
+
+            $query = $canSeeAllExpedientes
+                ? $baseQuery
+                : app(ExpedienteAssignmentVisibilityService::class)->scopeToCurrentUserAssigned($baseQuery);
+        }
+
+        return $table
+            ->query($query)
             ->columns([
 
                 TextColumn::make('expediente_id')

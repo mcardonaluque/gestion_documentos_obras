@@ -91,6 +91,18 @@ class ExpedienteUserAssignmentResource extends Resource
                     ->default(static fn (?ExpedienteUserAssignment $record): ?string => isset($record?->expediente?->ao_ejecucion)
                         ? (string) $record->expediente->ao_ejecucion
                         : now()->format('Y'))
+                    ->afterStateHydrated(static function (callable $set, mixed $state, ?ExpedienteUserAssignment $record): void {
+                        if (filled($state)) {
+                            return;
+                        }
+
+                        $set(
+                            'ao_ejecucion_filter',
+                            isset($record?->expediente?->ao_ejecucion)
+                                ? (string) $record->expediente->ao_ejecucion
+                                : now()->format('Y')
+                        );
+                    })
                     ->searchable()
                     ->preload()
                     ->live()
@@ -166,7 +178,7 @@ class ExpedienteUserAssignmentResource extends Resource
 
                         if ($assignments->isEmpty()) {
                             return new HtmlString(
-                                '<div class="rounded-xl border border-dashed border-gray-300 p-4 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">No hay asignaciones registradas para la selección actual.</div>'
+                                '<div class="p-4 text-sm text-gray-500 border border-gray-300 border-dashed rounded-xl dark:border-gray-700 dark:text-gray-400">No hay asignaciones registradas para la selección actual.</div>'
                             );
                         }
 

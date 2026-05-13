@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StaticCodeAnalysis>
+  <SuppressMessages>
+    <Suppression>
+      <RuleName>Microsoft.Rules.Data.SR0001</RuleName>
+    </Suppression>
+    <Suppression>
+      <RuleName>Microsoft.Rules.Data.SR0008</RuleName>
+    </Suppression>
+    <Suppression>
+      <RuleName>Microsoft.Rules.Data.SR0009</RuleName>
+    </Suppression>
+    <Suppression>
+      <RuleName>Microsoft.Rules.Data.SR0014</RuleName>
+    </Suppression>
+  </SuppressMessages>
+</StaticCodeAnalysis>

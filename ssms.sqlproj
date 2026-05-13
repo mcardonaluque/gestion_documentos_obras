@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build">
+  <Sdk Name="Microsoft.Build.Sql" Version="2.1.0" />
+  <PropertyGroup>
+    <Name>$safeprojectname$</Name>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql170DatabaseSchemaProvider</DSP>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultCollation>SQL_Latin1_General_CP1_CI_AS</DefaultCollation>
+    <ProjectGuid>{00000000-0000-0000-0000-000000000000}</ProjectGuid>
+    <!-- Configuración para ignorar errores y continuar -->
+    <RunSqlCodeAnalysis>False</RunSqlCodeAnalysis>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <TreatTSqlWarningsAsErrors>False</TreatTSqlWarningsAsErrors>
+    <!-- Permitir build con errores -->
+    <ContinueOnError>True</ContinueOnError>
+    <MSBuildWarningsAsMessages>True</MSBuildWarningsAsMessages>
+  </PropertyGroup>
+</Project>

@@ -18,7 +18,7 @@ class EditExpedienteUserAssignment extends EditRecord
 
     protected Width | string | null $maxContentWidth = Width::Full;
 
-    protected ?string $heading = 'ASIGNACIÓN DE EXPEDIENYES';
+    protected ?string $heading = 'ASIGNACIÓN DE EXPEDIENTES';
 
     public function getMaxContentWidth(): Width | string | null
     {

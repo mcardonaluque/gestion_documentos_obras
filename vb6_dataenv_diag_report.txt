@@ -1,0 +1,45 @@
+=====================================================
+VB6 DataEnvironment Diagnostic Report
+Date: 05/05/2026 Time:  9:56:20,35
+Machine: S044_528 User: MCardona
+=====================================================
+
+[1] Basic environment
+PROCESSOR_ARCHITECTURE=AMD64
+ProgramFiles(x86)=C:\Program Files (x86)
+
+[2] Expected files
+OK  - C:\Program Files (x86)\Common Files\Designer\MSDE.DLL
+OK  - C:\Program Files (x86)\Common Files\Designer\MSDERUN.DLL
+
+[3] regsvr32 availability
+OK  - C:\Windows\SysWOW64\regsvr32.exe
+OK  - C:\Windows\System32\regsvr32.exe
+
+[4] CLSID registration check ({C0E45035-5775-11D0-B388-00A0C9055D8E})
+--- HKCR --- 
+ERROR: El sistema no ha podido encontrar la clave o el valor del Registro
+especificados.
+--- HKCR Wow6432Node --- 
+ERROR: El sistema no ha podido encontrar la clave o el valor del Registro
+especificados.
+--- HKLM 64-bit Classes --- 
+ERROR: El sistema no ha podido encontrar la clave o el valor del Registro
+especificados.
+--- HKLM WOW6432Node Classes --- 
+ERROR: El sistema no ha podido encontrar la clave o el valor del Registro
+especificados.
+
+[5] Data Environment Add-In hints
+--- Search Addins for MSDE / Data Environment --- 
+HKEY_CURRENT_USER\Software\VB and VBA Program Settings\Microsoft Visual Basic AddIns\VBDataViewWindow
+
+[6] VB6 executable check
+OK  - C:\Program Files (x86)\Microsoft Visual Studio\VB98\VB6.EXE
+
+[7] Recommendations snapshot
+1) If CLSID keys are missing, register MSDE/MSDERUN with SysWOW64 regsvr32 as admin.
+2) If files are missing, reinstall VB6 full + SP6 data designers.
+3) Verify Add-In appears in VB6 Complementos  de complementos.
+
+Done. Report: "C:\xampp\htdocs\gestion_documentos_obras\vb6_dataenv_diag_report.txt"

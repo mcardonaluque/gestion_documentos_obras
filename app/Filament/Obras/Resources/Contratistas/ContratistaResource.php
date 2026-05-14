@@ -4,6 +4,8 @@ namespace App\Filament\Obras\Resources\Contratistas;
 
 use App\Models\Contratista;
 use App\Models\TipoContratista;
+use App\Models\TbMunicipio;
+use App\Models\TbProvincias;
 use BackedEnum;
 use Filament\Actions;
 use Filament\Forms;
@@ -12,7 +14,9 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ContratistaResource extends Resource
 {
@@ -46,6 +50,12 @@ class ContratistaResource extends Resource
             $tipo->Ultimo_codigo = (string) $nuevoCodigo;
             $tipo->save();
         }
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['provincia', 'provinciaFiscal', 'tipoContratista']);
     }
 
     public static function form(Schema $schema): Schema
@@ -107,18 +117,44 @@ class ContratistaResource extends Resource
                 Forms\Components\TextInput::make('CPostal')
                     ->numeric(),
                 Forms\Components\TextInput::make('Localidad'),
-                Forms\Components\TextInput::make('Municipio')
-                    ->numeric(),
-                Forms\Components\TextInput::make('Provincia')
-                    ->numeric(),
+                Forms\Components\Select::make('Provincia')
+                    ->label('Provincia')
+                    ->options(fn () => TbProvincias::orderBy('PR')
+                        ->get()
+                        ->mapWithKeys(fn ($p) => [$p->PR => trim($p->NOMBRE_PR)])
+                        ->toArray())
+                    ->searchable()
+                    ->live()
+                    ->afterStateUpdated(fn (callable $set) => $set('Municipio', null)),
+                Forms\Components\Select::make('Municipio')
+                    ->label('Municipio')
+                    ->options(fn (callable $get) => TbMunicipio::query()
+                        ->when(filled($get('Provincia')), fn ($q) => $q->where('Codigo_Provincia', $get('Provincia')))
+                        ->orderBy('Municipio')
+                        ->pluck('Municipio', 'Codigo_Municipio')
+                        ->toArray())
+                    ->searchable(),
                 Forms\Components\TextInput::make('DomicilioFiscal'),
                 Forms\Components\TextInput::make('CPostalFiscal')
                     ->numeric(),
                 Forms\Components\TextInput::make('LocalidadFiscal'),
-                Forms\Components\TextInput::make('MunicipioFiscal')
-                    ->numeric(),
-                Forms\Components\TextInput::make('ProvinciaFiscal')
-                    ->numeric(),
+                Forms\Components\Select::make('ProvinciaFiscal')
+                    ->label('Provincia Fiscal')
+                    ->options(fn () => TbProvincias::orderBy('PR')
+                        ->get()
+                        ->mapWithKeys(fn ($p) => [$p->PR => trim($p->NOMBRE_PR)])
+                        ->toArray())
+                    ->searchable()
+                    ->live()
+                    ->afterStateUpdated(fn (callable $set) => $set('MunicipioFiscal', null)),
+                Forms\Components\Select::make('MunicipioFiscal')
+                    ->label('Municipio Fiscal')
+                    ->options(fn (callable $get) => TbMunicipio::query()
+                        ->when(filled($get('ProvinciaFiscal')), fn ($q) => $q->where('Codigo_Provincia', $get('ProvinciaFiscal')))
+                        ->orderBy('Municipio')
+                        ->pluck('Municipio', 'Codigo_Municipio')
+                        ->toArray())
+                    ->searchable(),
                 Forms\Components\TextInput::make('Telefono'),
                 Forms\Components\TextInput::make('Telefono2'),
                 Forms\Components\TextInput::make('Movil'),
@@ -182,11 +218,12 @@ class ContratistaResource extends Resource
                     ->placeholder('-'),
                 Infolists\Components\TextEntry::make('Localidad')
                     ->placeholder('-'),
-                Infolists\Components\TextEntry::make('Municipio')
-                    ->numeric()
+                Infolists\Components\TextEntry::make('municipio_nombre')
+                    ->label('Municipio')
                     ->placeholder('-'),
-                Infolists\Components\TextEntry::make('Provincia')
-                    ->numeric()
+                Infolists\Components\TextEntry::make('provincia.NOMBRE_PR')
+                    ->label('Provincia')
+                    ->formatStateUsing(fn ($state) => trim((string) $state))
                     ->placeholder('-'),
                 Infolists\Components\TextEntry::make('DomicilioFiscal')
                     ->placeholder('-'),
@@ -195,11 +232,12 @@ class ContratistaResource extends Resource
                     ->placeholder('-'),
                 Infolists\Components\TextEntry::make('LocalidadFiscal')
                     ->placeholder('-'),
-                Infolists\Components\TextEntry::make('MunicipioFiscal')
-                    ->numeric()
+                Infolists\Components\TextEntry::make('municipio_fiscal_nombre')
+                    ->label('Municipio Fiscal')
                     ->placeholder('-'),
-                Infolists\Components\TextEntry::make('ProvinciaFiscal')
-                    ->numeric()
+                Infolists\Components\TextEntry::make('provinciaFiscal.NOMBRE_PR')
+                    ->label('Provincia Fiscal')
+                    ->formatStateUsing(fn ($state) => trim((string) $state))
                     ->placeholder('-'),
                 Infolists\Components\TextEntry::make('Telefono')
                     ->placeholder('-'),
@@ -291,91 +329,170 @@ class ContratistaResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('Localidad')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('Municipio')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('municipio_nombre')
+                    ->label('Municipio')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('provincia.NOMBRE_PR')
+                    ->label('Provincia')
+                    ->formatStateUsing(fn ($state) => trim((string) $state))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('Provincia')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Cód. Provincia')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('DomicilioFiscal')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('CPostalFiscal')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('LocalidadFiscal')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('MunicipioFiscal')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('ProvinciaFiscal')
-                    ->numeric()
-                    ->sortable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('municipio_fiscal_nombre')
+                    ->label('Municipio Fiscal')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('provinciaFiscal.NOMBRE_PR')
+                    ->label('Provincia Fiscal')
+                    ->formatStateUsing(fn ($state) => trim((string) $state))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Telefono')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Telefono2')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Movil')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Fax')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Email')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('RepLegal1')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Nif1')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Sexo1')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('RepLegal2')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Nif2')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Sexo2')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('RepLegal3')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Nif3')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Sexo3')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('RepLegal4')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Nif4')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Sexo4')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('PresentadoNif')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('Constitucion')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('RegMercantil')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('DeclResponsable')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('PoderBastanteado')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('ClasificacionDef')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('ClasificacionProv')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Escritura')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('Registro')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('Estado')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('Provisional')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('Provincia')
+                    ->label('Provincia')
+                    ->options(fn () => TbProvincias::orderBy('PR')
+                        ->get()
+                        ->mapWithKeys(fn ($p) => [$p->PR => trim($p->NOMBRE_PR)])
+                        ->toArray())
+                    ->attribute('Provincia'),
+                Tables\Filters\SelectFilter::make('Municipio')
+                    ->label('Municipio')
+                    ->options(fn () => TbMunicipio::query()
+                        ->orderBy('Municipio')
+                        ->get(['Codigo_Provincia', 'Codigo_Municipio', 'Municipio'])
+                        ->mapWithKeys(fn ($m) => [
+                            ((string) $m->Codigo_Provincia . '|' . (string) $m->Codigo_Municipio)
+                                => trim((string) $m->Municipio) . ' (' . (string) $m->Codigo_Provincia . ')',
+                        ])
+                        ->toArray())
+                    ->query(function (Builder $query, array $data): Builder {
+                        $value = $data['value'] ?? null;
+
+                        if (blank($value) || ! str_contains((string) $value, '|')) {
+                            return $query;
+                        }
+
+                        [$provincia, $municipio] = explode('|', (string) $value, 2);
+
+                        return $query
+                            ->where('Provincia', $provincia)
+                            ->where('Municipio', $municipio);
+                    }),
+                Tables\Filters\Filter::make('Cif')
+                    ->label('CIF')
+                    ->form([
+                        Forms\Components\TextInput::make('cif_valor')->label('CIF'),
+                    ])
+                    ->query(fn ($query, array $data) => $query->when(
+                        filled($data['cif_valor'] ?? null),
+                        fn ($q) => $q->where('Cif', 'like', '%' . $data['cif_valor'] . '%')
+                    )),
             ])
+            ->filtersLayout(FiltersLayout::AboveContent)
+            ->recordUrl(fn (Contratista $record): string => static::getUrl('edit', ['record' => $record]))
             ->recordActions([
-                Actions\ViewAction::make(),
                 Actions\EditAction::make(),
+                Actions\ViewAction::make(),
             ])
             ->toolbarActions([
                 Actions\BulkActionGroup::make([

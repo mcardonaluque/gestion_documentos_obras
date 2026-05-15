@@ -9,6 +9,8 @@ BRANCH="version4"
 PRESERVE_DATABASE_CONFIG="${PRESERVE_DATABASE_CONFIG:-0}"
 DB_CONFIG_RELATIVE_PATH="config/database.php"
 DB_CONFIG_BACKUP=""
+WEB_USER="${WEB_USER:-www-data}"
+WEB_GROUP="${WEB_GROUP:-www-data}"
 
 if [[ "${1:-}" != "" ]]; then
   APP_DIR="$1"
@@ -51,13 +53,22 @@ composer install --no-dev --optimize-autoloader --no-interaction
 echo "[5/11] Rebuilding package discovery"
 php artisan package:discover --ansi
 
-echo "[6/11] Clearing caches"
+echo "[6/12] Ensuring permissions for storage and cache"
+if command -v chown > /dev/null 2>&1 && command -v chmod > /dev/null 2>&1; then
+  if [[ "$(id -u)" == "0" ]] && id -u "${WEB_USER}" > /dev/null 2>&1; then
+    chown -R "${WEB_USER}:${WEB_GROUP}" storage bootstrap/cache || true
+  fi
+  find storage bootstrap/cache -type d -exec chmod 775 {} \; || true
+  find storage bootstrap/cache -type f -exec chmod 664 {} \; || true
+fi
+
+echo "[7/12] Clearing caches"
 php artisan optimize:clear
 php artisan view:clear
 php artisan config:clear
 rm -f bootstrap/cache/config.php bootstrap/cache/packages.php bootstrap/cache/services.php || true
 
-echo "[7/11] Verifying Filament Tables package"
+echo "[8/12] Verifying Filament Tables package"
 if ! composer show filament/tables > /dev/null 2>&1; then
   echo "filament/tables is missing. Installing Filament 4 packages..."
   composer require filament/filament:^4.0 filament/forms:^4.0 filament/tables:^4.0 --no-interaction
@@ -65,15 +76,15 @@ if ! composer show filament/tables > /dev/null 2>&1; then
   php artisan optimize:clear
 fi
 
-echo "[8/11] Running migrations"
+echo "[9/12] Running migrations"
 php artisan migrate --force
 
-echo "[9/11] Rebuilding production caches"
+echo "[10/12] Rebuilding production caches"
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-echo "[10/11] Restarting queue workers"
+echo "[11/12] Restarting queue workers"
 php artisan queue:restart || true
 
 echo "[11/12] Restarting web runtime (php-fpm/apache) when available"

@@ -113,8 +113,8 @@ return [
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE_OB', 'true'),
             'options' => array_filter([
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            ] + (defined('PDO::SQLSRV_ATTR_QUERY_TIMEOUT') ? [
-                PDO::SQLSRV_ATTR_QUERY_TIMEOUT => env('DB_QUERY_TIMEOUT_OB', 30),
+            ] + (defined('PDO::SQLSRV_ATTR_QUERY_TIMEOUT') && env('DB_USE_QUERY_TIMEOUT_OB', false) ? [
+                PDO::SQLSRV_ATTR_QUERY_TIMEOUT => (int) env('DB_QUERY_TIMEOUT_OB', 30),
             ] : [])),
 
         ],
@@ -132,8 +132,8 @@ return [
               'prefix_indexes' => true,
               'encrypt' => env('DB_ENCRYPT_TB', 'yes'),
              'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE_TB', 'false'),
-             'options' => array_filter((defined('PDO::SQLSRV_ATTR_QUERY_TIMEOUT') ? [
-                 PDO::SQLSRV_ATTR_QUERY_TIMEOUT => env('DB_QUERY_TIMEOUT_TB', 30),
+             'options' => array_filter((defined('PDO::SQLSRV_ATTR_QUERY_TIMEOUT') && env('DB_USE_QUERY_TIMEOUT_TB', false) ? [
+                 PDO::SQLSRV_ATTR_QUERY_TIMEOUT => (int) env('DB_QUERY_TIMEOUT_TB', 30),
              ] : [])),
 
 

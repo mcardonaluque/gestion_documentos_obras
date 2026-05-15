@@ -17,6 +17,9 @@ fi
 echo "[1/11] Entering project directory: ${APP_DIR}"
 cd "${APP_DIR}"
 
+# Ensure old local git flags do not block config updates from the branch.
+git update-index --no-skip-worktree "${DB_CONFIG_RELATIVE_PATH}" || true
+
 echo "[2/11] Enabling maintenance mode"
 php artisan down || true
 
@@ -30,6 +33,11 @@ echo "[3/11] Fetching and updating branch ${BRANCH}"
 git fetch origin
 git checkout "${BRANCH}"
 git pull origin "${BRANCH}"
+
+if [[ "${PRESERVE_DATABASE_CONFIG}" != "1" ]]; then
+  echo "Syncing ${DB_CONFIG_RELATIVE_PATH} from branch ${BRANCH}"
+  git checkout "origin/${BRANCH}" -- "${DB_CONFIG_RELATIVE_PATH}"
+fi
 
 if [[ -n "${DB_CONFIG_BACKUP}" ]]; then
   echo "Restoring preserved ${DB_CONFIG_RELATIVE_PATH}"
@@ -47,6 +55,7 @@ echo "[6/11] Clearing caches"
 php artisan optimize:clear
 php artisan view:clear
 php artisan config:clear
+rm -f bootstrap/cache/config.php bootstrap/cache/packages.php bootstrap/cache/services.php || true
 
 echo "[7/11] Verifying Filament Tables package"
 if ! composer show filament/tables > /dev/null 2>&1; then
@@ -67,7 +76,16 @@ php artisan view:cache
 echo "[10/11] Restarting queue workers"
 php artisan queue:restart || true
 
-echo "[11/11] Disabling maintenance mode"
+echo "[11/12] Restarting web runtime (php-fpm/apache) when available"
+if command -v systemctl > /dev/null 2>&1; then
+  systemctl restart php8.3-fpm || true
+  systemctl restart php8.2-fpm || true
+  systemctl restart php8.1-fpm || true
+  systemctl restart apache2 || true
+  systemctl restart httpd || true
+fi
+
+echo "[12/12] Disabling maintenance mode"
 php artisan up || true
 
 echo "Deployment finished successfully."

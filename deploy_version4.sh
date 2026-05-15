@@ -6,7 +6,7 @@ set -euo pipefail
 
 APP_DIR="/var/www/gestion_documentos_obras"
 BRANCH="version4"
-PRESERVE_DATABASE_CONFIG="${PRESERVE_DATABASE_CONFIG:-1}"
+PRESERVE_DATABASE_CONFIG="${PRESERVE_DATABASE_CONFIG:-0}"
 DB_CONFIG_RELATIVE_PATH="config/database.php"
 DB_CONFIG_BACKUP=""
 
@@ -35,7 +35,6 @@ if [[ -n "${DB_CONFIG_BACKUP}" ]]; then
   echo "Restoring preserved ${DB_CONFIG_RELATIVE_PATH}"
   cp "${DB_CONFIG_BACKUP}" "${DB_CONFIG_RELATIVE_PATH}"
   rm -f "${DB_CONFIG_BACKUP}"
-  git update-index --skip-worktree "${DB_CONFIG_RELATIVE_PATH}" || true
 fi
 
 echo "[4/11] Installing PHP dependencies"

@@ -2,6 +2,22 @@
 
 use Illuminate\Support\Str;
 
+$sqlsrvOptions = static function (string $prefix): array {
+    $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    ];
+
+    $useQueryTimeout = filter_var(env("DB_USE_QUERY_TIMEOUT_{$prefix}", false), FILTER_VALIDATE_BOOLEAN);
+    $queryTimeout = env("DB_QUERY_TIMEOUT_{$prefix}");
+
+    // Some SQLSRV environments reject very low/invalid timeout values (e.g. 1).
+    if ($useQueryTimeout && extension_loaded('sqlsrv') && is_numeric($queryTimeout) && (int) $queryTimeout >= 5) {
+        $options[PDO::SQLSRV_ATTR_QUERY_TIMEOUT] = (int) $queryTimeout;
+    }
+
+    return $options;
+};
+
 return [
 
     /*
@@ -111,9 +127,7 @@ return [
             'prefix_indexes' => true,
             'encrypt' => env('DB_ENCRYPT_OB', 'yes'),
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE_OB', 'true'),
-            'options' => array_filter([
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            ]),
+            'options' => $sqlsrvOptions('OB'),
 
         ],
         'Tablas' => [
@@ -130,7 +144,7 @@ return [
               'prefix_indexes' => true,
               'encrypt' => env('DB_ENCRYPT_TB', 'yes'),
              'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE_TB', 'false'),
-             'options' => [],
+               'options' => $sqlsrvOptions('TB'),
 
 
         ],

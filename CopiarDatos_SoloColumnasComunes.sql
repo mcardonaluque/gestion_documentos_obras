@@ -10,6 +10,307 @@
 USE [OBRAS_TEST];
 GO
 
+SET NOCOUNT ON;
+
+DECLARE @SourceLinkedServer sysname = 'GUADIX';
+DECLARE @SourceDatabase sysname = 'OBRAS';
+DECLARE @SourceSchema sysname = 'dbo';
+DECLARE @TargetSchema sysname = 'dbo';
+
+IF OBJECT_ID('tempdb..#Tablas') IS NOT NULL DROP TABLE #Tablas;
+CREATE TABLE #Tablas (
+   TableName sysname COLLATE DATABASE_DEFAULT NOT NULL PRIMARY KEY
+);
+
+DECLARE @sql nvarchar(max);
+DECLARE @msg nvarchar(4000);
+
+SET @sql = N'
+INSERT INTO #Tablas (TableName)
+SELECT t.name
+FROM sys.tables t
+JOIN sys.schemas ts
+   ON ts.schema_id = t.schema_id
+   AND ts.name = @TargetSchema
+JOIN ' + QUOTENAME(@SourceLinkedServer) + N'.' + QUOTENAME(@SourceDatabase) + N'.sys.tables st
+   ON st.name = t.name COLLATE DATABASE_DEFAULT
+JOIN ' + QUOTENAME(@SourceLinkedServer) + N'.' + QUOTENAME(@SourceDatabase) + N'.sys.schemas ss
+   ON ss.schema_id = st.schema_id
+   AND ss.name = @SourceSchema
+WHERE t.is_ms_shipped = 0;';
+
+SET @sql = REPLACE(@sql, 'WHERE t.is_ms_shipped = 0;',
+N'WHERE t.is_ms_shipped = 0
+   AND t.name NOT IN (
+         ''migrations'', ''failed_jobs'', ''jobs'', ''job_batches'',
+         ''users'', ''teams'', ''team_user'',
+         ''cache'', ''cache_locks'', ''sessions'',
+         ''password_reset_tokens'', ''personal_access_tokens'',
+         ''notifications'', ''activity_log'', ''model_has_permissions'',
+         ''model_has_roles'', ''roles'', ''permissions'', ''role_has_permissions''
+   );');
+
+EXEC sp_executesql
+   @sql,
+   N'@TargetSchema sysname, @SourceSchema sysname',
+   @TargetSchema = @TargetSchema,
+   @SourceSchema = @SourceSchema;
+
+-- Desactiva FK/CK temporalmente para permitir recargar tablas padre e hijas sin conflictos de orden.
+SET @sql = N'';
+SELECT @sql = @sql
+   + N'ALTER TABLE ' + QUOTENAME(@TargetSchema) + N'.' + QUOTENAME(t.TableName) + N' NOCHECK CONSTRAINT ALL;'
+FROM #Tablas t;
+EXEC sp_executesql @sql;
+
+DECLARE @TableName sysname;
+
+DECLARE cur_tablas CURSOR FAST_FORWARD FOR
+   SELECT TableName
+   FROM #Tablas
+   ORDER BY TableName;
+
+OPEN cur_tablas;
+FETCH NEXT FROM cur_tablas INTO @TableName;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+   IF OBJECT_ID('tempdb..#Cols') IS NOT NULL DROP TABLE #Cols;
+   CREATE TABLE #Cols (
+      ColumnName sysname COLLATE DATABASE_DEFAULT NOT NULL,
+      ColumnId int NOT NULL,
+      IsIdentityTarget bit NOT NULL,
+      IsIdentitySource bit NOT NULL
+   );
+
+   SET @msg = N'Copiando datos de tabla: ' + @TableName;
+   RAISERROR('%s', 0, 1, @msg) WITH NOWAIT;
+
+   SET @sql = N'
+   INSERT INTO #Cols (ColumnName, ColumnId, IsIdentityTarget, IsIdentitySource)
+   SELECT
+      tc.name,
+      tc.column_id,
+      CASE WHEN ic.object_id IS NULL THEN 0 ELSE 1 END,
+      CASE WHEN sic.object_id IS NULL THEN 0 ELSE 1 END
+   FROM sys.tables tt
+   JOIN sys.schemas ts
+      ON ts.schema_id = tt.schema_id
+      AND ts.name = @TargetSchema
+   JOIN sys.columns tc
+      ON tc.object_id = tt.object_id
+   LEFT JOIN sys.identity_columns ic
+      ON ic.object_id = tc.object_id
+      AND ic.column_id = tc.column_id
+   JOIN ' + QUOTENAME(@SourceLinkedServer) + N'.' + QUOTENAME(@SourceDatabase) + N'.sys.tables st
+      ON st.name = tt.name COLLATE DATABASE_DEFAULT
+   JOIN ' + QUOTENAME(@SourceLinkedServer) + N'.' + QUOTENAME(@SourceDatabase) + N'.sys.schemas ss
+      ON ss.schema_id = st.schema_id
+      AND ss.name = @SourceSchema
+   JOIN ' + QUOTENAME(@SourceLinkedServer) + N'.' + QUOTENAME(@SourceDatabase) + N'.sys.columns sc
+      ON sc.object_id = st.object_id
+      AND sc.name = tc.name COLLATE DATABASE_DEFAULT
+   LEFT JOIN ' + QUOTENAME(@SourceLinkedServer) + N'.' + QUOTENAME(@SourceDatabase) + N'.sys.identity_columns sic
+      ON sic.object_id = sc.object_id
+      AND sic.column_id = sc.column_id
+   WHERE tt.name = @TableName COLLATE DATABASE_DEFAULT
+     AND tc.is_computed = 0
+     AND sc.is_computed = 0
+     AND tc.system_type_id <> 189
+     AND sc.system_type_id <> 189;';
+
+   EXEC sp_executesql
+      @sql,
+      N'@TableName sysname, @TargetSchema sysname, @SourceSchema sysname',
+      @TableName = @TableName,
+      @TargetSchema = @TargetSchema,
+      @SourceSchema = @SourceSchema;
+
+   DECLARE @InsertCols nvarchar(max) = NULL;
+   DECLARE @SelectCols nvarchar(max) = NULL;
+   DECLARE @RequiredInsertCols nvarchar(max) = NULL;
+   DECLARE @RequiredSelectCols nvarchar(max) = NULL;
+   DECLARE @IdentityColumn sysname = NULL;
+   DECLARE @UseIdentityInsert bit = 0;
+   DECLARE @RowsCopied int = 0;
+
+   SELECT @InsertCols = STUFF((
+      SELECT ', ' + QUOTENAME(ColumnName)
+      FROM #Cols
+      ORDER BY ColumnId
+      FOR XML PATH(''), TYPE
+   ).value('.', 'nvarchar(max)'), 1, 2, '');
+
+   SELECT @SelectCols = STUFF((
+      SELECT ', s.' + QUOTENAME(ColumnName)
+      FROM #Cols
+      ORDER BY ColumnId
+      FOR XML PATH(''), TYPE
+   ).value('.', 'nvarchar(max)'), 1, 2, '');
+
+   SELECT @RequiredInsertCols = STUFF((
+      SELECT ', ' + QUOTENAME(c.name)
+      FROM sys.tables t
+      JOIN sys.schemas s
+         ON s.schema_id = t.schema_id
+        AND s.name = @TargetSchema
+      JOIN sys.columns c
+         ON c.object_id = t.object_id
+      WHERE t.name = @TableName COLLATE DATABASE_DEFAULT
+        AND c.is_computed = 0
+        AND c.system_type_id <> 189
+        AND c.is_nullable = 0
+        AND c.default_object_id = 0
+        AND c.is_identity = 0
+        AND NOT EXISTS (
+           SELECT 1
+           FROM #Cols x
+           WHERE x.ColumnName = c.name COLLATE DATABASE_DEFAULT
+        )
+      ORDER BY c.column_id
+      FOR XML PATH(''), TYPE
+   ).value('.', 'nvarchar(max)'), 1, 2, '');
+
+   SELECT @RequiredSelectCols = STUFF((
+      SELECT ', ' +
+         CASE
+            WHEN @TableName = 'DatosInicioDeObras' AND c.name = 'expediente_id' THEN
+               'LTRIM(RTRIM(CAST(s.[Codigo_Plan] AS VARCHAR(50)))) + ''_'' + '
+               + 'LTRIM(RTRIM(CAST(s.[numero_obra] AS VARCHAR(50)))) + ''_'' + '
+               + 'LTRIM(RTRIM(CAST(s.[subreferencia] AS VARCHAR(50)))) + ''_'' + '
+               + 'LTRIM(RTRIM(CAST(s.[ao_ejecucion] AS VARCHAR(50))))'
+            WHEN pkc.column_id IS NOT NULL AND ty.name IN ('tinyint', 'smallint', 'int', 'bigint', 'decimal', 'numeric') THEN
+               'ROW_NUMBER() OVER (ORDER BY (SELECT NULL))'
+            WHEN ty.name IN ('varchar', 'char', 'nvarchar', 'nchar', 'text', 'ntext', 'sysname') THEN
+               ''''''
+            WHEN ty.name = 'xml' THEN
+               'CONVERT(xml, ''<root/>'')'
+            WHEN ty.name = 'uniqueidentifier' THEN
+               'CONVERT(uniqueidentifier, ''00000000-0000-0000-0000-000000000000'')'
+            WHEN ty.name = 'bit' THEN
+               '0'
+            WHEN ty.name IN ('tinyint', 'smallint', 'int', 'bigint', 'decimal', 'numeric', 'float', 'real', 'money', 'smallmoney') THEN
+               '0'
+            WHEN ty.name = 'date' THEN
+               'CONVERT(date, ''19000101'')'
+            WHEN ty.name = 'time' THEN
+               'CONVERT(time, ''00:00:00'')'
+            WHEN ty.name = 'datetime' THEN
+               'CONVERT(datetime, ''19000101'')'
+            WHEN ty.name = 'smalldatetime' THEN
+               'CONVERT(smalldatetime, ''19000101'')'
+            WHEN ty.name = 'datetime2' THEN
+               'CONVERT(datetime2, ''19000101'')'
+            WHEN ty.name = 'datetimeoffset' THEN
+               'SYSDATETIMEOFFSET()'
+            WHEN ty.name IN ('binary', 'varbinary', 'image') THEN
+               '0x00'
+            ELSE
+               '0'
+         END
+      FROM sys.tables t
+      JOIN sys.schemas s
+         ON s.schema_id = t.schema_id
+        AND s.name = @TargetSchema
+      JOIN sys.columns c
+         ON c.object_id = t.object_id
+      JOIN sys.types ty
+         ON ty.user_type_id = c.user_type_id
+      LEFT JOIN (
+          SELECT ic.object_id, ic.column_id
+          FROM sys.indexes i
+          JOIN sys.index_columns ic
+              ON ic.object_id = i.object_id
+             AND ic.index_id = i.index_id
+          WHERE i.is_primary_key = 1
+      ) pkc
+          ON pkc.object_id = c.object_id
+         AND pkc.column_id = c.column_id
+      WHERE t.name = @TableName COLLATE DATABASE_DEFAULT
+        AND c.is_computed = 0
+        AND c.system_type_id <> 189
+        AND c.is_nullable = 0
+        AND c.default_object_id = 0
+        AND c.is_identity = 0
+        AND NOT EXISTS (
+           SELECT 1
+           FROM #Cols x
+           WHERE x.ColumnName = c.name COLLATE DATABASE_DEFAULT
+        )
+      ORDER BY c.column_id
+      FOR XML PATH(''), TYPE
+   ).value('.', 'nvarchar(max)'), 1, 2, '');
+
+   IF @RequiredInsertCols IS NOT NULL AND LEN(@RequiredInsertCols) > 0
+   BEGIN
+      SET @InsertCols = CASE WHEN @InsertCols IS NULL OR LEN(@InsertCols) = 0 THEN @RequiredInsertCols ELSE @InsertCols + ', ' + @RequiredInsertCols END;
+      SET @SelectCols = CASE WHEN @SelectCols IS NULL OR LEN(@SelectCols) = 0 THEN @RequiredSelectCols ELSE @SelectCols + ', ' + @RequiredSelectCols END;
+      SET @msg = N'   Aviso: columnas obligatorias no existentes en origen rellenadas automaticamente.';
+      RAISERROR('%s', 0, 1, @msg) WITH NOWAIT;
+   END
+
+   SELECT TOP (1) @IdentityColumn = ColumnName
+   FROM #Cols
+    WHERE IsIdentityTarget = 1
+   ORDER BY ColumnId;
+
+   IF @IdentityColumn IS NOT NULL
+   BEGIN
+      SET @UseIdentityInsert = 1;
+   END
+
+   BEGIN TRY
+      IF @InsertCols IS NULL OR LEN(@InsertCols) = 0
+      BEGIN
+         SET @sql = N'DELETE FROM ' + QUOTENAME(@TargetSchema) + N'.' + QUOTENAME(@TableName) + N'; SELECT @RowsOut = 0;';
+      END
+      ELSE
+      BEGIN
+         SET @sql = N'DELETE FROM ' + QUOTENAME(@TargetSchema) + N'.' + QUOTENAME(@TableName) + N';'
+            + CASE WHEN @UseIdentityInsert = 1
+               THEN N' SET IDENTITY_INSERT ' + QUOTENAME(@TargetSchema) + N'.' + QUOTENAME(@TableName) + N' ON;'
+               ELSE N'' END
+            + N' INSERT INTO ' + QUOTENAME(@TargetSchema) + N'.' + QUOTENAME(@TableName)
+            + N' (' + @InsertCols + N')'
+            + N' SELECT ' + @SelectCols
+            + N' FROM ' + QUOTENAME(@SourceLinkedServer) + N'.' + QUOTENAME(@SourceDatabase) + N'.' + QUOTENAME(@SourceSchema) + N'.' + QUOTENAME(@TableName) + N' s;'
+            + N' SELECT @RowsOut = @@ROWCOUNT;'
+            + CASE WHEN @UseIdentityInsert = 1
+               THEN N' SET IDENTITY_INSERT ' + QUOTENAME(@TargetSchema) + N'.' + QUOTENAME(@TableName) + N' OFF;'
+               ELSE N'' END;
+      END
+
+      EXEC sp_executesql
+         @sql,
+         N'@RowsOut int OUTPUT',
+         @RowsOut = @RowsCopied OUTPUT;
+
+      SET @msg = N'   Registros copiados: ' + CAST(@RowsCopied AS varchar(20));
+      RAISERROR('%s', 0, 1, @msg) WITH NOWAIT;
+   END TRY
+   BEGIN CATCH
+      SET @msg = N'   ERROR: ' + ERROR_MESSAGE();
+      RAISERROR('%s', 0, 1, @msg) WITH NOWAIT;
+   END CATCH;
+
+   FETCH NEXT FROM cur_tablas INTO @TableName;
+END
+
+CLOSE cur_tablas;
+DEALLOCATE cur_tablas;
+
+-- Reactiva restricciones (sin revalidacion completa historica) al terminar la carga.
+SET @sql = N'';
+SELECT @sql = @sql
+   + N'ALTER TABLE ' + QUOTENAME(@TargetSchema) + N'.' + QUOTENAME(t.TableName) + N' CHECK CONSTRAINT ALL;'
+FROM #Tablas t;
+EXEC sp_executesql @sql;
+
+PRINT 'Proceso completado';
+GO
+
+/*
+
 -- ============================================
 -- Tabla: AutorizacionesProyectos
 -- Columnas comunes: 9
@@ -41,9 +342,13 @@ GO
 DELETE FROM [dbo].[Avisos];
 GO
 
-INSERT INTO [dbo].[Avisos] ([Referencia], [TipoAviso], [Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [Usuario], [FecSolucion], [borrado])
-SELECT [Referencia], [TipoAviso], [Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [Usuario], [FecSolucion], [borrado]
+IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(N'[dbo].[Avisos]'))
+   SET IDENTITY_INSERT [dbo].[Avisos] ON;
+INSERT INTO [dbo].[Avisos] ([id], [Referencia], [TipoAviso], [Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [Usuario], [FecSolucion], [borrado])
+SELECT [id], [Referencia], [TipoAviso], [Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [Usuario], [FecSolucion], [borrado]
 FROM [GUADIX].[OBRAS].[dbo].[Avisos];
+IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(N'[dbo].[Avisos]'))
+   SET IDENTITY_INSERT [dbo].[Avisos] OFF;
 GO
 
 DECLARE @rowcountAvisos INT = @@ROWCOUNT;
@@ -61,8 +366,8 @@ GO
 DELETE FROM [dbo].[Ayuda_Tecnica];
 GO
 
-INSERT INTO [dbo].[Ayuda_Tecnica] ([Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [departamento], [codigo_municipio], [ao_proyecto], [numero_proyecto], [dpto_redactor], [departamento_direccion], [pasado], [SubvencionEconomicaR], [SubvencionEconomicaD], [AyuTecRed], [AyuTecDir], [team_id], [created_at], [updated_at])
-SELECT [Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [departamento], [codigo_municipio], [ao_proyecto], [numero_proyecto], [dpto_redactor], [departamento_direccion], [pasado], [SubvencionEconomicaR], [SubvencionEconomicaD], [AyuTecRed], [AyuTecDir], [team_id], [created_at], [updated_at]
+INSERT INTO [dbo].[Ayuda_Tecnica] ([Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [departamento], [codigo_municipio], [ao_proyecto], [numero_proyecto], [dpto_redactor], [departamento_direccion], [pasado], [SubvencionEconomicaR], [SubvencionEconomicaD], [AyuTecRed], [AyuTecDir])
+SELECT [Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [departamento], [codigo_municipio], [ao_proyecto], [numero_proyecto], [dpto_redactor], [departamento_direccion], [pasado], [SubvencionEconomicaR], [SubvencionEconomicaD], [AyuTecRed], [AyuTecDir]
 FROM [GUADIX].[OBRAS].[dbo].[Ayuda_Tecnica];
 GO
 
@@ -201,8 +506,8 @@ GO
 DELETE FROM [dbo].[Datos_Ejecucion_Obras];
 GO
 
-INSERT INTO [dbo].[Datos_Ejecucion_Obras] ([Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [Fecha_Inicio_Acta_Replanteo], [Fecha_Final_Acta_Replanteo], [Fecha_Prorroga_Acta_Replanteo], [Indicador_Impresion_AR], [Indicador_Recepcion_AR], [TipoActaRecepcion], [Fecha_Acta_RecProv], [Lugar_Acta_Rec], [Fecha_Com_Inf], [Fecha_Edicto_BOE], [Fecha_BOE], [Num_BOE], [Plazo_Reclam], [Fecha_Certif_NO_Reclam], [Fecha_Com_Inf_2], [Fecha_Com_Gob], [Fecha_Comun_Contrat], [Fecha_Certif_Liquid], [Fecha_Rem_Interv], [Fecha_Rem_MAP], [Admin_ActaRecepcion], [Dir_ActaRecepcion], [Alcalde_ActaRecepcion], [Cont_ActaRecepcion], [Interv_ActaRecepcion], [Dipu_ActaRecepcion], [Texto], [Fecha_Paralizacion_Temporal], [Motivo_Paralizacion], [Fecha_Aprob_Paralizacion_Temporal], [Fecha_Inicio_Paralizacion], [Fecha_Final_Paralizacion], [Fecha_Acta_Rec], [Fecha_Aviso_Finalizacion], [Fecha_Aviso_FinalizacionMAP], [Fecha_Medicion], [team_id], [created_at], [updated_at])
-SELECT [Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [Fecha_Inicio_Acta_Replanteo], [Fecha_Final_Acta_Replanteo], [Fecha_Prorroga_Acta_Replanteo], [Indicador_Impresion_AR], [Indicador_Recepcion_AR], [TipoActaRecepcion], [Fecha_Acta_RecProv], [Lugar_Acta_Rec], [Fecha_Com_Inf], [Fecha_Edicto_BOE], [Fecha_BOE], [Num_BOE], [Plazo_Reclam], [Fecha_Certif_NO_Reclam], [Fecha_Com_Inf_2], [Fecha_Com_Gob], [Fecha_Comun_Contrat], [Fecha_Certif_Liquid], [Fecha_Rem_Interv], [Fecha_Rem_MAP], [Admin_ActaRecepcion], [Dir_ActaRecepcion], [Alcalde_ActaRecepcion], [Cont_ActaRecepcion], [Interv_ActaRecepcion], [Dipu_ActaRecepcion], [Texto], [Fecha_Paralizacion_Temporal], [Motivo_Paralizacion], [Fecha_Aprob_Paralizacion_Temporal], [Fecha_Inicio_Paralizacion], [Fecha_Final_Paralizacion], [Fecha_Acta_Rec], [Fecha_Aviso_Finalizacion], [Fecha_Aviso_FinalizacionMAP], [Fecha_Medicion], [team_id], [created_at], [updated_at]
+INSERT INTO [dbo].[Datos_Ejecucion_Obras] ([Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [Fecha_Inicio_Acta_Replanteo], [Fecha_Final_Acta_Replanteo], [Fecha_Prorroga_Acta_Replanteo], [Indicador_Impresion_AR], [Indicador_Recepcion_AR], [TipoActaRecepcion], [Fecha_Acta_RecProv], [Lugar_Acta_Rec], [Fecha_Com_Inf], [Fecha_Edicto_BOE], [Fecha_BOE], [Num_BOE], [Plazo_Reclam], [Fecha_Certif_NO_Reclam], [Fecha_Com_Inf_2], [Fecha_Com_Gob], [Fecha_Comun_Contrat], [Fecha_Certif_Liquid], [Fecha_Rem_Interv], [Fecha_Rem_MAP], [Admin_ActaRecepcion], [Dir_ActaRecepcion], [Alcalde_ActaRecepcion], [Cont_ActaRecepcion], [Interv_ActaRecepcion], [Dipu_ActaRecepcion], [Texto], [Fecha_Paralizacion_Temporal], [Motivo_Paralizacion], [Fecha_Aprob_Paralizacion_Temporal], [Fecha_Inicio_Paralizacion], [Fecha_Final_Paralizacion], [Fecha_Acta_Rec], [Fecha_Aviso_Finalizacion], [Fecha_Aviso_FinalizacionMAP], [Fecha_Medicion])
+SELECT [Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [Fecha_Inicio_Acta_Replanteo], [Fecha_Final_Acta_Replanteo], [Fecha_Prorroga_Acta_Replanteo], [Indicador_Impresion_AR], [Indicador_Recepcion_AR], [TipoActaRecepcion], [Fecha_Acta_RecProv], [Lugar_Acta_Rec], [Fecha_Com_Inf], [Fecha_Edicto_BOE], [Fecha_BOE], [Num_BOE], [Plazo_Reclam], [Fecha_Certif_NO_Reclam], [Fecha_Com_Inf_2], [Fecha_Com_Gob], [Fecha_Comun_Contrat], [Fecha_Certif_Liquid], [Fecha_Rem_Interv], [Fecha_Rem_MAP], [Admin_ActaRecepcion], [Dir_ActaRecepcion], [Alcalde_ActaRecepcion], [Cont_ActaRecepcion], [Interv_ActaRecepcion], [Dipu_ActaRecepcion], [Texto], [Fecha_Paralizacion_Temporal], [Motivo_Paralizacion], [Fecha_Aprob_Paralizacion_Temporal], [Fecha_Inicio_Paralizacion], [Fecha_Final_Paralizacion], [Fecha_Acta_Rec], [Fecha_Aviso_Finalizacion], [Fecha_Aviso_FinalizacionMAP], [Fecha_Medicion]
 FROM [GUADIX].[OBRAS].[dbo].[Datos_Ejecucion_Obras];
 GO
 
@@ -241,8 +546,8 @@ GO
 DELETE FROM [dbo].[Datosadicionales];
 GO
 
-INSERT INTO [dbo].[Datosadicionales] ([Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [tipo_movimiento], [numero_movimiento], [Importe_Pts], [Partida], [FechaEmision], [FechaEnvio], [FechaFiscalizacion], [FechaInformativa], [PuntoInformativa], [FechaComision], [PuntoComision], [FechaDecreto], [NumDecreto], [Observaciones], [NumCertificacion], [Importe], [Estado], [team_id], [created_at], [updated_at])
-SELECT [Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [tipo_movimiento], [numero_movimiento], [Importe_Pts], [Partida], [FechaEmision], [FechaEnvio], [FechaFiscalizacion], [FechaInformativa], [PuntoInformativa], [FechaComision], [PuntoComision], [FechaDecreto], [NumDecreto], [Observaciones], [NumCertificacion], [Importe], [Estado], [team_id], [created_at], [updated_at]
+INSERT INTO [dbo].[Datosadicionales] ([Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [tipo_movimiento], [numero_movimiento], [Importe_Pts], [Partida], [FechaEmision], [FechaEnvio], [FechaFiscalizacion], [FechaInformativa], [PuntoInformativa], [FechaComision], [PuntoComision], [FechaDecreto], [NumDecreto], [Observaciones], [NumCertificacion], [Importe], [Estado])
+SELECT [Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [tipo_movimiento], [numero_movimiento], [Importe_Pts], [Partida], [FechaEmision], [FechaEnvio], [FechaFiscalizacion], [FechaInformativa], [PuntoInformativa], [FechaComision], [PuntoComision], [FechaDecreto], [NumDecreto], [Observaciones], [NumCertificacion], [Importe], [Estado]
 FROM [GUADIX].[OBRAS].[dbo].[Datosadicionales];
 GO
 
@@ -261,9 +566,15 @@ GO
 DELETE FROM [dbo].[DatosInicioDeObras];
 GO
 
-INSERT INTO [dbo].[DatosInicioDeObras] ([Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [nombre_obra1], [nombre_obra2], [nombre_obra3], [municipio], [carretera], [disponibilidad_terreno], [fecha_pet_acta_replanteo], [fecha_acta_replanteo_previo], [fecha_notificacion_ayto], [peticion_ayuda_tec], [fecha_rem_pet_ayuda], [fecha_rec_pet_ayuda], [forma_ejecucion], [fecha_prev_comienzo_obra], [fecha_prev_term_obra], [fecha_prev_prorroga], [fecha_aprobacion_plan], [fecha_envio_fiscalizacion], [fecha_fiscalizacion], [codigo_estado_obra], [comentario], [NumCertif], [NumLiquid], [CompApAyto], [TipoObra], [FechaMediosMatAyto], [PartidaPresupuesto], [Mapper], [LicenciaObra], [Clasificacion], [TipoActuacion], [FechaComPatronato], [Aceptacion], [FechaIngresoAyto], [Longitud], [NombreObraNueva], [EstadoServicioTecnico], [EstadoServicioAdministrativo], [FechaEntregaPrev], [TipoPrograma], [IdConcertacion], [team_id], [created_at], [updated_at])
-SELECT [Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [nombre_obra1], [nombre_obra2], [nombre_obra3], [municipio], [carretera], [disponibilidad_terreno], [fecha_pet_acta_replanteo], [fecha_acta_replanteo_previo], [fecha_notificacion_ayto], [peticion_ayuda_tec], [fecha_rem_pet_ayuda], [fecha_rec_pet_ayuda], [forma_ejecucion], [fecha_prev_comienzo_obra], [fecha_prev_term_obra], [fecha_prev_prorroga], [fecha_aprobacion_plan], [fecha_envio_fiscalizacion], [fecha_fiscalizacion], [codigo_estado_obra], [comentario], [NumCertif], [NumLiquid], [CompApAyto], [TipoObra], [FechaMediosMatAyto], [PartidaPresupuesto], [Mapper], [LicenciaObra], [Clasificacion], [TipoActuacion], [FechaComPatronato], [Aceptacion], [FechaIngresoAyto], [Longitud], [NombreObraNueva], [EstadoServicioTecnico], [EstadoServicioAdministrativo], [FechaEntregaPrev], [TipoPrograma], [IdConcertacion], [team_id], [created_at], [updated_at]
-FROM [GUADIX].[OBRAS].[dbo].[DatosInicioDeObras];
+INSERT INTO [dbo].[DatosInicioDeObras] ([Codigo_Plan], [numero_obra], [subreferencia], [ao_ejecucion], [nombre_obra1], [nombre_obra2], [nombre_obra3], [municipio], [carretera], [disponibilidad_terreno], [fecha_pet_acta_replanteo], [fecha_acta_replanteo_previo], [fecha_notificacion_ayto], [peticion_ayuda_tec], [fecha_rem_pet_ayuda], [fecha_rec_pet_ayuda], [forma_ejecucion], [fecha_prev_comienzo_obra], [fecha_prev_term_obra], [fecha_prev_prorroga], [fecha_aprobacion_plan], [fecha_envio_fiscalizacion], [fecha_fiscalizacion], [codigo_estado_obra], [comentario], [NumCertif], [NumLiquid], [CompApAyto], [TipoObra], [FechaMediosMatAyto], [PartidaPresupuesto], [Mapper], [LicenciaObra], [Clasificacion], [TipoActuacion], [FechaComPatronato], [Aceptacion], [FechaIngresoAyto], [Longitud], [NombreObraNueva], [EstadoServicioTecnico], [EstadoServicioAdministrativo], [FechaEntregaPrev], [TipoPrograma], [IdConcertacion], [expediente_id])
+SELECT d.[Codigo_Plan], d.[numero_obra], d.[subreferencia], d.[ao_ejecucion], d.[nombre_obra1], d.[nombre_obra2], d.[nombre_obra3], d.[municipio], d.[carretera], d.[disponibilidad_terreno], d.[fecha_pet_acta_replanteo], d.[fecha_acta_replanteo_previo], d.[fecha_notificacion_ayto], d.[peticion_ayuda_tec], d.[fecha_rem_pet_ayuda], d.[fecha_rec_pet_ayuda], d.[forma_ejecucion], d.[fecha_prev_comienzo_obra], d.[fecha_prev_term_obra], d.[fecha_prev_prorroga], d.[fecha_aprobacion_plan], d.[fecha_envio_fiscalizacion], d.[fecha_fiscalizacion], d.[codigo_estado_obra], d.[comentario], d.[NumCertif], d.[NumLiquid], d.[CompApAyto], d.[TipoObra], d.[FechaMediosMatAyto], d.[PartidaPresupuesto], d.[Mapper], d.[LicenciaObra], d.[Clasificacion], d.[TipoActuacion], d.[FechaComPatronato], d.[Aceptacion], d.[FechaIngresoAyto], d.[Longitud], d.[NombreObraNueva], d.[EstadoServicioTecnico], d.[EstadoServicioAdministrativo], d.[FechaEntregaPrev], d.[TipoPrograma], d.[IdConcertacion],
+       CONCAT(
+           LTRIM(RTRIM(COALESCE(CAST(d.[Codigo_Plan] AS VARCHAR(50)), ''))), '_',
+           COALESCE(CAST(d.[numero_obra] AS VARCHAR(50)), ''), '_',
+           COALESCE(CAST(d.[subreferencia] AS VARCHAR(50)), ''), '_',
+           COALESCE(CAST(d.[ao_ejecucion] AS VARCHAR(50)), '')
+       )
+FROM [GUADIX].[OBRAS].[dbo].[DatosInicioDeObras] d;
 GO
 
 DECLARE @rowcountDatosInicioDeObras INT = @@ROWCOUNT;
@@ -301,9 +612,13 @@ GO
 DELETE FROM [dbo].[DestinosDeDocumentos];
 GO
 
+IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(N'[dbo].[DestinosDeDocumentos]'))
+   SET IDENTITY_INSERT [dbo].[DestinosDeDocumentos] ON;
 INSERT INTO [dbo].[DestinosDeDocumentos] ([id], [destino])
 SELECT [id], [destino]
 FROM [GUADIX].[OBRAS].[dbo].[DestinosDeDocumentos];
+IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(N'[dbo].[DestinosDeDocumentos]'))
+   SET IDENTITY_INSERT [dbo].[DestinosDeDocumentos] OFF;
 GO
 
 DECLARE @rowcountDestinosDeDocumentos INT = @@ROWCOUNT;
@@ -321,9 +636,13 @@ GO
 DELETE FROM [dbo].[documentacionexpedientes];
 GO
 
+IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(N'[dbo].[documentacionexpedientes]'))
+   SET IDENTITY_INSERT [dbo].[documentacionexpedientes] ON;
 INSERT INTO [dbo].[documentacionexpedientes] ([idDocumento], [referencia], [subreferencia], [ao_ejecucion], [fechaincorporacion], [fechaHelp], [csv], [nregistro], [nsecuencia], [estado], [descripcion], [team_id], [destino], [procedencia], [created_at], [updated_at])
 SELECT [idDocumento], [referencia], [subreferencia], [ao_ejecucion], [fechaincorporacion], [fechaHelp], [csv], [nregistro], [nsecuencia], [estado], [descripcion], [team_id], [destino], [procedencia], [created_at], [updated_at]
 FROM [GUADIX].[OBRAS].[dbo].[documentacionexpedientes];
+IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(N'[dbo].[documentacionexpedientes]'))
+   SET IDENTITY_INSERT [dbo].[documentacionexpedientes] OFF;
 GO
 
 DECLARE @rowcountdocumentacionexpedientes INT = @@ROWCOUNT;
@@ -361,9 +680,13 @@ GO
 DELETE FROM [dbo].[documento_genericos];
 GO
 
+IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(N'[dbo].[documento_genericos]'))
+   SET IDENTITY_INSERT [dbo].[documento_genericos] ON;
 INSERT INTO [dbo].[documento_genericos] ([id], [created_at], [updated_at], [cod_documento], [nombre], [descripcion], [fase_doc], [fase_siguiente], [cod_tipo_doc], [con_plantilla], [plantilla], [ruta_plantilla], [cod_estado], [cod_destino], [entrada_salida], [cod_firmante], [obligatorio])
 SELECT [id], [created_at], [updated_at], [cod_documento], [nombre], [descripcion], [fase_doc], [fase_siguiente], [cod_tipo_doc], [con_plantilla], [plantilla], [ruta_plantilla], [cod_estado], [cod_destino], [entrada_salida], [cod_firmante], [obligatorio]
 FROM [GUADIX].[OBRAS].[dbo].[documento_genericos];
+IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(N'[dbo].[documento_genericos]'))
+   SET IDENTITY_INSERT [dbo].[documento_genericos] OFF;
 GO
 
 DECLARE @rowcountdocumento_genericos INT = @@ROWCOUNT;
@@ -381,9 +704,13 @@ GO
 DELETE FROM [dbo].[Documentos_de_fases_de_proyectos];
 GO
 
+IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(N'[dbo].[Documentos_de_fases_de_proyectos]'))
+   SET IDENTITY_INSERT [dbo].[Documentos_de_fases_de_proyectos] ON;
 INSERT INTO [dbo].[Documentos_de_fases_de_proyectos] ([codigo_plan], [numero_obra], [subreferencia], [ao_ejecucion], [cod_municipio], [ao_proyecto], [numero_proyecto], [ao_fase], [numero_fase], [documento], [csv], [numero_doc])
 SELECT [codigo_plan], [numero_obra], [subreferencia], [ao_ejecucion], [cod_municipio], [ao_proyecto], [numero_proyecto], [ao_fase], [numero_fase], [documento], [csv], [numero_doc]
 FROM [GUADIX].[OBRAS].[dbo].[Documentos_de_fases_de_proyectos];
+IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(N'[dbo].[Documentos_de_fases_de_proyectos]'))
+   SET IDENTITY_INSERT [dbo].[Documentos_de_fases_de_proyectos] OFF;
 GO
 
 DECLARE @rowcountDocumentos_de_fases_de_proyectos INT = @@ROWCOUNT;
@@ -981,9 +1308,13 @@ GO
 DELETE FROM [dbo].[Pliegos];
 GO
 
+IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(N'[dbo].[Pliegos]'))
+   SET IDENTITY_INSERT [dbo].[Pliegos] ON;
 INSERT INTO [dbo].[Pliegos] ([AoPliego], [DepPliego], [NumPliego], [FecPliego], [clase_exp], [tipo_proc], [forma_cont], [NomPliego], [ImpPliego], [plazo], [UnidadPlazo], [revision], [formula], [formula2], [formula3], [formula4], [TramAnticipada], [Observaciones], [FechaAlta], [IdUsuario], [FechaBaja], [IdUsuarioBaja], [Estado])
 SELECT [AoPliego], [DepPliego], [NumPliego], [FecPliego], [clase_exp], [tipo_proc], [forma_cont], [NomPliego], [ImpPliego], [plazo], [UnidadPlazo], [revision], [formula], [formula2], [formula3], [formula4], [TramAnticipada], [Observaciones], [FechaAlta], [IdUsuario], [FechaBaja], [IdUsuarioBaja], [Estado]
 FROM [GUADIX].[OBRAS].[dbo].[Pliegos];
+IF EXISTS (SELECT 1 FROM sys.identity_columns WHERE object_id = OBJECT_ID(N'[dbo].[Pliegos]'))
+   SET IDENTITY_INSERT [dbo].[Pliegos] OFF;
 GO
 
 DECLARE @rowcountPliegos INT = @@ROWCOUNT;
@@ -1215,3 +1546,4 @@ GO
 -- ============================================
 PRINT 'Proceso completado';
 GO
+*/

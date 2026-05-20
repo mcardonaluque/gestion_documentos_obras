@@ -13,6 +13,11 @@ $sqlsrvOptions = static function (string $prefix): array {
     // On builds where the constants do NOT collide, this simply disables the query timeout.
     $options = [];
 
+    // Keep PDO option key 17 at a safe falsy value in all runtimes.
+    // If 17 is ATTR_STRINGIFY_FETCHES, this keeps native types.
+    // If some runtime maps 17 to SQLSRV query timeout, value 0 is valid.
+    $options[17] = 0;
+
     // Defensive fallback for environments where config is cached from a PHP runtime
     // that does not have pdo_sqlsrv loaded. In that case the SQLSRV constant is not
     // defined while caching, so we force integer key 17 to avoid invalid value "1".
@@ -21,7 +26,7 @@ $sqlsrvOptions = static function (string $prefix): array {
         ? \PDO::SQLSRV_ATTR_QUERY_TIMEOUT
         : 17;
 
-    $options[$timeoutOption] = (int) env("DB_{$prefix}_QUERY_TIMEOUT", 0);
+    $options[$timeoutOption] = (int) env("DB_{$prefix}_QUERY_TIMEOUT", 30);
 
     return $options;
 };

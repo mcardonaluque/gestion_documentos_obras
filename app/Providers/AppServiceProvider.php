@@ -13,6 +13,7 @@ use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Request;
 use Spatie\Permission\Models\Permission;
 
 use function Illuminate\Log\log;
@@ -79,6 +80,32 @@ class AppServiceProvider extends ServiceProvider
                 'guard' => $event->guard
             ]);
         });
+
+        if (env('APP_DEBUG') && ! app()->runningInConsole()) {
+            try {
+                $connection = DB::connection('Obras');
+                $pdo = $connection->getPdo();
+
+                $timeout = null;
+                if (defined('PDO::SQLSRV_ATTR_QUERY_TIMEOUT')) {
+                    $timeout = $pdo->getAttribute(\PDO::SQLSRV_ATTR_QUERY_TIMEOUT);
+                }
+
+                Log::debug('SQLSRV runtime request probe', [
+                    'path' => Request::path(),
+                    'sapi' => php_sapi_name(),
+                    'default_connection' => config('database.default'),
+                    'obras_options' => config('database.connections.Obras.options'),
+                    'pdo_query_timeout_attr' => $timeout,
+                ]);
+            } catch (\Throwable $exception) {
+                Log::warning('SQLSRV runtime request probe failed', [
+                    'path' => Request::path(),
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
         if (env('APP_DEBUG')) {
             DB::listen(function ($query) {
                 Log::debug(

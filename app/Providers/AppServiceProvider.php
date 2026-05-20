@@ -81,7 +81,11 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
-        if (env('APP_DEBUG') && ! app()->runningInConsole()) {
+        $sqlsrvDiagEnabled = (bool) env('SQLSRV_DIAG', false);
+        $sqlsrvSlowMs = (float) env('SQLSRV_DIAG_SLOW_MS', 100);
+        $sqlsrvDiag = Log::channel('sqlsrv_diag');
+
+        if ($sqlsrvDiagEnabled && ! app()->runningInConsole()) {
             try {
                 $connection = DB::connection('Obras');
                 $pdo = $connection->getPdo();
@@ -91,19 +95,44 @@ class AppServiceProvider extends ServiceProvider
                     $timeout = $pdo->getAttribute(\PDO::SQLSRV_ATTR_QUERY_TIMEOUT);
                 }
 
-                Log::debug('SQLSRV runtime request probe', [
+                $sqlsrvDiag->debug('SQLSRV runtime request probe', [
                     'path' => Request::path(),
+                    'method' => Request::method(),
+                    'host' => Request::getHost(),
                     'sapi' => php_sapi_name(),
                     'default_connection' => config('database.default'),
                     'obras_options' => config('database.connections.Obras.options'),
                     'pdo_query_timeout_attr' => $timeout,
                 ]);
             } catch (\Throwable $exception) {
-                Log::warning('SQLSRV runtime request probe failed', [
+                $sqlsrvDiag->warning('SQLSRV runtime request probe failed', [
                     'path' => Request::path(),
                     'error' => $exception->getMessage(),
                 ]);
             }
+        }
+
+        if ($sqlsrvDiagEnabled) {
+            DB::listen(function ($query) use ($sqlsrvDiag, $sqlsrvSlowMs) {
+                $isObras = ($query->connectionName ?? null) === 'Obras';
+
+                if (! $isObras) {
+                    return;
+                }
+
+                $payload = [
+                    'connection' => $query->connectionName,
+                    'sql' => $query->sql,
+                    'bindings' => $query->bindings,
+                    'time_ms' => $query->time,
+                ];
+
+                if ((float) $query->time >= $sqlsrvSlowMs) {
+                    $sqlsrvDiag->warning('SQLSRV slow query', $payload);
+                } else {
+                    $sqlsrvDiag->debug('SQLSRV query', $payload);
+                }
+            });
         }
 
         if (env('APP_DEBUG')) {

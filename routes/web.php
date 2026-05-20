@@ -52,7 +52,7 @@ Route::get('/check-filament-notifications', function() {
 });
 
 // Temporary runtime diagnostics for SQLSRV/PDO options (remove after use).
-Route::get('/_diag/sqlsrv-runtime', function () {
+$sqlsrvRuntimeDiagHandler = function () {
     $token = (string) request()->query('token', '');
     $expectedToken = (string) env('DIAG_TOKEN', '');
 
@@ -101,4 +101,7 @@ Route::get('/_diag/sqlsrv-runtime', function () {
         ],
         'timestamp' => now()->toIso8601String(),
     ]);
-});
+};
+
+Route::get('/_diag/sqlsrv-runtime', $sqlsrvRuntimeDiagHandler);
+Route::get('/obras/_diag/sqlsrv-runtime', $sqlsrvRuntimeDiagHandler);

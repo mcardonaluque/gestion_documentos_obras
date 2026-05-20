@@ -3,16 +3,18 @@
 use Illuminate\Support\Str;
 
 $sqlsrvOptions = static function (string $prefix): array {
-    $options = [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    ];
+    // On some Linux pdo_sqlsrv versions, PDO::SQLSRV_ATTR_QUERY_TIMEOUT shares the same
+    // integer value as PDO::ATTR_STRINGIFY_FETCHES (17). When Laravel's SqlServerConnector
+    // passes [17 => false] as a PDO option, the driver interprets key 17 as QUERY_TIMEOUT,
+    // converts PHP false to 1, and rejects it as an invalid value.
+    //
+    // Explicitly setting PDO::SQLSRV_ATTR_QUERY_TIMEOUT => 0 here causes getOptions() to
+    // replace the conflicting default key with value 0 (no timeout), which is always valid.
+    // On builds where the constants do NOT collide, this simply disables the query timeout.
+    $options = [];
 
-    $useQueryTimeout = filter_var(env("DB_USE_QUERY_TIMEOUT_{$prefix}", false), FILTER_VALIDATE_BOOLEAN);
-    $queryTimeout = env("DB_QUERY_TIMEOUT_{$prefix}");
-
-    // Some SQLSRV environments reject very low/invalid timeout values (e.g. 1).
-    if ($useQueryTimeout && extension_loaded('sqlsrv') && is_numeric($queryTimeout) && (int) $queryTimeout >= 5) {
-        $options[PDO::SQLSRV_ATTR_QUERY_TIMEOUT] = (int) $queryTimeout;
+    if (defined('PDO::SQLSRV_ATTR_QUERY_TIMEOUT')) {
+        $options[\PDO::SQLSRV_ATTR_QUERY_TIMEOUT] = 0;
     }
 
     return $options;

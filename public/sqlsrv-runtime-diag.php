@@ -35,6 +35,31 @@ if ($expectedToken === '') {
 
 header('Content-Type: application/json; charset=utf-8');
 
+$dbProbe = [];
+
+try {
+    $connection = app('db')->connection('Obras');
+    $pdo = $connection->getPdo();
+
+    $dbProbe['connected'] = true;
+    $dbProbe['pdo_class'] = get_class($pdo);
+    $dbProbe['query_timeout_attr'] = defined('PDO::SQLSRV_ATTR_QUERY_TIMEOUT')
+        ? $pdo->getAttribute(PDO::SQLSRV_ATTR_QUERY_TIMEOUT)
+        : null;
+
+    $dbProbe['roles_top_1'] = $connection
+        ->table('roles')
+        ->select('name')
+        ->limit(1)
+        ->first();
+} catch (Throwable $exception) {
+    $dbProbe['connected'] = false;
+    $dbProbe['error'] = [
+        'class' => get_class($exception),
+        'message' => $exception->getMessage(),
+    ];
+}
+
 echo json_encode([
     'sapi' => php_sapi_name(),
     'php_version' => PHP_VERSION,
@@ -55,6 +80,7 @@ echo json_encode([
         'obras_options' => config('database.connections.Obras.options'),
         'obras_login_timeout' => config('database.connections.Obras.login_timeout'),
     ],
+    'db_probe' => $dbProbe,
     'request' => [
         'host' => $_SERVER['HTTP_HOST'] ?? null,
         'remote_addr' => $_SERVER['REMOTE_ADDR'] ?? null,

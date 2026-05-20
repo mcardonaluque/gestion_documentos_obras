@@ -83,10 +83,16 @@ echo json_encode([
     'db_probe' => $dbProbe,
     'request' => [
         'host' => $_SERVER['HTTP_HOST'] ?? null,
+        'server_name' => $_SERVER['SERVER_NAME'] ?? null,
         'remote_addr' => $_SERVER['REMOTE_ADDR'] ?? null,
         'request_uri' => $_SERVER['REQUEST_URI'] ?? null,
         'script_name' => $_SERVER['SCRIPT_NAME'] ?? null,
+        'script_filename' => $_SERVER['SCRIPT_FILENAME'] ?? null,
         'document_root' => $_SERVER['DOCUMENT_ROOT'] ?? null,
+    ],
+    'server' => [
+        'hostname' => gethostname() ?: null,
+        'php_sapi' => PHP_SAPI,
     ],
     'timestamp' => now()->toIso8601String(),
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);

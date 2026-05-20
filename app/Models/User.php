@@ -3,7 +3,6 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Facades\Filament;
 use Filament\Models\Contracts\HasTenants;
@@ -25,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class User extends Authenticatable implements FilamentUser , HasTenants
 {
-    use HasFactory, Notifiable, HasRoles, HasPanelShield, HasPermissions;
+    use HasFactory, Notifiable, HasRoles, HasPermissions;
     protected $connection = 'Obras';
 
 

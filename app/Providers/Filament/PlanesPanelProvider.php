@@ -2,7 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Auth\Login as CustomLogin;
 use Filament\Pages\Dashboard;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -51,7 +50,7 @@ class PlanesPanelProvider extends PanelProvider
                 //\BezhanSalleh\FilamentShield\Resources\RoleResource::class,
 
             ])
-            ->login(CustomLogin::class)
+            ->login()
             ->authGuard('web')
             ->favicon(asset('img/favicon.ico'))
             ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))

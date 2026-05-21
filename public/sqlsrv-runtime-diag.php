@@ -9,6 +9,18 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
+try {
+    app('log')->channel('sqlsrv_diag')->debug('sqlsrv runtime diag web hit', [
+        'host' => $_SERVER['HTTP_HOST'] ?? null,
+        'server_name' => $_SERVER['SERVER_NAME'] ?? null,
+        'request_uri' => $_SERVER['REQUEST_URI'] ?? null,
+        'script_filename' => $_SERVER['SCRIPT_FILENAME'] ?? null,
+        'sapi' => php_sapi_name(),
+    ]);
+} catch (Throwable $exception) {
+    // Keep the diagnostic endpoint usable even if the dedicated channel is unavailable.
+}
+
 $expectedToken = (string) env('DIAG_TOKEN', '');
 
 if ($expectedToken !== '' && ! hash_equals($expectedToken, $token)) {

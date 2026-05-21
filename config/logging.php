@@ -78,6 +78,8 @@ return [
             'path' => storage_path('logs/sqlsrv-diag.log'),
             'level' => env('SQLSRV_DIAG_LEVEL', 'debug'),
             'days' => env('SQLSRV_DIAG_DAYS', 7),
+            'enabled' => env('SQLSRV_DIAG', false),
+            'slow_ms' => env('SQLSRV_DIAG_SLOW_MS', 100),
             'replace_placeholders' => true,
         ],
 

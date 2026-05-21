@@ -81,8 +81,8 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
-        $sqlsrvDiagEnabled = (bool) env('SQLSRV_DIAG', false);
-        $sqlsrvSlowMs = (float) env('SQLSRV_DIAG_SLOW_MS', 100);
+        $sqlsrvDiagEnabled = (bool) config('logging.channels.sqlsrv_diag.enabled', false);
+        $sqlsrvSlowMs = (float) config('logging.channels.sqlsrv_diag.slow_ms', 100);
         $sqlsrvDiag = Log::channel('sqlsrv_diag');
 
         if ($sqlsrvDiagEnabled && ! app()->runningInConsole()) {

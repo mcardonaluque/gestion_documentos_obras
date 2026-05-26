@@ -54,7 +54,9 @@ class DatosEjecucionObrasResource extends Resource
             //->addSelect(trim('TablaDeMunicipios.nombre_municipio'))
            // ->WhereNotNull('carretera');  //->with('municipios');
             ->where('Datos_Ejecucion_Obras.ao_ejecucion', '>=', $añoAnterior2)
-            ->where('Datos_Ejecucion_Obras.ao_ejecucion', '<=', $añoActual);
+            ->where('Datos_Ejecucion_Obras.ao_ejecucion', '<=', $añoActual)
+            ->whereNotNull('Datos_Ejecucion_Obras.expediente_id')
+                ->where('Datos_Ejecucion_Obras.expediente_id', '<>', '');
             //->where('codigo_municipio','=', )
 
     }
@@ -153,8 +155,12 @@ class DatosEjecucionObrasResource extends Resource
                 CreateAction::make(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->visible(fn (DatosEjecucionObras $record): bool => filled($record->getKey())),
             ])
+            ->recordUrl(fn (DatosEjecucionObras $record): ?string => filled($record->getKey())
+                ? static::getUrl('edit', ['record' => $record])
+                : null)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

@@ -4,7 +4,6 @@ namespace App\Filament\Obras\Resources\DatosEjecucionObras\Pages;
 
 use Filament\Schemas\Components\Tabs\Tab;
 use App\Filament\Obras\Resources\DatosEjecucionObras\DatosEjecucionObrasResource;
-use App\Models\DatosEjecucionObras;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,20 +13,29 @@ class ListDatosEjecucionObras extends ListRecords
     protected static string $resource = DatosEjecucionObrasResource::class;
     public function getTabs(): array
     {
-        $añoActual=now()->year;
-        $añoAnterior = now()->subYears(1)->year;
-        $añoAnterior2 = now()->subYears(10)->year;
+        // Usar la misma query base del Resource para que badges y listado sean coherentes.
+        $baseQuery = DatosEjecucionObrasResource::getEloquentQuery();
+
+        $años = (clone $baseQuery)
+            ->select('ao_ejecucion')
+            ->whereNotNull('ao_ejecucion')
+            ->distinct()
+            ->orderBy('ao_ejecucion', 'desc')
+            ->pluck('ao_ejecucion')
+            ->filter(fn ($año) => filled($año))
+            ->map(fn ($año) => (string) $año)
+            ->values();
+
         $Tabs['all'] = Tab::make('Todos')
             ->label('Todos')
             ->icon('heroicon-o-rectangle-stack')
-            ->badge(DatosEjecucionObras::query()->count())
+            ->badge((clone $baseQuery)->count())
             ->query(fn (Builder $query) => $query);
-        foreach (range($añoAnterior2, $añoActual) as $año) {
-            // Aquí puedes realizar alguna acción con cada año
-            // Por ejemplo, podrías crear una pestaña para cada año
-            $count = DatosEjecucionObras::where('ao_ejecucion', $año)
-            //->where('team_id',filament()->getTenant()->id)
-            ->count();
+
+        foreach ($años as $año) {
+            $count = (clone $baseQuery)
+                ->where('ao_ejecucion', $año)
+                ->count();
             $Tabs[] = Tab::make('Año ' . $año)
                 ->label((string) $año)
                 ->badge($count)

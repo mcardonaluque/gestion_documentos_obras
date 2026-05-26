@@ -45,18 +45,13 @@ class DatosEjecucionObrasResource extends Resource
    **/
     public static function getEloquentQuery(): Builder
     {
-        $añoActual = now()->year;
-
-        $añoAnterior2 = now()->subYears(10)->year;
         return parent::getEloquentQuery()
-        ->select('Datos_Ejecucion_Obras.*') // Selecciona todas las columnas de la tabla "obras"
+            ->select('Datos_Ejecucion_Obras.*')
+            ->whereNotNull('Datos_Ejecucion_Obras.expediente_id')
+            ->where('Datos_Ejecucion_Obras.expediente_id', '<>', ''); // Filament necesita una key no nula por fila.
             //->leftJoin('DatosInicioDeObras', 'DatosInicioDeObras.Expediente', '=', 'Datos_Ejecucion_Obras.Expediente') // Join con la tabla "municipios"
             //->addSelect(trim('TablaDeMunicipios.nombre_municipio'))
            // ->WhereNotNull('carretera');  //->with('municipios');
-            ->where('Datos_Ejecucion_Obras.ao_ejecucion', '>=', $añoAnterior2)
-            ->where('Datos_Ejecucion_Obras.ao_ejecucion', '<=', $añoActual)
-            ->whereNotNull('Datos_Ejecucion_Obras.expediente_id')
-                ->where('Datos_Ejecucion_Obras.expediente_id', '<>', '');
             //->where('codigo_municipio','=', )
 
     }
@@ -146,7 +141,6 @@ class DatosEjecucionObrasResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                self::assignedExpedientesFilter(),
                 ...self::getCommonFilters(),
                 self::getMunicipioFromInicioObrasFilter(),
             ],layout: FiltersLayout::AboveContent)

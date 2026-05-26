@@ -41,6 +41,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Planes-Administración')
             ->collapsedSidebarWidth('18rem')
             ->login(CustomLogin::class)
+            ->passwordReset()
             ->databaseNotifications(livewireComponent: PersistentDatabaseNotifications::class)
             ->authGuard('web')
             ->favicon(asset('img/favicon.ico'))

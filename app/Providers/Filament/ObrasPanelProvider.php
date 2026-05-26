@@ -80,6 +80,7 @@ class ObrasPanelProvider extends PanelProvider
 
             ])
             ->login(CustomLogin::class)
+            ->passwordReset()
             ->favicon(asset('img/favicon.ico'))
             ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))
             ->brandLogoHeight('2rem')

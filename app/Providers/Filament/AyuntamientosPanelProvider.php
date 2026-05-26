@@ -32,6 +32,7 @@ class AyuntamientosPanelProvider extends PanelProvider
             ->id('ayuntamientos')
             ->path('ayuntamientos')
             ->login(CustomLogin::class)
+            ->passwordReset()
             ->authGuard('web') //
             ->authMiddleware([
                 Authenticate::class, //

@@ -51,6 +51,7 @@ class PlanesPanelProvider extends PanelProvider
 
             ])
             ->login()
+            ->passwordReset()
             ->authGuard('web')
             ->favicon(asset('img/favicon.ico'))
             ->brandLogo(asset('img/logo_diputacionmalaga_horizontal.svg'))

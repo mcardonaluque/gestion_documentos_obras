@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Obras\Resources\Concerns;
 
 use App\Services\Assignments\ExpedienteAssignmentVisibilityService;
+use Filament\Forms\Components\Toggle;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -31,13 +32,21 @@ trait HasAssignedExpedienteVisibility
     {
         return Filter::make('solo_expedientes_asignados')
             ->label('Solo expedientes asignados')
-            ->default()
-            ->query(function (Builder $query): Builder {
+            ->schema([
+                Toggle::make('enabled')
+                    ->label('Aplicar filtro')
+                    ->default(false),
+            ])
+            ->query(function (Builder $query, array $data): Builder {
+                if (! ((bool) ($data['enabled'] ?? false))) {
+                    return $query;
+                }
+
                 /** @var ExpedienteAssignmentVisibilityService $service */
                 $service = app(ExpedienteAssignmentVisibilityService::class);
 
                 return $service->scopeToCurrentUserAssigned($query, static::assignedExpedienteColumn());
             })
-            ->indicateUsing(static fn (): string => 'Solo asignados');
+            ->indicateUsing(static fn (array $data): ?string => ((bool) ($data['enabled'] ?? false)) ? 'Solo asignados' : null);
     }
 }

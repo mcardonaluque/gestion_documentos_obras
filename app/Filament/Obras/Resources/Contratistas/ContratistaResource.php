@@ -68,7 +68,10 @@ class ContratistaResource extends Resource
                     ->helperText('Se propone automaticamente al seleccionar el tipo de contratista.'),
                 Forms\Components\Select::make('Tipo_contratista')
                     ->label('Tipo de Contratista')
-                    ->relationship('tipoContratista', 'Denominacion')
+                    ->options(fn () => TipoContratista::query()
+                        ->orderBy('Denominacion')
+                        ->pluck('Denominacion', 'Tipo_contratista')
+                        ->toArray())
                     ->searchable()
                     ->preload()
                     ->live()
@@ -331,7 +334,13 @@ class ContratistaResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('municipio_nombre')
                     ->label('Municipio')
-                    ->searchable(),
+                    ->searchable(query: static function (Builder $query, string $search): Builder {
+                        return $query->whereHas('municipio', static function (Builder $municipioQuery) use ($search): void {
+                            $municipioQuery
+                                ->whereColumn('TbMunicipios.Codigo_Provincia', 'TBContratistas.Provincia')
+                                ->where('TbMunicipios.Municipio', 'like', "%{$search}%");
+                        });
+                    }),
                 Tables\Columns\TextColumn::make('provincia.NOMBRE_PR')
                     ->label('Provincia')
                     ->formatStateUsing(fn ($state) => trim((string) $state))
@@ -352,7 +361,13 @@ class ContratistaResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('municipio_fiscal_nombre')
                     ->label('Municipio Fiscal')
-                    ->searchable()
+                    ->searchable(query: static function (Builder $query, string $search): Builder {
+                        return $query->whereHas('municipioFiscal', static function (Builder $municipioQuery) use ($search): void {
+                            $municipioQuery
+                                ->whereColumn('TbMunicipios.Codigo_Provincia', 'TBContratistas.ProvinciaFiscal')
+                                ->where('TbMunicipios.Municipio', 'like', "%{$search}%");
+                        });
+                    })
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('provinciaFiscal.NOMBRE_PR')
                     ->label('Provincia Fiscal')

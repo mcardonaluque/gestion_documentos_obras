@@ -72,8 +72,7 @@ class ContratistaResource extends Resource
                         ->orderBy('Denominacion')
                         ->pluck('Denominacion', 'Tipo_contratista')
                         ->toArray())
-                    ->searchable()
-                    ->preload()
+                    ->native(true)
                     ->live()
                     ->afterStateHydrated(static function (callable $set, mixed $state): void {
                         if (blank($state)) {
@@ -204,7 +203,8 @@ class ContratistaResource extends Resource
             ->components([
                 Infolists\Components\TextEntry::make('Codigo_contratista')
                     ->numeric(),
-                Infolists\Components\TextEntry::make('Tipo_contratista')
+                Infolists\Components\TextEntry::make('tipoContratista.Denominacion')
+                    ->label('Tipo de Contratista')
                     ->placeholder('-'),
                 Infolists\Components\TextEntry::make('Empresa')
                     ->placeholder('-'),

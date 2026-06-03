@@ -13,6 +13,12 @@ class EditContratista extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('volver_a_tabla')
+                ->label('Volver a contratistas')
+                ->url(ContratistaResource::getUrl('index')),
+            Actions\Action::make('anadir_otro')
+                ->label('Anadir otro contratista')
+                ->url(ContratistaResource::getUrl('create')),
             Actions\ViewAction::make(),
             Actions\DeleteAction::make(),
         ];

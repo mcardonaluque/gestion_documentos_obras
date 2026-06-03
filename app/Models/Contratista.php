@@ -12,6 +12,7 @@ class Contratista extends Model
     protected $connection='Obras';
     protected $table='TBContratistas';
     protected $primaryKey='Codigo_contratista';
+    protected $guarded = [];
     protected $attributes = [
         'Municipio' => null,
         'MunicipioFiscal' => null,

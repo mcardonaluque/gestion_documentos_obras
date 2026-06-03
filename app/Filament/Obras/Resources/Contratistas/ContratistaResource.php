@@ -52,6 +52,31 @@ class ContratistaResource extends Resource
         }
     }
 
+    public static function getSiguienteCodigoDisponiblePorTipo(?string $tipoContratista): ?string
+    {
+        if (blank($tipoContratista)) {
+            return null;
+        }
+
+        $ultimoCodigo = TipoContratista::query()
+            ->where('Tipo_contratista', $tipoContratista)
+            ->value('Ultimo_codigo');
+
+        $siguiente = is_numeric((string) $ultimoCodigo)
+            ? ((int) $ultimoCodigo + 1)
+            : null;
+
+        if ($siguiente === null) {
+            return null;
+        }
+
+        while (Contratista::query()->where('Codigo_contratista', (string) $siguiente)->exists()) {
+            $siguiente++;
+        }
+
+        return (string) $siguiente;
+    }
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -100,8 +125,10 @@ class ContratistaResource extends Resource
 
                         $set('ultimo_codigo_tipo_info', filled($ultimoCodigo) ? (string) $ultimoCodigo : null);
 
-                        if (blank($get('Codigo_contratista')) && is_numeric((string) $ultimoCodigo)) {
-                            $set('Codigo_contratista', (string) ((int) $ultimoCodigo + 1));
+                        $codigoSugerido = static::getSiguienteCodigoDisponiblePorTipo((string) $state);
+
+                        if (filled($codigoSugerido)) {
+                            $set('Codigo_contratista', $codigoSugerido);
                         }
                     })
                     ->required(),
@@ -125,16 +152,27 @@ class ContratistaResource extends Resource
                         ->get()
                         ->mapWithKeys(fn ($p) => [$p->PR => trim($p->NOMBRE_PR)])
                         ->toArray())
+                    ->placeholder('Selecciona una provincia')
                     ->searchable()
                     ->live()
                     ->afterStateUpdated(fn (callable $set) => $set('Municipio', null)),
                 Forms\Components\Select::make('Municipio')
                     ->label('Municipio')
-                    ->options(fn (callable $get) => TbMunicipio::query()
-                        ->when(filled($get('Provincia')), fn ($q) => $q->where('Codigo_Provincia', $get('Provincia')))
-                        ->orderBy('Municipio')
-                        ->pluck('Municipio', 'Codigo_Municipio')
-                        ->toArray())
+                    ->options(function (callable $get): array {
+                        if (blank($get('Provincia'))) {
+                            return [];
+                        }
+
+                        return TbMunicipio::query()
+                            ->where('Codigo_Provincia', $get('Provincia'))
+                            ->orderBy('Municipio')
+                            ->get(['Codigo_Municipio', 'Municipio'])
+                            ->mapWithKeys(fn ($municipio) => [
+                                $municipio->Codigo_Municipio => trim((string) $municipio->Municipio),
+                            ])
+                            ->toArray();
+                    })
+                    ->placeholder('Selecciona un municipio')
                     ->searchable(),
                 Forms\Components\TextInput::make('DomicilioFiscal'),
                 Forms\Components\TextInput::make('CPostalFiscal')
@@ -146,16 +184,27 @@ class ContratistaResource extends Resource
                         ->get()
                         ->mapWithKeys(fn ($p) => [$p->PR => trim($p->NOMBRE_PR)])
                         ->toArray())
+                    ->placeholder('Selecciona una provincia fiscal')
                     ->searchable()
                     ->live()
                     ->afterStateUpdated(fn (callable $set) => $set('MunicipioFiscal', null)),
                 Forms\Components\Select::make('MunicipioFiscal')
                     ->label('Municipio Fiscal')
-                    ->options(fn (callable $get) => TbMunicipio::query()
-                        ->when(filled($get('ProvinciaFiscal')), fn ($q) => $q->where('Codigo_Provincia', $get('ProvinciaFiscal')))
-                        ->orderBy('Municipio')
-                        ->pluck('Municipio', 'Codigo_Municipio')
-                        ->toArray())
+                    ->options(function (callable $get): array {
+                        if (blank($get('ProvinciaFiscal'))) {
+                            return [];
+                        }
+
+                        return TbMunicipio::query()
+                            ->where('Codigo_Provincia', $get('ProvinciaFiscal'))
+                            ->orderBy('Municipio')
+                            ->get(['Codigo_Municipio', 'Municipio'])
+                            ->mapWithKeys(fn ($municipio) => [
+                                $municipio->Codigo_Municipio => trim((string) $municipio->Municipio),
+                            ])
+                            ->toArray();
+                    })
+                    ->placeholder('Selecciona un municipio fiscal')
                     ->searchable(),
                 Forms\Components\TextInput::make('Telefono'),
                 Forms\Components\TextInput::make('Telefono2'),

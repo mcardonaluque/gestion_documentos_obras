@@ -9,6 +9,19 @@ class CreateContratista extends CreateRecord
 {
     protected static string $resource = ContratistaResource::class;
 
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $tipo = $data['Tipo_contratista'] ?? null;
+
+        $codigoDisponible = ContratistaResource::getSiguienteCodigoDisponiblePorTipo($tipo);
+
+        if (filled($codigoDisponible)) {
+            $data['Codigo_contratista'] = $codigoDisponible;
+        }
+
+        return $data;
+    }
+
     protected function afterCreate(): void
     {
         ContratistaResource::actualizarUltimoCodigoTipo(

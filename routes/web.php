@@ -3,9 +3,7 @@
 use App\Http\Controllers\DocumentoPdfController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::redirect('/', '/obras/login');
 
 // Ruta protegida para previsualizar el PDF de un documento del expediente.
 // Acepta tanto enlaces externos como rutas físicas resolubles en el servidor.

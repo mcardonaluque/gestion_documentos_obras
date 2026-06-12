@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\DB;
@@ -28,7 +26,7 @@ class ControlDeFechasHelper
     {
         // Extraer el nombre del campo sin el nombre de la tabla
         $fieldName = last(explode('.', $rule->field_to_validate));
-        
+
         if (!array_key_exists($fieldName, $data)) {
             return;
         }
@@ -49,7 +47,7 @@ class ControlDeFechasHelper
                     ]);
                 }
                 break;
-                
+
             case 'before':
                 if (strtotime($data[$fieldName]) >= strtotime($relatedValue)) {
                     throw ValidationException::withMessages([
@@ -57,7 +55,7 @@ class ControlDeFechasHelper
                     ]);
                 }
                 break;
-                
+
             case 'after_or_equal':
                 if (strtotime($data[$fieldName]) < strtotime($relatedValue)) {
                     throw ValidationException::withMessages([
@@ -65,7 +63,7 @@ class ControlDeFechasHelper
                     ]);
                 }
                 break;
-                
+
             // Más tipos de validación según necesites
         }
     }
@@ -93,7 +91,7 @@ class ControlDeFechasHelper
             $relatedId = DB::table($rule->field_to_validate)
                 ->where('id', $recordId)
                 ->value(str_replace($rule->related_table.'_', '', $rule->related_field));
-                
+
             if ($relatedId) {
                 return DB::table($rule->related_table)
                     ->where('id', $relatedId)

@@ -15,6 +15,7 @@ use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
 use App\Filament\Obras\Resources\Proyectos\Pages\ListProyectos;
 use App\Filament\Obras\Resources\Proyectos\Pages\CreateProyecto;
 use App\Filament\Obras\Resources\Proyectos\Pages\EditProyecto;
+use App\Models\DatosDeInicioDeObras;
 use App\Models\Expediente;
 use App\Models\PorcentajesProyectos;
 use App\Models\Proyecto;
@@ -836,12 +837,18 @@ class ProyectoResource extends Resource
             $psu = 0.0;
             $subcontrata = 0.0;
 
-            if ($piv > 0) {
-                $anyHonorarioSinIva = ($honDir > 0 && ! $honDirIncluyeIva) || ($honRed > 0 && ! $honRedIncluyeIva);
-                if ($anyHonorarioSinIva) {
-                    $iva = $importe * $piv / (100 + $piv);
-                } else {
+            if ($piv == 0.0) {
+                $iva = 0.0;
+            } else {
+                $sinHonorarios = ($honDir == 0.0 && $honRed == 0.0);
+                $honDirConIva = ($honDir != 0.0 && $honDirIncluyeIva);
+                $honRedConIva = ($honRed != 0.0 && $honRedIncluyeIva);
+                $honorariosSinIvaAmbos = ($honDir != 0.0 && ! $honDirIncluyeIva) && ($honRed != 0.0 && ! $honRedIncluyeIva);
+
+                if ($sinHonorarios || $honDirConIva || $honRedConIva) {
                     $iva = ($importe - ($honDir + $honRed)) * $piv / (100 + $piv);
+                } elseif ($honorariosSinIvaAmbos) {
+                    $iva = $importe * $piv / (100 + $piv);
                 }
             }
 
@@ -914,9 +921,15 @@ class ProyectoResource extends Resource
             return self::$formaEjecucionCache[$expedienteId];
         }
 
-        $forma = Expediente::query()
+        $forma = DatosDeInicioDeObras::query()
             ->where('expediente_id', $expedienteId)
             ->value('forma_ejecucion');
+
+        if ($forma === null || $forma === '') {
+            $forma = Expediente::query()
+                ->where('expediente_id', $expedienteId)
+                ->value('forma_ejecucion');
+        }
 
         self::$formaEjecucionCache[$expedienteId] = $forma;
 

@@ -85,17 +85,20 @@ class DocumentoGenericoResource extends Resource
                     ->reactive(),
                 TextInput::make('plantilla')
                     ->label('Nombre de plantilla')
-                    ->visible(fn (Get $get): bool => (bool) $get('con_plantilla')),
+                    ->visible(fn (Get $get): bool => (bool) $get('con_plantilla'))
+                    ->required(fn (Get $get): bool => (bool) $get('con_plantilla')),
                 TextInput::make('ruta_plantilla')
                     ->label('Ruta de plantilla')
                     ->visible(fn (Get $get): bool => (bool) $get('con_plantilla'))
-                    ->helperText('Ruta absoluta o relativa dentro de storage/app. Soporta .docx y .dotx.'),
+                    ->helperText('Ruta absoluta o relativa dentro de storage/app. Soporta .docx y .dotx.')
+                    ->required(fn (Get $get): bool => (bool) $get('con_plantilla')),
                 Checkbox::make('obligatorio')
                     ->label('Obligatorio')
                     ->required()
                     ->default(true),
                 Select::make('cod_estado')
                     ->label('Estado del expediente')
+                    ->required()
                     ->options(TablaDeEstados::all()->pluck('estado', 'cod_estado')->toArray())
                     ->searchable()
                     ->preload(),
@@ -113,6 +116,7 @@ class DocumentoGenericoResource extends Resource
                     ->preload(),
                 Select::make('entrada_salida')
                     ->label('Entrada/Salida')
+                    ->required()
                     ->options([
                         'E' => 'Entrada',
                         'S' => 'Salida',

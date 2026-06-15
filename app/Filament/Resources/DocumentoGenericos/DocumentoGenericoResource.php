@@ -60,20 +60,24 @@ class DocumentoGenericoResource extends Resource
                 Select::make('fase_doc')
                     ->options(FaseDocumento::all()->pluck('nombre', 'cod_fase')->toArray())
                     ->label('Fase')
+                    ->required()
                     ->searchable()
                     ->preload(),
                 Select::make('fase_siguiente')
+                ->required()
                     ->options(FaseDocumento::all()->pluck('nombre', 'cod_fase')->toArray())
                     ->label('Fase siguiente')
                     ->searchable()
                     ->preload(),
                 Select::make('cod_tipo_doc')
                     ->label('Tipo de documento')
+                    ->required()
                     ->options(TipoDocumento::all()->pluck('nombre', 'id')->toArray())
                     ->searchable()
                     ->preload(),
                 TextInput::make('cod_documento')
-                    ->label('Código identificativo'),
+                    ->label('Código identificativo')
+                    ->required(),
                 Checkbox::make('con_plantilla')
                     ->label('¿Tiene plantilla?')
                     ->required()
@@ -97,11 +101,13 @@ class DocumentoGenericoResource extends Resource
                     ->preload(),
                 Select::make('cod_origen')
                     ->label('Origen del documento')
+                    ->required()
                     ->options(DestinoDeDocumentos::all()->pluck('destino', 'id')->toArray())
                     ->searchable()
                     ->preload(),
                 Select::make('cod_destino')
                     ->label('Destinatario del documento')
+                    ->required()
                     ->options(DestinoDeDocumentos::all()->pluck('destino', 'id')->toArray())
                     ->searchable()
                     ->preload(),

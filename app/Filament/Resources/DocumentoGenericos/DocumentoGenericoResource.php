@@ -80,7 +80,6 @@ class DocumentoGenericoResource extends Resource
                     ->required(),
                 Checkbox::make('con_plantilla')
                     ->label('¿Tiene plantilla?')
-                    ->required()
                     ->default(true)
                     ->reactive(),
                 TextInput::make('plantilla')

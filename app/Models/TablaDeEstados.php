@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class TablaDeEstados extends Model
 {
@@ -15,6 +13,21 @@ class TablaDeEstados extends Model
     protected $primaryKey='cod_estado';
     protected $keyType = 'string';
     public $incrementing = false;
+    protected $fillable=[
+        'cod_estado',
+        'estado',
+        'estado_abrev',
+        'moduloini',
+        'modulofin',
+        'Tabla',
+        'Planes',
+        'SubvRP',
+        'Contratacion',
+        'Proyecto',
+        'Obras',
+        'Certificaciones',
+    ];
+
     public function obras(){
         return $this->hasMany (DatosDeInicioDeObras::class,'codigo_estado_obra','cod_estado');
     }

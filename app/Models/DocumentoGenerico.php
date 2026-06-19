@@ -38,6 +38,7 @@ class DocumentoGenerico extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'cod_documento',
         'nombre',
         'fase_doc',
         'fase_siguiente',
@@ -50,6 +51,7 @@ class DocumentoGenerico extends Model
         'fasesiguiente',
         'cod_destino',
         'cod_origen',
+        'entrada_salida',
         'obligatorio',
         'cod_estado',
     ];

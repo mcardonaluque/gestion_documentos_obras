@@ -56,14 +56,17 @@ final class DateRuleEvaluator
 
             $passed = $this->evaluateCondition($rule->condicion, $leftDate, $rightDate, $rule->plazo_dias, $rule->aviso_dias);
             $triggered = $rule->dispara_si_cumple ? $passed : ! $passed;
+            $messageStage = $this->resolveMessageStage($rule->condicion, $passed);
+            $message = $this->resolveRuleMessage($rule, $messageStage);
 
             $results->push(new DateRuleEvaluationResult(
                 rule: $rule,
                 field: $rule->campo1,
                 passed: $passed,
                 triggered: $triggered,
+                messageStage: $messageStage,
                 type: $rule->tipo,
-                message: $rule->mensaje,
+                message: $message,
                 leftValue: $leftRaw,
                 rightValue: $rightRaw,
             ));
@@ -193,6 +196,32 @@ final class DateRuleEvaluator
             DateRuleCondition::DAYS_TO_DEADLINE_LTE => $leftDate !== null && $deadlineDays !== null && $warningDays !== null
                 && now()->diffInDays($leftDate->copy()->addDays($deadlineDays), false) <= $warningDays,
         };
+    }
+
+    private function resolveMessageStage(DateRuleCondition $condition, bool $passed): string
+    {
+        if ($condition === DateRuleCondition::DAYS_TO_DEADLINE_LTE && $passed) {
+            return 'preaviso';
+        }
+
+        return $passed ? 'cumplida' : 'incumplida';
+    }
+
+    private function resolveRuleMessage(DateValidationRule $rule, string $stage): string
+    {
+        if ($stage === 'preaviso' && filled($rule->mensaje_preventivo)) {
+            return (string) $rule->mensaje_preventivo;
+        }
+
+        if ($stage === 'cumplida' && filled($rule->mensaje_cumplida)) {
+            return (string) $rule->mensaje_cumplida;
+        }
+
+        if ($stage === 'incumplida' && filled($rule->mensaje_incumplida)) {
+            return (string) $rule->mensaje_incumplida;
+        }
+
+        return (string) $rule->mensaje;
     }
 
     private function toDate(?string $raw): ?Carbon

@@ -1,164 +1,94 @@
-# Arquitectura técnica del proyecto
+# Arquitectura tecnica del proyecto
 
-## Objetivo general
+## Objetivo
 
-Aplicación Laravel con paneles Filament orientada a la gestión documental, expedientes de obras, validación de fechas, trazabilidad de eventos y generación de documentos a partir de plantillas Word con salida final en PDF.
+Proyecto Laravel + Filament para gestion de expedientes de obras, con:
 
----
+- gestion documental y generacion de plantillas
+- control de reglas de fechas
+- notificaciones y trazabilidad de ejecucion
 
-## Estructura funcional por carpetas
+## Evolucion del motor de fechas (implementado)
 
-### app/Models
+Se ha incorporado una arquitectura de dos capas para fechas:
 
-Contiene el modelo de dominio y el acceso ORM a tablas y vistas de la base de datos.
+1. Catalogo de hitos funcionales por configuracion
+2. Proyeccion unificada por expediente para consulta y validacion
 
-Responsabilidades habituales:
+### Componentes nuevos
 
-- definir relaciones Eloquent
-- declarar casts y fillable
-- exponer atributos calculados
-- representar entidades del negocio
+- Tabla `fecha_hitos_catalogo`: metadatos de cada hito (codigo, tabla/campo origen, fase, obligatoriedad).
+- Tabla `expediente_fecha_hitos`: fechas materializadas por expediente e hito.
+- Modelo `FechaHitoCatalogo`.
+- Modelo `ExpedienteFechaHito`.
+- Servicio `SincronizadorFechasHitosService`.
+- Comando `date-hitos:sincronizar`.
 
-### app/Services
+### Fuente de verdad de catalogo
 
-Contiene lógica de aplicación reutilizable que no debe vivir en Resources ni Controllers.
+El catalogo funcional se define en `config/date_rules.php` dentro de `hitos_catalogo`.
 
-Submódulos principales:
+El comando de sincronizacion:
 
-- Assignments: visibilidad y asignación de expedientes por usuario
-- DateRules: evaluación, notificación y trazabilidad de reglas de fechas
-- Importes: cálculo y persistencia de importes por organismo
-- Templates: generación documental desde plantillas Word y salida PDF
-- Tramitador: servicios orientados al circuito de tramitación
+1. sincroniza el catalogo persistente desde config
+2. marca como inactivos hitos que ya no esten en config
+3. materializa fechas en la tabla unificada leyendo tablas origen
 
-### app/Events y app/Listeners
+## Motor de reglas con mensajes por etapa (implementado)
 
-Implementan comunicación desacoplada entre módulos. Un evento representa algo que ha ocurrido y un listener decide qué hacer con ello.
+La tabla `date_validation_rules` se amplia con:
 
-### app/Observers
+- `mensaje_preventivo`
+- `mensaje_cumplida`
+- `mensaje_incumplida`
 
-Encapsulan reacciones automáticas a cambios de modelos, por ejemplo validaciones de fechas antes y después de guardar.
+La evaluacion ahora clasifica cada resultado en una etapa:
 
-### app/Notifications
+- `preaviso`: para reglas de vencimiento cercano (condicion `days_to_deadline_lte` cuando pasa)
+- `cumplida`
+- `incumplida`
 
-Define el formato de notificaciones persistentes o enviadas a otros canales.
+### Resolucion de mensaje
 
-### app/Helpers
+Orden de prioridad:
 
-Agrupa utilidades estáticas heredadas o de apoyo. Su uso debe ser excepcional y siempre justificado frente a un Service.
+1. mensaje especifico de etapa
+2. mensaje base (`mensaje`)
 
-### app/Enums
+Esto permite usar textos distintos antes del vencimiento y al cumplirse o incumplirse la regla.
 
-Centraliza valores cerrados y opciones de negocio para formularios, flujos y lógica condicional.
+### Notificaciones y deduplicacion
 
-### app/DTOs
+- El notificador adapta el titulo segun etapa (`Preaviso...`, `Regla cumplida`, etc.).
+- El logger incluye la etapa en el fingerprint diario para no mezclar eventos de distinta naturaleza.
 
-Define objetos de transferencia de datos inmutables usados para desacoplar cálculo, persistencia y presentación.
+## Flujo operativo recomendado
 
-### app/Providers
+1. Definir o ajustar hitos en `config/date_rules.php`.
+2. Ejecutar migraciones.
+3. Ejecutar sincronizacion de hitos:
 
-Registra servicios, eventos, assets y configuración transversal durante el arranque de la aplicación.
+    `php artisan date-hitos:sincronizar`
 
----
+4. Configurar reglas en Filament (`DateValidationRuleResource`) incluyendo mensajes por etapa.
+5. Validar flujo de notificaciones en un expediente real.
 
-## Módulos clave documentados
+## Comandos utiles
 
-### Motor documental de plantillas
+- Sincronizacion global:
 
-Ubicación: app/Services/Templates
+    `php artisan date-hitos:sincronizar`
 
-Responsabilidades:
+- Sincronizacion de un expediente:
 
-- localizar la plantilla Word física
-- extraer variables WD\_\*
-- construir el contexto de datos desde el modelo actual
-- resolver valores de cada variable
-- renderizar el DOCX temporal
-- convertir el resultado final a PDF con LibreOffice
+    `php artisan date-hitos:sincronizar --expediente=ID_EXPEDIENTE`
 
-Clases principales:
+- Limpieza previa de proyeccion y recarga:
 
-- TemplatePathResolver: resuelve rutas de plantillas
-- WordTemplatePlaceholderExtractor: extrae variables del documento Word
-- TemplateContextFactory: prepara relaciones y metadatos de impresión
-- TemplateVariableValueResolver: obtiene el valor de cada variable
-- WordTemplateVariableSynchronizer: sincroniza la plantilla con la tabla de variables
-- WordTemplatePrintService: coordina la generación DOCX y PDF
+    `php artisan date-hitos:sincronizar --limpiar`
 
-### Reglas de fechas
+## Notas tecnicas
 
-Ubicación: app/Services/DateRules y app/Observers
-
-Responsabilidades:
-
-- detectar cambios relevantes en fechas
-- evaluar reglas configuradas
-- bloquear guardados inválidos
-- registrar ejecución y resultados
-- notificar incidencias o avisos
-
-### Notificaciones y eventos
-
-Ubicación: app/Events, app/Listeners, app/Notifications, app/Services/NotificationService.php
-
-Responsabilidades:
-
-- emitir eventos de sistema desacoplados
-- registrar auditoría
-- resolver destinatarios
-- persistir notificaciones visibles en Filament
-
-### Asignación de expedientes
-
-Ubicación: app/Services/Assignments
-
-Responsabilidades:
-
-- decidir qué expedientes puede ver cada usuario
-- filtrar consultas de Resources y widgets
-- soportar segregación funcional por equipo o asignación directa
-
----
-
-## Convenciones recomendadas
-
-### Services
-
-Cada servicio debe tener una responsabilidad clara, ser fácilmente testeable y exponer métodos pequeños con nombres expresivos.
-
-### DTOs
-
-Se usan para transportar datos calculados entre capas sin mezclar reglas de negocio con arrays difusos.
-
-### Enums
-
-Se usan para sustituir cadenas mágicas y centralizar opciones de selección o estado.
-
-### Resources de Filament
-
-Solo deben contener configuración de UI, acciones simples y delegación a Services o Actions del dominio.
-
----
-
-## Flujo de impresión de documentos
-
-1. El usuario selecciona un documento genérico o una acción de impresión.
-2. Se localiza la plantilla Word configurada.
-3. Se extraen o sincronizan variables WD\_\*.
-4. Se construye el contexto desde el registro actual y sus relaciones.
-5. Se resuelve cada variable a texto final.
-6. Se genera un DOCX temporal.
-7. Se convierte a PDF.
-8. Se devuelve la descarga al usuario.
-
----
-
-## Mantenimiento futuro
-
-Cuando se añada un nuevo módulo se recomienda documentar siempre:
-
-- finalidad de la clase
-- responsabilidad del método
-- significado de propiedades públicas
-- tipos de entrada y salida
-- dependencias externas o efectos laterales
+- El sincronizador detecta columnas disponibles por `INFORMATION_SCHEMA.COLUMNS` para evitar errores cuando una tabla no tenga `team_id` u otros campos opcionales.
+- Solo se procesan tablas con columna `expediente_id`.
+- Si un campo fecha viene vacio o no parseable, se omite sin romper la ejecucion.

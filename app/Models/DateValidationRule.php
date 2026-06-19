@@ -25,6 +25,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $campo2
  * @property DateRuleCondition $condicion
  * @property string $mensaje
+ * @property string|null $mensaje_preventivo
+ * @property string|null $mensaje_cumplida
+ * @property string|null $mensaje_incumplida
  * @property DateRuleType $tipo
  * @property string|null $fase
  * @property string|null $estado
@@ -57,6 +60,9 @@ class DateValidationRule extends Model
         'campo2',
         'condicion',
         'mensaje',
+        'mensaje_preventivo',
+        'mensaje_cumplida',
+        'mensaje_incumplida',
         'tipo',
         'fase',
         'estado',

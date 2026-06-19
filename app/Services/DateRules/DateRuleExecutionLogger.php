@@ -28,6 +28,7 @@ final class DateRuleExecutionLogger
                 $model::class,
                 (string) $model->getKey(),
                 $result->field,
+                $result->messageStage,
                 $result->message,
                 now()->toDateString(),
             ]));

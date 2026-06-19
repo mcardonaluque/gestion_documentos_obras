@@ -35,6 +35,8 @@ use App\Filament\Auth\Login as CustomLogin;
 use App\Filament\Widgets\UltimasObrasTableWidget;
 use App\Filament\Widgets\NotificationsWidget;
 use App\Filament\Obras\Pages\Dashboard as ObrasDashboard;
+use App\Filament\Obras\Pages\HitosFechasMaterializados;
+use App\Filament\Obras\Pages\InformeExpedientesAgrupado;
 use App\Filament\Obras\Resources\Documentoexpedientes\DocumentoexpedienteResource;
 
 
@@ -103,6 +105,8 @@ class ObrasPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Obras/Resources/Pages'), for: 'App\\Filament\\Resources\\Pages')
             ->pages([
                 ObrasDashboard::class,
+                InformeExpedientesAgrupado::class,
+                HitosFechasMaterializados::class,
             ])
            //->viteTheme('resources/css/custom.css')
            //->theme('resources/css/filament/custom.css')

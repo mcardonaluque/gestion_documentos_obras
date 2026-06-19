@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             DocumentosExpedientesSeeder::class,
             \Database\Seeders\DateValidationRuleSeeder::class,
-            // Otros seeders...
+                \Database\Seeders\FechaHitoCatalogoSeeder::class,
         ]);
 
     }

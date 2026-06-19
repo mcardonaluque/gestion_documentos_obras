@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DocumentoPdfController;
+use App\Http\Controllers\Informes\ImprimirInformeExpedientesController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/obras/login');
@@ -12,6 +13,9 @@ Route::middleware('auth')->get('/documentos-expediente/{documento}/pdf', [Docume
 
 Route::middleware('auth')->get('/documentos-expediente/{documento}/pdf/download', [DocumentoPdfController::class, 'download'])
     ->name('documentos.pdf.download');
+
+Route::middleware('auth')->get('/informes/expedientes/imprimir', ImprimirInformeExpedientesController::class)
+    ->name('informes.expedientes.imprimir');
 
 Route::get('/check-filament-notifications', function() {
     $user = auth()->user();

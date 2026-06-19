@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Flujo de validación de fechas</title>
+  <desc id="desc">Diagrama de secuencia del flujo de validación, evaluación, logging y notificación de reglas de fechas.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .header { fill: #0f172a; }
+      .header-text { fill: #ffffff; font: 700 28px Arial, sans-serif; }
+      .subtext { fill: #cbd5e1; font: 14px Arial, sans-serif; }
+      .actor { fill: #ffffff; stroke: #94a3b8; stroke-width: 2; rx: 14; }
+      .actor-title { fill: #0f172a; font: 700 18px Arial, sans-serif; }
+      .lifeline { stroke: #cbd5e1; stroke-width: 2; stroke-dasharray: 10 8; }
+      .message { stroke: #334155; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .message-dashed { stroke: #64748b; stroke-width: 3; fill: none; stroke-dasharray: 10 8; marker-end: url(#arrow); }
+      .label { fill: #0f172a; font: 15px Arial, sans-serif; }
+      .small { fill: #475569; font: 13px Arial, sans-serif; }
+      .note { fill: #fef3c7; stroke: #f59e0b; stroke-width: 2; rx: 14; }
+      .note-text { fill: #92400e; font: 14px Arial, sans-serif; }
+      .group { fill: #ecfeff; stroke: #06b6d4; stroke-width: 2; rx: 16; }
+      .group-title { fill: #155e75; font: 700 16px Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="900"/>
+  <rect class="header" x="0" y="0" width="1600" height="92"/>
+  <text class="header-text" x="48" y="42">Flujo de validación de fechas</text>
+  <text class="subtext" x="48" y="68">Secuencia real desde el recurso Filament hasta evaluación, registro y notificación</text>
+
+  <!-- Actors -->
+  <rect class="actor" x="40" y="130" width="220" height="64"/>
+  <text class="actor-title" x="150" y="168" text-anchor="middle">Usuario</text>
+
+  <rect class="actor" x="320" y="130" width="250" height="64"/>
+  <text class="actor-title" x="445" y="160" text-anchor="middle">Resource / Page Filament</text>
+  <text class="small" x="445" y="182" text-anchor="middle">Create / Edit / Livewire</text>
+
+  <rect class="actor" x="650" y="130" width="260" height="64"/>
+  <text class="actor-title" x="780" y="160" text-anchor="middle">NotifiesAndValidatesDates</text>
+  <text class="small" x="780" y="182" text-anchor="middle">Trait de apoyo</text>
+
+  <rect class="actor" x="980" y="130" width="220" height="64"/>
+  <text class="actor-title" x="1090" y="168" text-anchor="middle">DateRuleEvaluator</text>
+
+  <rect class="actor" x="1260" y="130" width="240" height="64"/>
+  <text class="actor-title" x="1380" y="160" text-anchor="middle">Observer / Logger / Notifier</text>
+  <text class="small" x="1380" y="182" text-anchor="middle">Persistencia y aviso</text>
+
+  <!-- Lifelines -->
+  <line class="lifeline" x1="150" y1="194" x2="150" y2="830"/>
+  <line class="lifeline" x1="445" y1="194" x2="445" y2="830"/>
+  <line class="lifeline" x1="780" y1="194" x2="780" y2="830"/>
+  <line class="lifeline" x1="1090" y1="194" x2="1090" y2="830"/>
+  <line class="lifeline" x1="1380" y1="194" x2="1380" y2="830"/>
+
+  <!-- Main flow -->
+  <path class="message" d="M 260 250 L 420 250"/>
+  <text class="label" x="340" y="236" text-anchor="middle">1. Cambia una fecha en el formulario</text>
+
+  <path class="message" d="M 445 300 L 760 300"/>
+  <text class="label" x="602" y="286" text-anchor="middle">2. validateDateFieldOnBlur()</text>
+
+  <path class="message" d="M 780 360 L 1080 360"/>
+  <text class="label" x="930" y="346" text-anchor="middle">3. evaluate()</text>
+
+  <path class="message-dashed" d="M 1080 410 L 780 410"/>
+  <text class="label" x="930" y="396" text-anchor="middle">4. resultados + errores bloqueantes</text>
+
+  <rect class="note" x="645" y="450" width="270" height="80"/>
+  <text class="note-text" x="780" y="480" text-anchor="middle">Si hay error bloqueante</text>
+  <text class="note-text" x="780" y="504" text-anchor="middle">se lanza ValidationException</text>
+
+  <path class="message" d="M 780 570 L 1380 570"/>
+  <text class="label" x="1080" y="556" text-anchor="middle">5. log() + notify()</text>
+
+  <rect class="group" x="1010" y="620" width="300" height="150"/>
+  <text class="group-title" x="1160" y="650" text-anchor="middle">Servicios posteriores al guardado</text>
+  <text class="small" x="1035" y="682">• DateRuleExecutionLogger::log()</text>
+  <text class="small" x="1035" y="708">• DateRuleNotifier::notify()</text>
+  <text class="small" x="1035" y="734">• Opcional: DispatchDateRuleNotificationsJob</text>
+  <text class="small" x="1035" y="760">• Muestra aviso/alerta al usuario o team</text>
+
+  <path class="message" d="M 1380 780 L 260 780"/>
+  <text class="label" x="820" y="766" text-anchor="middle">6. Notificación persistente / visual</text>
+
+  <!-- Side flow for save -->
+  <rect class="group" x="330" y="620" width="300" height="150"/>
+  <text class="group-title" x="480" y="650" text-anchor="middle">Guardado en Resource</text>
+  <text class="small" x="350" y="682">• persistWithDateControls()</text>
+  <text class="small" x="350" y="708">• applyDateControlsForManualChanges()</text>
+  <text class="small" x="350" y="734">• saveQuietly() / save()</text>
+  <text class="small" x="350" y="760">• Observer global en AppServiceProvider</text>
+
+  <!-- Legend -->
+  <rect class="note" x="40" y="610" width="220" height="150"/>
+  <text class="note-text" x="150" y="640" text-anchor="middle">Orden práctico</text>
+  <text class="note-text" x="60" y="668">1. Validación en blur</text>
+  <text class="note-text" x="60" y="694">2. Validación al guardar</text>
+  <text class="note-text" x="60" y="720">3. Logging</text>
+  <text class="note-text" x="60" y="746">4. Notificación</text>
+
+  <text class="small" x="48" y="860">Archivo generado para reutilizar como copia visual del diagrama en formato SVG.</text>
+</svg>

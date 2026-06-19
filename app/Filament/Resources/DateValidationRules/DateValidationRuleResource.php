@@ -30,7 +30,9 @@ class DateValidationRuleResource extends Resource
 {
     protected static ?string $model = DateValidationRule::class;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Configuracion';
+    protected static string | \UnitEnum | null $navigationGroup = 'Validacion de fechas';
+
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $navigationLabel = 'Reglas de fechas';
 
@@ -90,6 +92,22 @@ class DateValidationRuleResource extends Resource
                 Textarea::make('mensaje')
                     ->required()
                     ->rows(3)
+                    ->helperText('Mensaje base usado cuando no exista un mensaje especifico por etapa.')
+                    ->columnSpanFull(),
+                Textarea::make('mensaje_preventivo')
+                    ->label('Mensaje preventivo')
+                    ->rows(3)
+                    ->helperText('Se usa en notificaciones previas al vencimiento (preaviso).')
+                    ->columnSpanFull(),
+                Textarea::make('mensaje_cumplida')
+                    ->label('Mensaje regla cumplida')
+                    ->rows(3)
+                    ->helperText('Se usa cuando la condicion de la regla se cumple.')
+                    ->columnSpanFull(),
+                Textarea::make('mensaje_incumplida')
+                    ->label('Mensaje regla incumplida')
+                    ->rows(3)
+                    ->helperText('Se usa cuando la condicion de la regla no se cumple.')
                     ->columnSpanFull(),
                 Toggle::make('dispara_si_cumple')
                     ->label('Disparar cuando la condicion SI se cumple')

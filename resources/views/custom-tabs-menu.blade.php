@@ -204,6 +204,16 @@
                 <a href="/obras/notifications" class="custom-submenu-item">
                     📢 Notificaciones
                 </a>
+                @if(auth()->user()->hasRole('super_admin') || auth()->user()->can('page_InformeExpedientesAgrupado'))
+                <a href="/obras/informe-expedientes-agrupado" class="custom-submenu-item">
+                    📊 Informes
+                </a>
+                @endif
+                @if(auth()->user()->hasRole('super_admin'))
+                <a href="/obras/hitos-fechas-materializados" class="custom-submenu-item">
+                    🗓️ Hitos materializados
+                </a>
+                @endif
 
             </div>
     </nav>

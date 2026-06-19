@@ -14,6 +14,7 @@ final class DateRuleEvaluationResult
         public readonly string $field,
         public readonly bool $passed,
         public readonly bool $triggered,
+        public readonly string $messageStage,
         public readonly DateRuleType $type,
         public readonly string $message,
         public readonly ?string $leftValue,

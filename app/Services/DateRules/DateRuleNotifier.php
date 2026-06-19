@@ -51,7 +51,7 @@ final class DateRuleNotifier
 
             $messages[] = [
                 'recipient_ids' => $recipientIds,
-                'title' => $this->resolveTitle($result->type),
+                'title' => $this->resolveTitle($result->type, $result->messageStage),
                 'message' => $this->buildMessage($model, $result),
                 'level' => $result->type === DateRuleType::ERROR ? 'danger' : 'warning',
             ];
@@ -113,8 +113,16 @@ final class DateRuleNotifier
         return [];
     }
 
-    private function resolveTitle(DateRuleType $type): string
+    private function resolveTitle(DateRuleType $type, string $stage): string
     {
+        if ($stage === 'preaviso') {
+            return 'Preaviso de vencimiento de regla de fechas';
+        }
+
+        if ($stage === 'cumplida') {
+            return 'Regla de fechas cumplida';
+        }
+
         return match ($type) {
             DateRuleType::WARNING => 'Advertencia de control de fechas',
             DateRuleType::ERROR => 'Error de control de fechas',

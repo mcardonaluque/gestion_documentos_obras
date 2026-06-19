@@ -30,6 +30,16 @@ class ImportesPorOrganismoRelationManager extends RelationManager
     {
         return 'obra'; // esto debe ser el nombre de la relación inversa en el modelo ImportesporOrganismo
     }
+
+    public function getTableRecordKey(Model | array $record): string
+    {
+        if (is_array($record)) {
+            return (string) (($record['expediente_id'] ?? '') . '-' . ($record['organismo'] ?? ''));
+        }
+
+        return (string) ($record->expediente_id . '-' . $record->organismo);
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -59,11 +69,16 @@ class ImportesPorOrganismoRelationManager extends RelationManager
                 TextColumn::make('organismo'),
                 TextColumn::make('Porc_imp_aprobado'),
                 TextColumn::make('importe_aprobado'),
-                TextColumn::make('Porc_importe_contratar'),
-                TextColumn::make('importe_a_contratar'),
+                TextColumn::make('Porc_imp_contratar')
+                    ->label('Porc_imp_contratar')
+                    ->getStateUsing(fn (Model $record) => $record->Porc_imp_contratar ?? $record->Porc_importe_contratar),
+                TextColumn::make('Importe_a_contratar')
+                    ->label('Importe_a_contratar')
+                    ->getStateUsing(fn (Model $record) => $record->Importe_a_contratar ?? $record->importe_a_contratar),
                 TextColumn::make('Porc_imp_adjudicado'),
                 TextColumn::make('importe_adjudicacion'),
-                TextColumn::make('Porc_imp_baja'),
+                TextColumn::make('Porc_imp_baja')
+                    ->getStateUsing(fn (Model $record) => $record->Porc_imp_baja ?? $record->Porc_imp_baj),
                 TextColumn::make('importe_baja_contratacion'),
 
             ])

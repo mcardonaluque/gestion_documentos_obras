@@ -77,16 +77,16 @@ class ImportesManagementRepository
                 continue;
             }
 
-            $rowModel = ImportesPorOrganismo::query()->firstOrNew([
-                'expediente_id' => $expedienteId,
-                'organismo' => $organismo,
-            ]);
-
-            $rowModel->organismo = $organismo;
-
             $awardedAmount = (float) ($row['awarded_amount'] ?? 0.0);
             $dropPercent = $awardedAmount > 0.0 ? (float) ($row['drop_percent'] ?? 0.0) : 0.0;
             $dropAmount = $awardedAmount > 0.0 ? (float) ($row['drop_amount'] ?? 0.0) : 0.0;
+
+            $payload = [
+                'expediente_id' => $expedienteId,
+                'organismo' => $organismo,
+            ];
+
+            $rowModel = new ImportesPorOrganismo($payload);
 
             $this->assignFirstExisting($rowModel, ['Porc_imp_aprobado', 'porc_imp_aprobado'], $row['approved_percent'] ?? 0.0);
             $this->assignFirstExisting($rowModel, ['importe_aprobado'], $row['approved_amount'] ?? 0.0);
@@ -99,7 +99,20 @@ class ImportesManagementRepository
             $this->assignFirstExisting($rowModel, ['importe_ejecutado'], $row['executed_amount'] ?? 0.0);
             $this->assignFirstExisting($rowModel, ['Porc_imp_ejecutado', 'porc_imp_ejecutado'], $row['executed_percent'] ?? 0.0);
 
-            $rowModel->save();
+            $attributes = $rowModel->getAttributes();
+            $exists = ImportesPorOrganismo::query()
+                ->where('expediente_id', $expedienteId)
+                ->where('organismo', $organismo)
+                ->exists();
+
+            if ($exists) {
+                ImportesPorOrganismo::query()
+                    ->where('expediente_id', $expedienteId)
+                    ->where('organismo', $organismo)
+                    ->update($attributes);
+            } else {
+                $rowModel->save();
+            }
         }
     }
 

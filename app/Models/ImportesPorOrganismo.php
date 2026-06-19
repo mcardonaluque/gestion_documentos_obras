@@ -9,18 +9,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ImportesPorOrganismo extends Model
 {
-    
+
     use HasFactory;
     protected $connection='Obras';
     protected $table='ImportesPorOrganismo';
     protected $primaryKey='expediente_id';
     public $incrementing=false;
     protected $keyType='string';
+
     public function obra()
     {
         return $this->belongsTo(DatosDeInicioDeObras::class, 'expediente_id', 'expediente_id');
     }
-    
+
     public function obrasejecucion():BelongsTo{
         return $this->belongsTo (DatosEjecucionObras::class,'expediente_id','expediente_id');
     }
@@ -38,6 +39,6 @@ class ImportesPorOrganismo extends Model
     }
     public function getImportesPorOrganismoFase(int $fase)
     {
-     
+
     }
 }

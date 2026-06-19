@@ -109,7 +109,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
             ImportesInfo::make('importes')
                 ->label('Importes de la Obra')
                 ->columnSpan(1)
-                ->setImportesDataOrganismo($record?->importesPorOrganismo),
+                ->setImportesDeObra($record?->importes ?? $record?->importesPorOrganismo?->first()),
             ImportesManagement::make('importes_management')
                 ->label('Gestión de importes por organismo')
                 ->columnSpanFull()

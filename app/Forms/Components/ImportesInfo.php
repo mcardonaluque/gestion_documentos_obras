@@ -16,17 +16,15 @@ class ImportesInfo extends Fieldset
 
         $record = $this->getRecord();
 
-        if (blank($record) || ! method_exists($record, 'importesDeObras')) {
+        if (! is_object($record) || ! method_exists($record, 'importes')) {
             return;
         }
 
-        $importe = $record->importesDeObras()->with(['obra.municipios', 'obra.ejecucion'])->first();
+        $importe = $record->importes()->first();
 
         if (! $importe) {
             return;
         }
-
-        $obra = $importe->obra;
 
         $this->importesData = [
             'importe_aprobado' => $importe?->importe_aprobado ?? null,
@@ -71,8 +69,6 @@ class ImportesInfo extends Fieldset
             return $this;
         }
 
-        $obra = $importe->obra;
-
         $this->importesData = [
              'importe_aprobado' => $importe?->importe_aprobado ?? null,
             'importe_a_contratar' => $importe?->importe_a_contratar ?? null,
@@ -87,8 +83,12 @@ class ImportesInfo extends Fieldset
         return $this->default($this->importesData);
     }
     public function setImportesDeObra($Importes): static
-    {   $obra=$Importes->obra;
-        return $this->default([
+    {
+        if (blank($Importes)) {
+            return $this;
+        }
+
+        $this->importesData = [
             'importe_aprobado' => $Importes?->importe_aprobado ?? null,
             'importe_a_contratar' => $Importes?->importe_a_contratar ?? null,
             'importe_remanente' =>$Importes?->importe_remanente ?? null,
@@ -97,7 +97,9 @@ class ImportesInfo extends Fieldset
             'importe_ejecutado' => $Importes?->importe_ejecutado ?? null,
             'importe_ejecutado_decreto' => $Importes?->importe_ejecutado_decreto ?? null,
             'importePenalidadesProrrogas' => $Importes->importePenalidadesProrrogas ?? null,
-        ]);
+        ];
+
+        return $this->default($this->importesData);
     }
 
     protected function getSchemaComponents(): array
@@ -145,7 +147,7 @@ class ImportesInfo extends Fieldset
             TextInput::make('importe_ejecutado_decreto')
                 ->label('Importe Ejecutado Decreto')
                 ->columnSpan(1)
-                ->formatStateUsing(fn ($state) => $this->getImporteValue('forma_ejecucion', $state))
+                ->formatStateUsing(fn ($state) => $this->getImporteValue('importe_ejecutado_decreto', $state))
                 //->required()
                 ->disabled(),
 

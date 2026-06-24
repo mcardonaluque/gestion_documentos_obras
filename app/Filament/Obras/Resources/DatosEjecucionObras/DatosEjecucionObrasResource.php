@@ -18,6 +18,7 @@ use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\ImportesP
 use App\Filament\Obras\Resources\DatosEjecucionObras\RelationManagers\ActaRecepcionRelationManager;
 use App\Filament\Obras\Resources\DatosEjecucionObras\RelationManagers\ActaReplanteoRelationManager;
 use App\Filament\Obras\Resources\DatosEjecucionObras\RelationManagers\CertificacionesRelationManager;
+use App\Filament\Obras\Resources\DatosEjecucionObras\RelationManagers\ProrrogasRelationManager;
 use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
 use App\Models\DatosEjecucionObras;
 use Filament\Forms;
@@ -170,6 +171,7 @@ class DatosEjecucionObrasResource extends Resource
             ImportesPorOrganismoRelationManager::class,
             ActaReplanteoRelationManager::class,
             ActaRecepcionRelationManager::class,
+            ProrrogasRelationManager::class,
         ];
     }
 

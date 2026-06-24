@@ -57,4 +57,9 @@ class DatosEjecucionObras extends Model
     {
         return $this->hasOne(actaderecepcion::class, 'expediente_id', 'expediente_id');
     }
+
+    public function prorrogas(): HasMany
+    {
+        return $this->hasMany(\App\Models\Prorroga::class, 'expediente_id', 'expediente_id');
+    }
 }

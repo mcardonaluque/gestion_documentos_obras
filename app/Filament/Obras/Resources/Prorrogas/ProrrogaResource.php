@@ -30,6 +30,8 @@ class ProrrogaResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = 'Ejecucion';
 
+    protected static ?int $navigationSort = 25;
+
     protected static ?string $navigationLabel = 'Prórrogas';
 
     protected static ?string $modelLabel = 'Prórroga de obra';
@@ -37,6 +39,11 @@ class ProrrogaResource extends Resource
     protected static ?string $pluralModelLabel = 'Prórrogas de ejecución';
 
     protected static ?string $recordTitleAttribute = 'expediente_id';
+
+    public static function getNavigationGroup(): string | \UnitEnum | null
+    {
+        return 'Ejecucion';
+    }
 
     public static function getEloquentQuery(): Builder
     {
@@ -51,11 +58,32 @@ class ProrrogaResource extends Resource
         return $schema
             ->columns(4)
             ->components([
-                TextInput::make('Codigo_Plan')->label('Plan')->disabled(),
+                TextInput::make('codigo_plan_info')
+                    ->label('Código plan')
+                    ->readOnly()
+                    ->dehydrated(false)
+                    ->afterStateHydrated(function (TextInput $component, ?DatosEjecucionObras $record): void {
+                        $component->state($record?->Codigo_Plan ?? $record?->codigo_plan ?? '');
+                    }),
                 TextInput::make('numero_obra')->label('Obra')->disabled(),
                 TextInput::make('subreferencia')->label('Subref.')->disabled(),
                 TextInput::make('ao_ejecucion')->label('Año')->disabled(),
-                TextInput::make('obra.nombre_obra1')->label('Nombre obra')->disabled()->columnSpanFull(),
+                TextInput::make('nombre_plan_info')
+                    ->label('Nombre plan')
+                    ->readOnly()
+                    ->dehydrated(false)
+                    ->afterStateHydrated(function (TextInput $component, ?DatosEjecucionObras $record): void {
+                        $component->state($record?->planes?->denominacion_plan ?? 'Sin plan');
+                    })
+                    ->columnSpanFull(),
+                TextInput::make('nombre_obra_info')
+                    ->label('Nombre obra')
+                    ->readOnly()
+                    ->dehydrated(false)
+                    ->afterStateHydrated(function (TextInput $component, ?DatosEjecucionObras $record): void {
+                        $component->state($record?->obra?->nombre_obra1 ?? 'Sin nombre');
+                    })
+                    ->columnSpanFull(),
                 TextInput::make('expediente_id')->label('Expediente')->disabled()->columnSpanFull(),
             ]);
     }
@@ -81,6 +109,9 @@ class ProrrogaResource extends Resource
                     ->sortable(),
                 TextColumn::make('obra.nombre_obra1')
                     ->label('Nombre obra')
+                    ->searchable(),
+                TextColumn::make('obra.municipios.nombre_municipio')
+                    ->label('Municipio')
                     ->searchable(),
                 TextColumn::make('expediente_id')
                     ->label('Expediente')

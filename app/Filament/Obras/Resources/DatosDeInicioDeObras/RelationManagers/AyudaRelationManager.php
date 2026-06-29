@@ -37,11 +37,23 @@ class AyudaRelationManager extends RelationManager
                     ->maxLength(255),
                 Select::make('dpto_redactor')
                     ->label('Departamento Redactor')
-                    ->relationship('ayudaR', 'DENOMINACION'),
+                    ->relationship('ayudaR', 'DENOMINACION')
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set): void {
+                        if (filled($state)) {
+                            $set('AyuTecRed', 'SI');
+                        }
+                    }),
 
                 Select::make('departamento_direccion')
                     ->label('Departamento Dirección')
-                    ->relationship('ayudaD', 'DENOMINACION'),
+                    ->relationship('ayudaD', 'DENOMINACION')
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set): void {
+                        if (filled($state)) {
+                            $set('AyuTecDir', 'SI');
+                        }
+                    }),
 
                 TextInput::make('AyuTecRed')
                     ->required()
@@ -66,6 +78,7 @@ class AyudaRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->poll('3s')
             ->recordTitleAttribute('expediente_id')
             ->columns([
                 TextColumn::make('expediente_id'),

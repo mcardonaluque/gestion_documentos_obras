@@ -27,6 +27,7 @@ class DocumentoExpediente extends Model
     protected $keyType = 'string';
     protected $fillable = [
         'Codigo_Plan',
+        'cod_plan',
         'referencia',
         'subreferencia',
         'ao_ejecucion',

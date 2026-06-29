@@ -368,9 +368,11 @@
                 <a href="/obras/plan-sses" class="custom-submenu-item">
                     ⛑️ Planes de Seguridad y Salud
                 </a>
-
                 <a href="/obras/actaderecepcions" class="custom-submenu-item">
                     🖹 Acta de recepcion
+                </a>
+                      <a href="/obras/prorrogas-ejecucion" class="custom-submenu-item">
+                          📅 Prórrogas
                 </a>
             </div>
         </div>

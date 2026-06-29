@@ -9,6 +9,7 @@ use App\Filament\Traits\CommonFilters;
 use App\Models\DocumentoGenerico;
 use App\Models\Expediente;
 use App\Models\DocumentoExpediente;
+use App\Models\Planes;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -156,38 +157,59 @@ abstract class ExpedienteResourceBase extends Resource
                     ->label('Subir Documento')
                     ->icon('heroicon-o-paper-clip')
                     ->color('success')
+                    ->fillForm(function ($record): array {
+                        $codigoPlan = trim((string) ($record?->codigo_plan ?? $record?->Codigo_Plan ?? ''));
+
+                        $nombrePlan = '';
+                        if ($codigoPlan !== '') {
+                            $nombrePlan = (string) (Planes::query()
+                                ->where('codigo_plan', $codigoPlan)
+                                ->value('denominacion_plan') ?? '');
+                        }
+
+                        return [
+                            'expediente_id' => $record?->expediente_id,
+                            'codigo_plan_info' => $codigoPlan,
+                            'plan_nombre_info' => $nombrePlan,
+                            'nombre_obra_info' => $record?->nombre_obra,
+                            'numero_obra' => $record?->referencia,
+                            'subreferencia' => $record?->subreferencia,
+                            'ao_ejecucion' => $record?->ao_ejecucion,
+                            'nsecuencia' => ((int) ($record?->documentos()?->max('nsecuencia') ?? 0)) + 1,
+                            'created_at' => now(),
+                        ];
+                    })
                     ->schema([
                         TextInput::make('expediente_id')
                             ->label('Expediente')
-                            ->readOnly()
-                            ->default(fn ($record) => $record?->expediente_id),
+                            ->readOnly(),
 
-                        TextInput::make('Codigo_Plan')
+                        TextInput::make('codigo_plan_info')
                             ->label('Código plan')
                             ->readOnly()
-                            ->default(fn ($record) => $record?->codigo_plan),
-                        TextInput::make('planes.denominacion_plan')
+                            ->dehydrated(false),
+                        TextInput::make('plan_nombre_info')
                             ->label('Plan')
                             ->readOnly()
-                            ->default(fn ($record) => $record?->planes?->denominacion_plan),
+                            ->dehydrated(false),
+                        TextInput::make('nombre_obra_info')
+                            ->label('Nombre obra')
+                            ->readOnly()
+                            ->dehydrated(false),
                         TextInput::make('numero_obra')
                             ->label('Número obra')
-                            ->readOnly()
-                            ->default(fn ($record) => $record?->referencia),
+                            ->readOnly(),
 
                         TextInput::make('subreferencia')
-                            ->readOnly()
-                            ->default(fn ($record) => $record?->subreferencia),
+                            ->readOnly(),
 
                         TextInput::make('ao_ejecucion')
                             ->label('Año ejecución')
-                            ->readOnly()
-                            ->default(fn ($record) => $record?->ao_ejecucion),
+                            ->readOnly(),
 
                         TextInput::make('nsecuencia')
                             ->label('Nº secuencia')
-                            ->readOnly()
-                            ->default(fn ($record) => ((int) ($record?->documentos()?->max('nsecuencia') ?? 0)) + 1),
+                            ->readOnly(),
 
                         TextInput::make('descripcion')
                             ->label('Descripción del Documento')
@@ -214,17 +236,15 @@ abstract class ExpedienteResourceBase extends Resource
                         DatePicker::make('created_at')
                             ->label('Fecha de Incorporación')
                             ->disabled()
-                            ->required()
-                            ->default(now()),
+                            ->required(),
                     ])
                     ->action(function (array $data, $record) {
                         $nextSecuencia = ((int) (DocumentoExpediente::query()
                             ->where('expediente_id', $record->expediente_id)
                             ->max('nsecuencia') ?? 0)) + 1;
 
-                        $documento = $record->documentos()->create([
+                        $payload = [
                             'expediente_id' => $record->expediente_id,
-                            'cod_plan' => $record->codigo_plan,
                             'referencia' => $record->referencia,
                             'subreferencia' => $record->subreferencia,
                             'ao_ejecucion' => $record->ao_ejecucion,
@@ -234,7 +254,17 @@ abstract class ExpedienteResourceBase extends Resource
                             'nsecuencia' => $nextSecuencia,
                             'csv' => $data['archivo'],
                             'estado' => 'Nuevo',
-                        ]);
+                            'team_id' => $record->team_id,
+                        ];
+
+                        $payload = DocumentoExpediente::applyExpedienteDefaults($payload);
+
+                        // Compatibilidad con ambas convenciones en el esquema heredado.
+                        $codigoPlan = $record->codigo_plan ?? $record->Codigo_Plan ?? null;
+                        $payload['cod_plan'] = $codigoPlan;
+                        $payload['Codigo_Plan'] = $codigoPlan;
+
+                        $documento = $record->documentos()->create($payload);
 
                         event(new SystemEventOccurred(
                             eventType: 'documento_subido',

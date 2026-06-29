@@ -29,6 +29,8 @@ use Filament\Tables;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Closure;
 use Illuminate\Validation\ValidationException;
 class ProyectoResource extends Resource
 {
@@ -39,7 +41,7 @@ class ProyectoResource extends Resource
 
     protected static ?string $modelLabel = 'Proyecto';
     protected static ?string $pluralModelLabel = 'Proyectos';
-    protected static ?string $tenantOwnershipRelationshipName = 'team';
+    // protected static ?string $tenantOwnershipRelationshipName = 'team';
     /**protected static ?int $navigationSort = 2;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationColor = 'custom-blue';
@@ -56,9 +58,9 @@ class ProyectoResource extends Resource
             //->leftJoin('DatosInicioDeObras', 'DatosInicioDeObras.Expediente', '=', 'Datos_Ejecucion_Obras.Expediente') // Join con la tabla "municipios"
             //->addSelect(trim('TablaDeMunicipios.nombre_municipio'))
            // ->WhereNotNull('carretera');  //->with('municipios');
-           ->where('Proyectos.expediente_id', '!=', NULL)
            ->where('Proyectos.AO_PROYECTO', '>=', $añoAnterior2)
-           ->where('Proyectos.AO_PROYECTO', '<=', $añoActual);
+           ->where('Proyectos.AO_PROYECTO', '<=', $añoActual)
+           ->orderByDesc('Proyectos.AO_PROYECTO');
             //->where('codigo_municipio','=', )
 
     }
@@ -611,7 +613,7 @@ class ProyectoResource extends Resource
                 self::assignedExpedientesFilter(),
                 Filter::make('expediente_id')
                     ->label('Número de expediente')
-                    ->form([
+                    ->schema([
                         TextInput::make('expediente_id')
                             ->label('Nº expediente'),
                     ])
@@ -646,25 +648,83 @@ class ProyectoResource extends Resource
                     ->relationship('municipio', 'nombre_municipio')
                     ->searchable()
                     ->preload(),
-                Tables\Filters\SelectFilter::make('NUMERO_PROYECTO')
-                    ->label('Número de proyecto')
+                Tables\Filters\SelectFilter::make('Servicio_Redactor')
+                    ->label('Serv. Redactor')
                     ->options(fn (): array => Proyecto::query()
+                        ->leftJoin('TablaDeDepartamentos as ServicioRed', 'ServicioRed.CODIGO_DPTO', '=', 'Proyectos.Servicio_redactor')
+                        ->select('Proyectos.Servicio_redactor', 'ServicioRed.DENOMINACION')
                         ->whereNotNull('expediente_id')
-                        ->whereNotNull('NUMERO_PROYECTO')
+                        ->whereNotNull('Servicio_redactor')
                         ->distinct()
-                        ->orderByDesc('NUMERO_PROYECTO')
-                        ->pluck('NUMERO_PROYECTO', 'NUMERO_PROYECTO')
+                        ->orderByDesc('Servicio_redactor')
+                        ->pluck('ServicioRed.DENOMINACION', 'Proyectos.Servicio_redactor'   )
                         ->all())
                     ->searchable(),
             ])
+            ->recordUrl(fn (Proyecto $record): string => static::getUrl('edit', [
+                'record' => static::buildRouteRecordKey($record),
+            ]))
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->url(fn (Proyecto $record): string => static::getUrl('edit', [
+                        'record' => static::buildRouteRecordKey($record),
+                    ])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    private static function buildRouteRecordKey(Proyecto $record): string
+    {
+        $municipio = trim((string) ($record->CODIGO_MUNICIPIO ?? ''));
+        $aoProyecto = trim((string) ($record->AO_PROYECTO ?? ''));
+        $numeroProyecto = trim((string) ($record->NUMERO_PROYECTO ?? ''));
+
+        return implode('|', [$municipio, $aoProyecto, $numeroProyecto]);
+    }
+
+    private static function parseRouteRecordKey(string $key): ?array
+    {
+        $parts = explode('|', $key);
+
+        if (count($parts) !== 3) {
+            return null;
+        }
+
+        [$municipio, $aoProyecto, $numeroProyecto] = $parts;
+
+        if ($municipio === '' || $aoProyecto === '' || $numeroProyecto === '') {
+            return null;
+        }
+
+        return [
+            'CODIGO_MUNICIPIO' => $municipio,
+            'AO_PROYECTO' => $aoProyecto,
+            'NUMERO_PROYECTO' => $numeroProyecto,
+        ];
+    }
+
+    public static function resolveRecordRouteBinding(int | string $key, ?Closure $modifyQuery = null): ?Model
+    {
+        $parsedKey = static::parseRouteRecordKey((string) $key);
+
+        if ($parsedKey === null) {
+            return null;
+        }
+
+        $query = Proyecto::query()
+            ->where('CODIGO_MUNICIPIO', $parsedKey['CODIGO_MUNICIPIO'])
+            ->where('AO_PROYECTO', $parsedKey['AO_PROYECTO'])
+            ->where('NUMERO_PROYECTO', $parsedKey['NUMERO_PROYECTO']);
+
+        if ($modifyQuery !== null) {
+            $query = $modifyQuery($query) ?? $query;
+        }
+
+        return $query->first();
     }
 
     public static function getRelations(): array

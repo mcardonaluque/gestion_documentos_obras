@@ -3,6 +3,7 @@
 namespace App\Filament\Obras\Resources\DatosDeInicioDeObras;
 
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Livewire;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -22,7 +23,6 @@ use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\Documento
 use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
 use App\Filament\Obras\Resources\Concerns\HasWordTemplatePrinting;
 use App\Filament\Traits\ZonasFilter;
-use App\Forms\Components\ImportesInfo;
 use App\Forms\Components\ImportesManagement;
 use App\Models\DatosDeInicioDeObras;
 use App\Services\Importes\ImportesManagementRepository;
@@ -36,6 +36,7 @@ use App\Forms\Components\ObraGeneralInfo;
 use Filament\Tables\Enums\FiltersLayout;
 use App\Filament\Traits\CommonFilters;
 use App\Filament\Traits\MunicipiosFilter;
+use App\Filament\Widgets\DocumentosTable;
 //use Filament\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Filters\QueryBuilder;
 use Illuminate\Validation\ValidationException;
@@ -106,10 +107,14 @@ class DatosDeInicioDeObrasResource extends BaseResource
                 ->label('Información General de la Obra')
                 ->columnSpan(1)
                 ->SetObraData($record ?? null),
-            ImportesInfo::make('importes')
-                ->label('Importes de la Obra')
-                ->columnSpan(1)
-                ->setImportesDeObra($record?->importes ?? $record?->importesPorOrganismo?->first()),
+            // ImportesInfo::make('importes')
+            //     ->label('Importes de la Obra')
+            //     ->columnSpan(1)
+            //     ->setImportesDeObra($record?->importes ?? $record?->importesPorOrganismo?->first()),
+            Livewire::make(DocumentosTable::class, [
+                'expedienteSeleccionado' => (string) ($record?->expediente_id ?? ''),
+            ])
+                ->columnSpan(1),
             ImportesManagement::make('importes_management')
                 ->label('Gestión de importes por organismo')
                 ->columnSpanFull()
@@ -326,11 +331,23 @@ class DatosDeInicioDeObrasResource extends BaseResource
                 Select::make('dpto_redactor')
                     ->label('Departamento Redactor')
                     ->relationship('ayudaR', 'DENOMINACION')
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set): void {
+                        if (filled($state)) {
+                            $set('AyuTecRed', 'SI');
+                        }
+                    })
                     ->extraInputAttributes(['class' => '!h-9 !py-1 !text-sm !leading-none']),
 
                 Select::make('departamento_direccion')
                     ->label('Departamento Dirección')
-                    ->relationship('ayudaD', 'DENOMINACION'),
+                    ->relationship('ayudaD', 'DENOMINACION')
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set): void {
+                        if (filled($state)) {
+                            $set('AyuTecDir', 'SI');
+                        }
+                    }),
 
                 TextInput::make('AyuTecRed')
                     ->label('Ayuda Técnica a la Redacción')

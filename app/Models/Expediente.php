@@ -71,7 +71,7 @@
 
         }
         public function planes(): BelongsTo{
-            return $this->belongsTo(Planes::class,'codigo_plan ','Codigo_Plan');
+            return $this->belongsTo(Planes::class, 'codigo_plan', 'codigo_plan');
     }
 
         /**

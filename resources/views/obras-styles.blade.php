@@ -75,6 +75,37 @@
     gap: 0.5rem;
 }
 
+    .fi-modal,
+    .fi-modal-window,
+    .fi-modal-overlay,
+    dialog,
+    [role="dialog"] {
+        z-index: 10000 !important;
+    }
+
+    .fi-modal > .fi-modal-close-overlay,
+    .fi-modal-overlay,
+    .fi-modal-close-overlay,
+    dialog::backdrop {
+        background-color: rgba(15, 23, 42, 0.88) !important;
+        backdrop-filter: blur(6px);
+    }
+
+    .fi-modal > .fi-modal-close-overlay {
+        opacity: 1 !important;
+        z-index: 9998 !important;
+    }
+
+    .fi-modal > .fi-modal-window-ctn {
+        z-index: 9999 !important;
+    }
+
+    body:has(.fi-modal.fi-modal-open) .fi-topbar,
+    body:has(.fi-modal.fi-modal-open) .custom-tabs-container {
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
 
 
     .fi-header-heading {

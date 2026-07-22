@@ -18,6 +18,20 @@ use Illuminate\Support\Facades\DB;
  */
 final class DateRuleEvaluator
 {
+    private const WILDCARD = '*';
+
+    private const SYSTEM_TODAY_TOKENS = [
+        'today',
+        '@today',
+        'current_date',
+    ];
+
+    private const SYSTEM_NOW_TOKENS = [
+        'now',
+        '@now',
+        'current_timestamp',
+    ];
+
     /**
      * @param array<int, string> $changedFields
      * @return Collection<int, DateRuleEvaluationResult>
@@ -36,11 +50,13 @@ final class DateRuleEvaluator
         $results = collect();
 
         foreach ($rules as $rule) {
-            if ($this->normalizeIdentifier($rule->tabla1) !== $table) {
+            if (! $this->ruleMatchesTable($rule->tabla1, $table)) {
                 continue;
             }
 
-            if (! in_array($this->normalizeIdentifier($rule->campo1), $fields, true)) {
+            $targetFields = $this->resolveTargetFields($rule->campo1, $changedFields, $fields);
+
+            if ($targetFields === []) {
                 continue;
             }
 
@@ -48,28 +64,30 @@ final class DateRuleEvaluator
                 continue;
             }
 
-            $leftRaw = $this->resolveFieldValue($model, $rule->tabla1, $rule->campo1);
-            $rightRaw = $this->resolveFieldValue($model, $rule->tabla2, $rule->campo2);
+            foreach ($targetFields as $targetField) {
+                $leftRaw = $this->resolveFieldValue($model, $rule->tabla1, $targetField);
+                $rightRaw = $this->resolveRightValue($model, $rule->tabla2, $rule->campo2);
 
-            $leftDate = $this->toDate($leftRaw);
-            $rightDate = $this->toDate($rightRaw);
+                $leftDate = $this->toDate($leftRaw);
+                $rightDate = $this->toDate($rightRaw);
 
-            $passed = $this->evaluateCondition($rule->condicion, $leftDate, $rightDate, $rule->plazo_dias, $rule->aviso_dias);
-            $triggered = $rule->dispara_si_cumple ? $passed : ! $passed;
-            $messageStage = $this->resolveMessageStage($rule->condicion, $passed);
-            $message = $this->resolveRuleMessage($rule, $messageStage);
+                $passed = $this->evaluateCondition($rule->condicion, $leftDate, $rightDate, $rule->plazo_dias, $rule->aviso_dias);
+                $triggered = $rule->dispara_si_cumple ? $passed : ! $passed;
+                $messageStage = $this->resolveMessageStage($rule->condicion, $passed);
+                $message = $this->resolveRuleMessage($rule, $messageStage);
 
-            $results->push(new DateRuleEvaluationResult(
-                rule: $rule,
-                field: $rule->campo1,
-                passed: $passed,
-                triggered: $triggered,
-                messageStage: $messageStage,
-                type: $rule->tipo,
-                message: $message,
-                leftValue: $leftRaw,
-                rightValue: $rightRaw,
-            ));
+                $results->push(new DateRuleEvaluationResult(
+                    rule: $rule,
+                    field: $targetField,
+                    passed: $passed,
+                    triggered: $triggered,
+                    messageStage: $messageStage,
+                    type: $rule->tipo,
+                    message: $message,
+                    leftValue: $leftRaw,
+                    rightValue: $rightRaw,
+                ));
+            }
         }
 
         /** @var Collection<int, DateRuleEvaluationResult> $results */
@@ -181,12 +199,18 @@ final class DateRuleEvaluator
         ?int $deadlineDays,
         ?int $warningDays,
     ): bool {
+        $today = now()->startOfDay();
+
         return match ($condition) {
             DateRuleCondition::IS_DATE => $leftDate !== null,
             DateRuleCondition::AFTER => $leftDate !== null && $rightDate !== null && $leftDate->gt($rightDate),
             DateRuleCondition::AFTER_OR_EQUAL => $leftDate !== null && $rightDate !== null && ($leftDate->gt($rightDate) || $leftDate->equalTo($rightDate)),
             DateRuleCondition::BEFORE => $leftDate !== null && $rightDate !== null && $leftDate->lt($rightDate),
             DateRuleCondition::BEFORE_OR_EQUAL => $leftDate !== null && $rightDate !== null && ($leftDate->lt($rightDate) || $leftDate->equalTo($rightDate)),
+            DateRuleCondition::AFTER_TODAY => $leftDate !== null && $leftDate->copy()->startOfDay()->gt($today),
+            DateRuleCondition::AFTER_OR_EQUAL_TODAY => $leftDate !== null && ($leftDate->copy()->startOfDay()->gt($today) || $leftDate->copy()->startOfDay()->equalTo($today)),
+            DateRuleCondition::BEFORE_TODAY => $leftDate !== null && $leftDate->copy()->startOfDay()->lt($today),
+            DateRuleCondition::BEFORE_OR_EQUAL_TODAY => $leftDate !== null && ($leftDate->copy()->startOfDay()->lt($today) || $leftDate->copy()->startOfDay()->equalTo($today)),
             DateRuleCondition::MAX_DAYS_BETWEEN => $leftDate !== null && $rightDate !== null && $deadlineDays !== null
                 && $leftDate->diffInDays($rightDate) <= $deadlineDays,
             DateRuleCondition::MIN_DAYS_BETWEEN => $leftDate !== null && $rightDate !== null && $deadlineDays !== null
@@ -235,6 +259,77 @@ final class DateRuleEvaluator
         } catch (\Throwable) {
             return null;
         }
+    }
+
+    /**
+     * @param array<int, string> $changedFields
+     * @param array<int, string> $normalizedChangedFields
+     * @return array<int, string>
+     */
+    private function resolveTargetFields(?string $ruleField, array $changedFields, array $normalizedChangedFields): array
+    {
+        if ($ruleField === null || $ruleField === '') {
+            return [];
+        }
+
+        if ($this->isWildcard($ruleField)) {
+            return $changedFields;
+        }
+
+        $normalizedRuleField = $this->normalizeIdentifier($ruleField);
+
+        foreach ($normalizedChangedFields as $index => $changedField) {
+            if ($changedField === $normalizedRuleField) {
+                return [$changedFields[$index]];
+            }
+        }
+
+        return [];
+    }
+
+    private function resolveRightValue(Model $model, ?string $tableName, ?string $fieldName): ?string
+    {
+        $systemDate = $this->resolveSystemDateValue($tableName, $fieldName);
+
+        if ($systemDate !== null) {
+            return $systemDate;
+        }
+
+        return $this->resolveFieldValue($model, $tableName, $fieldName);
+    }
+
+    private function resolveSystemDateValue(?string $tableName, ?string $fieldName): ?string
+    {
+        $normalizedTable = $tableName !== null ? $this->normalizeIdentifier($tableName) : '';
+        $normalizedField = $fieldName !== null ? $this->normalizeIdentifier($fieldName) : '';
+
+        $tokens = array_filter([$normalizedTable, $normalizedField], static fn (string $value): bool => $value !== '');
+
+        foreach ($tokens as $token) {
+            if (in_array($token, self::SYSTEM_TODAY_TOKENS, true)) {
+                return now()->startOfDay()->toDateTimeString();
+            }
+
+            if (in_array($token, self::SYSTEM_NOW_TOKENS, true)) {
+                return now()->toDateTimeString();
+            }
+        }
+
+        return null;
+    }
+
+    private function ruleMatchesTable(?string $ruleTable, string $currentTable): bool
+    {
+        if ($ruleTable === null || $ruleTable === '') {
+            return false;
+        }
+
+        return $this->isWildcard($ruleTable) || $this->normalizeIdentifier($ruleTable) === $currentTable;
+    }
+
+    private function isWildcard(string $value): bool
+    {
+        return trim($value) === self::WILDCARD;
     }
 
     private function normalizeIdentifier(string $value): string

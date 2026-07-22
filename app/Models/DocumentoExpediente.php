@@ -204,10 +204,33 @@ class DocumentoExpediente extends Model
             return $data;
         }
 
-        $data['Codigo_Plan'] = $expediente->codigo_plan ?? $expediente->Codigo_Plan ?? $data['Codigo_Plan'] ?? null;
-        $data['referencia'] = $expediente->referencia ?? $data['referencia'] ?? null;
-        $data['subreferencia'] = $expediente->subreferencia ?? $data['subreferencia'] ?? null;
-        $data['ao_ejecucion'] = $expediente->ao_ejecucion ?? $data['ao_ejecucion'] ?? null;
+        $codigoPlan = $expediente->codigo_plan
+            ?? $expediente->Codigo_Plan
+            ?? $expediente->Codigo_plan
+            ?? $data['Codigo_Plan']
+            ?? null;
+
+        $numeroObra = $expediente->numero_obra
+            ?? $expediente->referencia
+            ?? $data['referencia']
+            ?? null;
+
+        $subreferencia = $expediente->subreferecnia
+            ?? $expediente->subreferencia
+            ?? $data['subreferencia']
+            ?? null;
+
+        $aoEjecucion = $expediente->ao_ejecucion
+            ?? $data['ao_ejecucion']
+            ?? null;
+
+        $data['Codigo_Plan'] = $codigoPlan;
+        $data['codigo_plan'] = $codigoPlan;
+        $data['referencia'] = $numeroObra;
+        $data['numero_obra'] = $numeroObra;
+        $data['subreferencia'] = $subreferencia;
+        $data['subreferecnia'] = $subreferencia;
+        $data['ao_ejecucion'] = $aoEjecucion;
         $data['nsecuencia'] = static::nextSequenceForExpediente((string) $expedienteId);
         $data['team_id'] = $data['team_id'] ?? $expediente->team_id ?? null;
 

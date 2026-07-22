@@ -3,8 +3,9 @@
 namespace App\Filament\Widgets;
 
 use App\Events\SystemEventOccurred;
+use App\Helpers\GetDatosGenerales;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\CreateAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -107,52 +108,65 @@ class DocumentosTable extends BaseWidget
                     }),
             ])
             ->headerActions([
-            CreateAction::make()
+            Action::make('subirDocumento')
                     ->label('Añadir un documento de expediente')
+                    ->fillForm(function (): array {
+                        return $this->resolveCreateDocumentDefaults();
+                    })
                     ->schema([
                 Section::make()
                     ->schema([
                 Select::make('expediente_id')
                     ->label('Expediente')
-                    ->relationship('expedientes', 'expediente_id')
                     ->searchable()
                     ->preload()
                     ->default(fn () => $this->expedienteSeleccionado)
                     ->disabled()
                     ->dehydrated()
                     ->required(),
-                Select::make('Codigo_Plan')
-                    ->relationship('planes', 'codigo_plan')
+                TextInput::make('Codigo_Plan')
                     ->label('Código plan')
-                    ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
-                        'expediente_id' => $this->expedienteSeleccionado,
-                    ])['Codigo_Plan'] ?? null)
-                    ->disabled()
+                    ->readOnly()
+                    ->default(fn () => $this->resolveCreateDocumentDefaults()['Codigo_Plan'] ?? null)
                     ->required(),
+                TextInput::make('plan_denominacion')
+                    ->label('Denominación del plan')
+                    ->readOnly()
+                    ->default(fn () => $this->resolveCreateDocumentDefaults()['plan_denominacion'] ?? null)
+                    ->dehydrated(false),
                 TextInput::make('referencia')
                     ->label('Número obra')
                     ->readOnly()
-                    ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
-                        'expediente_id' => $this->expedienteSeleccionado,
-                    ])['referencia'] ?? null)
+                    ->default(fn () => $this->resolveCreateDocumentDefaults()['referencia'] ?? null)
                     ->required()
                     ->numeric(),
                 TextInput::make('subreferencia')
                     ->label('Subreferencia')
                     ->readOnly()
-                    ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
-                        'expediente_id' => $this->expedienteSeleccionado,
-                    ])['subreferencia'] ?? null)
+                    ->default(fn () => $this->resolveCreateDocumentDefaults()['subreferencia'] ?? null)
                     ->numeric()
-                    ->default(null),
+                    ->default(fn () => $this->resolveCreateDocumentDefaults()['subreferencia'] ?? null),
                 TextInput::make('ao_ejecucion')
                     ->label('Año ejecución')
                     ->readOnly()
-                    ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
-                        'expediente_id' => $this->expedienteSeleccionado,
-                    ])['ao_ejecucion'] ?? null)
+                    ->default(fn () => $this->resolveCreateDocumentDefaults()['ao_ejecucion'] ?? null)
                     ->required()
                     ->numeric(),
+                TextInput::make('municipio_nombre')
+                    ->label('Municipio')
+                    ->readOnly()
+                    ->default(fn () => $this->resolveCreateDocumentDefaults()['municipio_nombre'] ?? null)
+                    ->dehydrated(false),
+                TextInput::make('estado_nombre')
+                    ->label('Estado de la obra')
+                    ->readOnly()
+                    ->default(fn () => $this->resolveCreateDocumentDefaults()['estado_nombre'] ?? null)
+                    ->dehydrated(false),
+                TextInput::make('forma_ejecucion_nombre')
+                    ->label('Forma de ejecución')
+                    ->readOnly()
+                    ->default(fn () => $this->resolveCreateDocumentDefaults()['forma_ejecucion_nombre'] ?? null)
+                    ->dehydrated(false),
                 Select::make('cod_documento')
                         ->label('Tipo Documento')
                         ->relationship('tipodocumentos', 'nombre')
@@ -165,11 +179,6 @@ class DocumentosTable extends BaseWidget
 
                 DatePicker::make('fechaincorporacion')
                         ->label('Fecha Incorporación'),
-
-                Select::make('estado')
-                        ->label('Estado')
-                        ->relationship('estados', 'nombre')
-                        ->required(),
                 // Campo documental principal para el visor PDF.
                 TextInput::make('archivo')
                     ->label('Ruta o URL del PDF')
@@ -187,18 +196,16 @@ class DocumentosTable extends BaseWidget
                     ->label('Nº secuencia')
                     ->readOnly()
                     ->numeric()
-                    ->default(fn () => DocumentoExpediente::applyExpedienteDefaults([
-                        'expediente_id' => $this->expedienteSeleccionado,
-                    ])['nsecuencia'] ?? null),
+                    ->default(fn () => $this->resolveCreateDocumentDefaults()['nsecuencia'] ?? null),
                  DatePicker::make('fechaHelp'),
-                  Select::make('estado')
+                                    Select::make('estado')
                     ->relationship('estados', 'nombre')
                     ->required(),
 
                 Select::make('team_id')
                     ->label('Municipio')
                     ->relationship('team', 'name')
-                    ->default(fn () => Filament::getTenant()?->id),
+                    ->default(fn () => $this->resolveCreateDocumentDefaults()['team_id'] ?? Filament::getTenant()?->id),
                 Select::make('destino')
                     ->relationship('destinos', 'destino')
                     ->label('Destino'),
@@ -209,7 +216,7 @@ class DocumentosTable extends BaseWidget
                     ->columns(2),
                     ])
 
-                ->action(function (array $data) {
+                ->action(function (array $data): void {
                         // Asignar automáticamente el expediente seleccionado
                         $data['expediente_id'] = $this->expedienteSeleccionado;
                         $data = DocumentoExpediente::applyExpedienteDefaults($data);
@@ -337,5 +344,36 @@ class DocumentosTable extends BaseWidget
             ->emptyStateHeading($this->expedienteSeleccionado ? 'No hay documentos' : 'Selecciona un expediente')
             ->emptyStateDescription($this->expedienteSeleccionado ? 'Agrega el primer documento' : 'Haz click en un expediente de la tabla superior')
             ->emptyStateIcon('heroicon-o-document');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function resolveCreateDocumentDefaults(): array
+    {
+        $defaults = GetDatosGenerales::getDatosGenerales($this->expedienteSeleccionado);
+        $documentDefaults = DocumentoExpediente::applyExpedienteDefaults([
+            'expediente_id' => $this->expedienteSeleccionado,
+            'team_id' => Filament::getTenant()?->id,
+        ]);
+
+        $merged = array_merge($defaults, $documentDefaults);
+
+        return [
+            'expediente_id' => $merged['expediente_id'] ?? $this->expedienteSeleccionado,
+            'Codigo_Plan' => $merged['Codigo_Plan'] ?? $merged['expediente_codigo_plan'] ?? null,
+            'plan_denominacion' => $merged['plan_denominacion'] ?? $merged['expediente_plan_denominacion'] ?? null,
+            'referencia' => $merged['referencia'] ?? $merged['numero_obra'] ?? null,
+            'numero_obra' => $merged['numero_obra'] ?? $merged['referencia'] ?? null,
+            'subreferencia' => $merged['subreferencia'] ?? null,
+            'subreferecnia' => $merged['subreferecnia'] ?? $merged['subreferencia'] ?? null,
+            'ao_ejecucion' => $merged['ao_ejecucion'] ?? null,
+            'municipio_nombre' => $merged['municipio_nombre'] ?? $merged['expediente_municipio_nombre'] ?? null,
+            'estado_nombre' => $merged['estado_nombre'] ?? $merged['expediente_estado_nombre'] ?? null,
+            'forma_ejecucion_nombre' => $merged['forma_ejecucion_nombre'] ?? $merged['expediente_forma_ejecucion_nombre'] ?? null,
+            'nsecuencia' => $merged['nsecuencia'] ?? null,
+            'team_id' => $merged['team_id'] ?? Filament::getTenant()?->id,
+            'fechaincorporacion' => now(),
+        ];
     }
 }

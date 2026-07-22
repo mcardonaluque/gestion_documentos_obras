@@ -11,6 +11,10 @@ enum DateRuleCondition: string
     case AFTER_OR_EQUAL = 'after_or_equal';
     case BEFORE = 'before';
     case BEFORE_OR_EQUAL = 'before_or_equal';
+    case AFTER_TODAY = 'after_today';
+    case AFTER_OR_EQUAL_TODAY = 'after_or_equal_today';
+    case BEFORE_TODAY = 'before_today';
+    case BEFORE_OR_EQUAL_TODAY = 'before_or_equal_today';
     case MAX_DAYS_BETWEEN = 'max_days_between';
     case MIN_DAYS_BETWEEN = 'min_days_between';
     case DEADLINE_NOT_EXPIRED = 'deadline_not_expired';
@@ -27,6 +31,10 @@ enum DateRuleCondition: string
             self::AFTER_OR_EQUAL->value => 'Posterior o igual a',
             self::BEFORE->value => 'Anterior a',
             self::BEFORE_OR_EQUAL->value => 'Anterior o igual a',
+            self::AFTER_TODAY->value => 'Posterior a hoy',
+            self::AFTER_OR_EQUAL_TODAY->value => 'Posterior o igual a hoy',
+            self::BEFORE_TODAY->value => 'Anterior a hoy',
+            self::BEFORE_OR_EQUAL_TODAY->value => 'Anterior o igual a hoy',
             self::MAX_DAYS_BETWEEN->value => 'Maximo de dias entre fechas',
             self::MIN_DAYS_BETWEEN->value => 'Minimo de dias entre fechas',
             self::DEADLINE_NOT_EXPIRED->value => 'Plazo no vencido',
@@ -38,7 +46,12 @@ enum DateRuleCondition: string
     {
         return match ($this) {
             self::IS_DATE => false,
-            self::DEADLINE_NOT_EXPIRED, self::DAYS_TO_DEADLINE_LTE => false,
+            self::AFTER_TODAY,
+            self::AFTER_OR_EQUAL_TODAY,
+            self::BEFORE_TODAY,
+            self::BEFORE_OR_EQUAL_TODAY,
+            self::DEADLINE_NOT_EXPIRED,
+            self::DAYS_TO_DEADLINE_LTE => false,
             default => true,
         };
     }

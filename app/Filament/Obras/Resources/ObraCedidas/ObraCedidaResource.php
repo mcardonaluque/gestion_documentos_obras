@@ -89,6 +89,7 @@ class ObraCedidaResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('FechaCesion', 'desc')
             ->columns([
                 TextColumn::make('Codigo_Plan')
                     ->searchable(),

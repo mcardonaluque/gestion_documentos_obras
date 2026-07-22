@@ -52,18 +52,23 @@ class DateValidationRuleResource extends Resource
                 TextInput::make('tabla1')
                     ->label('Tabla principal')
                     ->required()
-                    ->placeholder('Ejemplo: Expedientes')
+                    ->placeholder('Ejemplo: Expedientes o * para todas')
+                    ->helperText('Use * para aplicar la regla a cualquier tabla observada.')
                     ->maxLength(120),
                 TextInput::make('campo1')
                     ->label('Campo fecha principal')
                     ->required()
-                    ->placeholder('Ejemplo: fechaincorporacion')
+                    ->placeholder('Ejemplo: fechaincorporacion o * para todos los campos fecha cambiados')
+                    ->helperText('Use * para aplicar la regla a todos los campos fecha modificados en el guardado.')
                     ->maxLength(120),
                 TextInput::make('tabla2')
                     ->label('Tabla comparacion')
+                    ->placeholder('Ejemplo: Proyectos o today/now para fecha de sistema')
                     ->maxLength(120),
                 TextInput::make('campo2')
                     ->label('Campo fecha comparacion')
+                    ->placeholder('Ejemplo: fecha_recepcion_proyecto o today/now')
+                    ->helperText('Puede usar today, @today, current_date, now, @now o current_timestamp como valor de sistema.')
                     ->maxLength(120),
                 Select::make('condicion')
                     ->options(DateRuleCondition::options())

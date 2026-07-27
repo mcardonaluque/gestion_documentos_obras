@@ -356,6 +356,12 @@
                 <a href="/obras/datos-de-inicio-de-obras" class="custom-submenu-item">
                     🏗️ Inicio de Obras
                 </a>
+                    <a href="/obras/normativa-ppacs" class="custom-submenu-item">
+                        📜 Normativa PPAC
+                    </a>
+                    <a href="/obras/prorrogas-ejecucion" class="custom-submenu-item">
+                        📅 Prórrogas y plazos
+                    </a>
             </div>
         </div>
         <!-- Tab Proyectos -->

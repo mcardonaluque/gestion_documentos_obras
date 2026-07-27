@@ -8,6 +8,7 @@ namespace App\Providers\Filament;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use App\Filament\Auth\Login as CustomLogin;
+use App\Http\Middleware\EnsureSuperAdminForAdminPanel;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Livewire\PersistentDatabaseNotifications;
 use App\Filament\Widgets\NotificationsWidget;
@@ -88,6 +89,7 @@ class AdminPanelProvider extends PanelProvider
             ])
            ->authMiddleware([
                 Authenticate::class,
+             EnsureSuperAdminForAdminPanel::class,
             ])
             ->renderHook('panels::head.end', fn () => view('filament-table-compact-styles'));
            // ->renderHook('panels::head.end', fn () => view('admin-styles'));

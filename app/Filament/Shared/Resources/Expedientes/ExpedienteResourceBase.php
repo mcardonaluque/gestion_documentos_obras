@@ -6,6 +6,7 @@ use App\Events\SystemEventOccurred;
 use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
 use App\Filament\Shared\Resources\Expedientes\RelationManagers\DocumentosRelationManager;
 use App\Filament\Traits\CommonFilters;
+use App\Forms\Components\PlazosObraInfo;
 use App\Models\DocumentoGenerico;
 use App\Models\Expediente;
 use App\Models\DocumentoExpediente;
@@ -86,6 +87,9 @@ abstract class ExpedienteResourceBase extends Resource
                     ->disabled()
                     ->label('Municipio')
                     ->relationship('team', 'name'),
+                PlazosObraInfo::make('plazos_obra_info')
+                    ->label('Plazos activos')
+                    ->columnSpanFull(),
             ]);
     }
 

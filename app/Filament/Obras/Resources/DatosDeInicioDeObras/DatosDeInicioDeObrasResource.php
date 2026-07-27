@@ -24,6 +24,7 @@ use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
 use App\Filament\Obras\Resources\Concerns\HasWordTemplatePrinting;
 use App\Filament\Traits\ZonasFilter;
 use App\Forms\Components\ImportesManagement;
+use App\Forms\Components\PlazosObraInfo;
 use App\Models\DatosDeInicioDeObras;
 use App\Services\Importes\ImportesManagementRepository;
 use Filament\Forms;
@@ -115,6 +116,9 @@ class DatosDeInicioDeObrasResource extends BaseResource
                 'expedienteSeleccionado' => (string) ($record?->expediente_id ?? ''),
             ])
                 ->columnSpan(1),
+            PlazosObraInfo::make('plazos_obra_info')
+                ->label('Plazos activos')
+                ->columnSpanFull(),
             ImportesManagement::make('importes_management')
                 ->label('Gestión de importes por organismo')
                 ->columnSpanFull()

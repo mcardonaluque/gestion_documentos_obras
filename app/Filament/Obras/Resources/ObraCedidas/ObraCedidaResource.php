@@ -6,6 +6,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Actions\EditAction;
@@ -61,6 +62,10 @@ class ObraCedidaResource extends Resource
                 DateTimePicker::make('FechaAdjudicacion'),
                 TextInput::make('ImporteAdjudicacion_Pts')
                     ->numeric(),
+                Section::make('Datos del Contratista')
+                ->columnSpanFull()
+                ->columns(7)
+                ->schema([
                 TextInput::make('NombreContratista')
                     ->maxLength(70),
                 TextInput::make('DomicilioContratista')
@@ -73,6 +78,7 @@ class ObraCedidaResource extends Resource
                     ->numeric(),
                 TextInput::make('NIFContratista')
                     ->maxLength(15),
+                ]),
                 DateTimePicker::make('FechaContrato'),
                 DateTimePicker::make('FechaRemisionInterv'),
                 TextInput::make('ImporteAdjudicacion')

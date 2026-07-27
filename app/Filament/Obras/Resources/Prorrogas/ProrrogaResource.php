@@ -40,11 +40,17 @@ class ProrrogaResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'expediente_id';
 
+    /**
+     * La navegación se agrupa bajo Ejecución para ubicar la gestión de prórrogas.
+     */
     public static function getNavigationGroup(): string | \UnitEnum | null
     {
         return 'Ejecucion';
     }
 
+    /**
+     * Limita el listado a expedientes de ejecución con expediente asociado.
+     */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -53,6 +59,9 @@ class ProrrogaResource extends Resource
             ->where('Datos_Ejecucion_Obras.expediente_id', '<>', '');
     }
 
+    /**
+     * Formulario informativo del expediente base sobre el que se gestionan las prórrogas.
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -88,6 +97,9 @@ class ProrrogaResource extends Resource
             ]);
     }
 
+    /**
+     * Tabla principal de gestión de expedientes con acceso a las prórrogas.
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -129,6 +141,9 @@ class ProrrogaResource extends Resource
             ->defaultSort('ao_ejecucion', 'desc');
     }
 
+    /**
+     * La gestión detallada de prórrogas se expone en el relation manager asociado.
+     */
     public static function getRelations(): array
     {
         return [
@@ -136,6 +151,9 @@ class ProrrogaResource extends Resource
         ];
     }
 
+    /**
+     * Páginas del recurso para listar y editar el expediente gestor de prórrogas.
+     */
     public static function getPages(): array
     {
         return [

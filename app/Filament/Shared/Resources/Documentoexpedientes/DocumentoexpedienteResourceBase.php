@@ -5,6 +5,7 @@ namespace App\Filament\Shared\Resources\Documentoexpedientes;
 use App\Models\DocumentoExpediente;
 use App\Models\Planes;
 use Filament\Facades\Filament;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -233,6 +234,16 @@ abstract class DocumentoexpedienteResourceBase extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('ver_documentos_agrupados')
+                    ->label('Ver documentos del expediente')
+                    ->icon('heroicon-o-folder-open')
+                    ->slideOver()
+                    ->modalWidth('xl')
+                    ->modalHeading(fn ($record) => 'Documentos del expediente ' . ($record->expedientes?->expediente_id ?? $record->expediente_id))
+                    ->modalContent(fn ($record) => view('documentos-slideover', [
+                        'expediente' => $record->expedientes,
+                        'documentos' => $record->expedientes?->documentos ?? collect(),
+                    ])),
                 ViewAction::make('Ver Documento')
                     ->url(fn ($record): string => static::getUrl('view', ['record' => $record])),
             ])

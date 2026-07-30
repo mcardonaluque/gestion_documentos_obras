@@ -4,6 +4,10 @@ namespace App\Filament\Widgets;
 
 use App\Events\SystemEventOccurred;
 use App\Helpers\GetDatosGenerales;
+use App\Models\DocumentoGenerico;
+use App\Models\PlazoObraActivo;
+use App\Services\Prorrogas\ProrrogaRulesService;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
@@ -18,6 +22,7 @@ use App\Models\DocumentoExpediente;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Filament\Facades\Filament;
 
@@ -217,6 +222,27 @@ class DocumentosTable extends BaseWidget
                     ])
 
                 ->action(function (array $data): void {
+                        $documentType = DocumentoGenerico::query()->find($data['cod_documento'] ?? null);
+
+                        if ($documentType && $this->isJustificationDocument($documentType)) {
+                            $plazoJustificacion = PlazoObraActivo::query()
+                                ->where('expediente_id', $this->expedienteSeleccionado)
+                                ->where('fase', 'justificacion')
+                                ->where('activo', true)
+                                ->orderByDesc('id')
+                                ->first();
+
+                            if ($plazoJustificacion) {
+                                $rulesService = app(ProrrogaRulesService::class);
+
+                                if (! $rulesService->allowJustificationUpload($plazoJustificacion, Carbon::now())) {
+                                    throw ValidationException::withMessages([
+                                        'cod_documento' => 'No se puede subir documentación de justificación fuera del plazo vigente. La fecha límite actual es '.Carbon::parse((string) $plazoJustificacion->fecha_fin)->format('d/m/Y').'.',
+                                    ]);
+                                }
+                            }
+                        }
+
                         // Asignar automáticamente el expediente seleccionado
                         $data['expediente_id'] = $this->expedienteSeleccionado;
                         $data = DocumentoExpediente::applyExpedienteDefaults($data);
@@ -349,6 +375,13 @@ class DocumentosTable extends BaseWidget
     /**
      * @return array<string, mixed>
      */
+    private function isJustificationDocument(DocumentoGenerico $documentType): bool
+    {
+        $phase = (string) ($documentType->fase_doc ?? '');
+
+        return str_contains(strtolower($phase), 'justific');
+    }
+
     private function resolveCreateDocumentDefaults(): array
     {
         $defaults = GetDatosGenerales::getDatosGenerales($this->expedienteSeleccionado);

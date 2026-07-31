@@ -44,25 +44,62 @@ class CreateExpedienteUserAssignment extends CreateRecord
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $expedienteId = (string) $data['expediente_id'];
-        $userId = (int) $data['user_id'];
+        $selectedExpedienteIds = collect((array) ($data['expediente_id'] ?? []))
+            ->filter(fn ($value) => filled($value))
+            ->map(fn ($value) => (string) $value)
+            ->unique()
+            ->values()
+            ->all();
 
-        $alreadyAssigned = ExpedienteUserAssignment::query()
-            ->where('expediente_id', $expedienteId)
-            ->where('user_id', $userId)
-            ->exists();
-
-        if ($alreadyAssigned) {
+        if ($selectedExpedienteIds === []) {
             throw ValidationException::withMessages([
-                'user_id' => 'Este usuario ya tiene asignado ese expediente.',
+                'expediente_id' => 'Debe seleccionar al menos un expediente.',
+            ]);
+        }
+
+        $userId = (int) $data['user_id'];
+        $existingAssignments = ExpedienteUserAssignment::query()
+            ->whereIn('expediente_id', $selectedExpedienteIds)
+            ->where('user_id', $userId)
+            ->pluck('expediente_id')
+            ->map(fn ($value) => (string) $value)
+            ->all();
+
+        if ($existingAssignments !== []) {
+            throw ValidationException::withMessages([
+                'expediente_id' => 'Algunos de los expedientes ya estaban asignados a este usuario: ' . implode(', ', $existingAssignments) . '.',
             ]);
         }
 
         $data['assigned_by'] = Auth::id();
-        $data['team_id'] = Expediente::query()
-            ->where('expediente_id', $expedienteId)
-            ->value('team_id');
 
         return $data;
+    }
+
+    protected function handleRecordCreation(array $data): \App\Models\ExpedienteUserAssignment
+    {
+        $selectedExpedienteIds = collect((array) ($data['expediente_id'] ?? []))
+            ->filter(fn ($value) => filled($value))
+            ->map(fn ($value) => (string) $value)
+            ->unique()
+            ->values();
+
+        $userId = (int) $data['user_id'];
+        $createdAssignments = collect();
+
+        foreach ($selectedExpedienteIds as $expedienteId) {
+            $teamId = Expediente::query()
+                ->where('expediente_id', $expedienteId)
+                ->value('team_id');
+
+            $createdAssignments->push(ExpedienteUserAssignment::create([
+                'expediente_id' => $expedienteId,
+                'user_id' => $userId,
+                'assigned_by' => Auth::id(),
+                'team_id' => $teamId,
+            ]));
+        }
+
+        return $createdAssignments->first() ?? new ExpedienteUserAssignment();
     }
 }

@@ -117,6 +117,19 @@ final class RegistrarProrrogaAction
                 $plazo->save();
             }
 
+            $justificationDeadline = $this->rulesService->calculateJustificationDeadline($newLimit);
+            $justificationPlazos = PlazoObraActivo::query()
+                ->where('expediente_id', $owner->expediente_id)
+                ->where('fase', 'justificacion')
+                ->where('activo', true)
+                ->get();
+
+            foreach ($justificationPlazos as $plazo) {
+                $plazo->forceFill(['fecha_fin' => $justificationDeadline->toDateString()]);
+                $plazo->fuente_ultima_actualizacion = 'prorroga';
+                $plazo->save();
+            }
+
             return $prorroga;
         });
     }

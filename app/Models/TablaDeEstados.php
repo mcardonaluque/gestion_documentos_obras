@@ -13,6 +13,7 @@ class TablaDeEstados extends Model
     protected $primaryKey='cod_estado';
     protected $keyType = 'string';
     public $incrementing = false;
+    public $timestamps = false;
     protected $fillable=[
         'cod_estado',
         'estado',

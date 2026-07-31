@@ -62,4 +62,22 @@ final class ProrrogaRulesService
 
         return new ProrrogaValidationResult(true, null, $maxAllowedDays);
     }
+
+    public function calculateJustificationDeadline(CarbonInterface $newExecutionLimit): Carbon
+    {
+        return Carbon::parse($newExecutionLimit)->copy()->addMonthsNoOverflow(3)->endOfDay();
+    }
+
+    public function allowJustificationUpload(PlazoObraActivo $plazo, CarbonInterface $uploadDate): bool
+    {
+        if (($plazo->fase ?? '') !== 'justificacion' || ! (bool) ($plazo->activo ?? false)) {
+            return true;
+        }
+
+        $deadline = $plazo->fecha_fin
+            ? Carbon::parse((string) $plazo->fecha_fin)->endOfDay()
+            : $uploadDate->copy()->endOfDay();
+
+        return $uploadDate->lessThanOrEqualTo($deadline);
+    }
 }

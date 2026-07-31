@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,11 +29,11 @@ class DocumentoGenerico extends Model
 
     protected $foreignKey = 'expediente_id';
 
-    public $incrementing = false;
+    public $incrementing = true;
 
     public $timestamps = false;
 
-    protected $keyType = 'string';
+    protected $keyType = 'int';
 
     /**
      * @var array<int, string>
@@ -62,6 +63,103 @@ class DocumentoGenerico extends Model
     protected $casts = [
         'con_plantilla' => 'boolean',
     ];
+
+    public static function normalizePhase(?string $phase): ?string
+    {
+        $normalized = strtolower(trim((string) ($phase ?? '')));
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        if (str_contains($normalized, 'justific')) {
+            return 'justificacion';
+        }
+
+        if (str_contains($normalized, 'ejecuc')) {
+            return 'ejecucion';
+        }
+
+        if (str_contains($normalized, 'contrat')) {
+            return 'contratacion';
+        }
+
+        if (str_contains($normalized, 'cesi')) {
+            return 'cesion';
+        }
+
+        if (str_contains($normalized, 'aproba')) {
+            return 'aprobacion';
+        }
+
+        if (str_contains($normalized, 'proyect')) {
+            return 'proyecto';
+        }
+
+        return $normalized;
+    }
+
+    public static function phaseLabel(?string $phase): string
+    {
+        return match (self::normalizePhase($phase)) {
+            'proyecto' => 'Proyecto',
+            'aprobacion' => 'Aprobación',
+            'cesion' => 'Cesión',
+            'contratacion' => 'Contratación',
+            'ejecucion' => 'Ejecución',
+            'justificacion' => 'Justificación',
+            default => ucfirst((string) ($phase ?? '')),
+        };
+    }
+
+    public static function getOptionsForPhase(?string $phase): array
+    {
+        $query = static::query()->orderBy('nombre');
+        $normalizedPhase = self::normalizePhase($phase);
+
+        if ($normalizedPhase) {
+            $query->where(function ($subQuery) use ($normalizedPhase): void {
+                match ($normalizedPhase) {
+                    'justificacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%justific%']),
+                    'ejecucion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%ejecuc%']),
+                    'contratacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%contrat%']),
+                    'cesion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%cesi%']),
+                    'aprobacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%aproba%']),
+                    default => $subQuery->where(function ($projectQuery): void {
+                        $projectQuery
+                            ->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyect%'])
+                            ->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyecto%']);
+                    }),
+                };
+            });
+        }
+
+        return $query->pluck('nombre', 'id')->toArray();
+    }
+
+    public function scopeForPhase(Builder $query, ?string $phase): Builder
+    {
+        $normalizedPhase = self::normalizePhase($phase);
+
+        if (! $normalizedPhase) {
+            return $query;
+        }
+
+        return $query->where(function ($subQuery) use ($normalizedPhase): void {
+            match ($normalizedPhase) {
+                'justificacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%justific%']),
+                'ejecucion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%ejecuc%']),
+                'contratacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%contrat%']),
+                'cesion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%cesi%']),
+                'aprobacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%aproba%']),
+                default => $subQuery->where(function ($projectQuery): void {
+                    $projectQuery
+                        ->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyect%'])
+                        ->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyecto%']);
+                }),
+            };
+        });
+    }
 
     public function fasedoc(): BelongsTo
     {

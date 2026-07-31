@@ -111,23 +111,22 @@ class ExpedienteUserAssignmentResource extends Resource
                     ->required(),
                 Select::make('user_id')
                     ->label('Usuario tramitador')
-                    ->relationship(
-                        name: 'user',
-                        titleAttribute: 'name',
-                        modifyQueryUsing: static fn (Builder $query): Builder => $query
-                            ->where(static fn (Builder $query): Builder => $query
-                                ->whereHas('teams', static fn (Builder $teamQuery): Builder => $teamQuery->whereKey(0))
-                                ->orWhere('interno', true))
-                            ->where(static fn (Builder $query): Builder => $query
-                                ->whereNull('interno')
-                                ->orWhere('interno', true))
+                    ->options(static function (): array {
+                        return User::query()
+                            ->where('interno', true)
                             ->orderBy('name')
-                    )
+                            ->get()
+                            ->mapWithKeys(static fn (User $record): array => [
+                                $record->getKey() => sprintf('%s (%s)', $record->name, (string) $record->email),
+                            ])
+                            ->toArray();
+                    })
                     ->getOptionLabelFromRecordUsing(
                         static fn (User $record): string => sprintf('%s (%s)', $record->name, (string) $record->email)
                     )
                     ->searchable()
                     ->preload()
+                    ->optionsLimit(50)
                     ->live()
                     ->required(),
                 Select::make('expediente_id')
@@ -148,6 +147,7 @@ class ExpedienteUserAssignmentResource extends Resource
                         ->toArray())
                     ->searchable()
                     ->preload()
+                    ->multiple(true)
                     ->live()
                     ->required()
                     ->helperText('Selecciona el año para cargar solo los expedientes correspondientes.'),
@@ -171,7 +171,14 @@ class ExpedienteUserAssignmentResource extends Resource
                         }
 
                         if (filled($selectedExpediente)) {
-                            $query->where('expediente_id', (string) $selectedExpediente);
+                            $selectedExpedienteIds = collect((array) $selectedExpediente)
+                                ->filter(fn ($value) => filled($value))
+                                ->map(fn ($value) => (string) $value)
+                                ->all();
+
+                            if ($selectedExpedienteIds !== []) {
+                                $query->whereIn('expediente_id', $selectedExpedienteIds);
+                            }
                         }
 
                         $assignments = $query->limit(250)->get();

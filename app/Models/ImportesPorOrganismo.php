@@ -19,6 +19,13 @@ class ImportesPorOrganismo extends Model
 
     public function obra()
     {
+        $expedienteId = $this->expediente_id;
+
+        if (blank($expedienteId) || (string) $expedienteId === '0') {
+            return $this->belongsTo(DatosDeInicioDeObras::class, 'expediente_id', 'expediente_id')
+                ->whereRaw('1 = 0');
+        }
+
         return $this->belongsTo(DatosDeInicioDeObras::class, 'expediente_id', 'expediente_id');
     }
 

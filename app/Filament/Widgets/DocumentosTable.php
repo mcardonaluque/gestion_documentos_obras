@@ -113,158 +113,12 @@ class DocumentosTable extends BaseWidget
                     }),
             ])
             ->headerActions([
-            Action::make('subirDocumento')
-                    ->label('Añadir un documento de expediente')
-                    ->fillForm(function (): array {
-                        return $this->resolveCreateDocumentDefaults();
-                    })
-                    ->schema([
-                Section::make()
-                    ->schema([
-                Select::make('expediente_id')
-                    ->label('Expediente')
-                    ->searchable()
-                    ->preload()
-                    ->default(fn () => $this->expedienteSeleccionado)
-                    ->disabled()
-                    ->dehydrated()
-                    ->required(),
-                TextInput::make('Codigo_Plan')
-                    ->label('Código plan')
-                    ->readOnly()
-                    ->default(fn () => $this->resolveCreateDocumentDefaults()['Codigo_Plan'] ?? null)
-                    ->required(),
-                TextInput::make('plan_denominacion')
-                    ->label('Denominación del plan')
-                    ->readOnly()
-                    ->default(fn () => $this->resolveCreateDocumentDefaults()['plan_denominacion'] ?? null)
-                    ->dehydrated(false),
-                TextInput::make('referencia')
-                    ->label('Número obra')
-                    ->readOnly()
-                    ->default(fn () => $this->resolveCreateDocumentDefaults()['referencia'] ?? null)
-                    ->required()
-                    ->numeric(),
-                TextInput::make('subreferencia')
-                    ->label('Subreferencia')
-                    ->readOnly()
-                    ->default(fn () => $this->resolveCreateDocumentDefaults()['subreferencia'] ?? null)
-                    ->numeric()
-                    ->default(fn () => $this->resolveCreateDocumentDefaults()['subreferencia'] ?? null),
-                TextInput::make('ao_ejecucion')
-                    ->label('Año ejecución')
-                    ->readOnly()
-                    ->default(fn () => $this->resolveCreateDocumentDefaults()['ao_ejecucion'] ?? null)
-                    ->required()
-                    ->numeric(),
-                TextInput::make('municipio_nombre')
-                    ->label('Municipio')
-                    ->readOnly()
-                    ->default(fn () => $this->resolveCreateDocumentDefaults()['municipio_nombre'] ?? null)
-                    ->dehydrated(false),
-                TextInput::make('estado_nombre')
-                    ->label('Estado de la obra')
-                    ->readOnly()
-                    ->default(fn () => $this->resolveCreateDocumentDefaults()['estado_nombre'] ?? null)
-                    ->dehydrated(false),
-                TextInput::make('forma_ejecucion_nombre')
-                    ->label('Forma de ejecución')
-                    ->readOnly()
-                    ->default(fn () => $this->resolveCreateDocumentDefaults()['forma_ejecucion_nombre'] ?? null)
-                    ->dehydrated(false),
-                Select::make('cod_documento')
-                        ->label('Tipo Documento')
-                        ->relationship('tipodocumentos', 'nombre')
-                        ->searchable()
-                        ->required()
-                        ->preload(),
-
-                Textarea::make('descripcion')
-                        ->label('Descripción'),
-
-                DatePicker::make('fechaincorporacion')
-                        ->label('Fecha Incorporación'),
-                // Campo documental principal para el visor PDF.
-                TextInput::make('archivo')
-                    ->label('Ruta o URL del PDF')
-                    ->placeholder('X:\\docs\\expediente_ie\\nombrearchivo.pdf o https://...')
-                    ->maxLength(1000)
-                    ->helperText('Admite una ruta física del servidor o un enlace web al PDF.')
-                    ->default(null),
-                TextInput::make('csv')
-                    ->maxLength(255)
-                    ->default(null),
-                TextInput::make('nregistro')
-                    ->maxLength(45)
-                    ->default(null),
-                TextInput::make('nsecuencia')
-                    ->label('Nº secuencia')
-                    ->readOnly()
-                    ->numeric()
-                    ->default(fn () => $this->resolveCreateDocumentDefaults()['nsecuencia'] ?? null),
-                 DatePicker::make('fechaHelp'),
-                                    Select::make('estado')
-                    ->relationship('estados', 'nombre')
-                    ->required(),
-
-                Select::make('team_id')
-                    ->label('Municipio')
-                    ->relationship('team', 'name')
-                    ->default(fn () => $this->resolveCreateDocumentDefaults()['team_id'] ?? Filament::getTenant()?->id),
-                Select::make('destino')
-                    ->relationship('destinos', 'destino')
-                    ->label('Destino'),
-                Select::make('procedencia')
-                    ->relationship('procedencias', 'destino')
-                    ->label('Procedencia'),
-                    ])
-                    ->columns(2),
-                    ])
-
-                ->action(function (array $data): void {
-                        $documentType = DocumentoGenerico::query()->find($data['cod_documento'] ?? null);
-
-                        if ($documentType && $this->isJustificationDocument($documentType)) {
-                            $plazoJustificacion = PlazoObraActivo::query()
-                                ->where('expediente_id', $this->expedienteSeleccionado)
-                                ->where('fase', 'justificacion')
-                                ->where('activo', true)
-                                ->orderByDesc('id')
-                                ->first();
-
-                            if ($plazoJustificacion) {
-                                $rulesService = app(ProrrogaRulesService::class);
-
-                                if (! $rulesService->allowJustificationUpload($plazoJustificacion, Carbon::now())) {
-                                    throw ValidationException::withMessages([
-                                        'cod_documento' => 'No se puede subir documentación de justificación fuera del plazo vigente. La fecha límite actual es '.Carbon::parse((string) $plazoJustificacion->fecha_fin)->format('d/m/Y').'.',
-                                    ]);
-                                }
-                            }
-                        }
-
-                        // Asignar automáticamente el expediente seleccionado
-                        $data['expediente_id'] = $this->expedienteSeleccionado;
-                        $data = DocumentoExpediente::applyExpedienteDefaults($data);
-                        $documento = DocumentoExpediente::create($data);
-
-                        event(new SystemEventOccurred(
-                            eventType: 'documento_subido_widget',
-                            title: 'Documento incorporado al expediente',
-                            message: "Se ha incorporado el documento {$documento->descripcion} al expediente {$documento->expediente_id}.",
-                            type: 'info',
-                            toAllUsers: false,
-                            userIds: [],
-                            teamId: $documento->team_id,
-                            entity: $documento,
-                            meta: [
-                                'origin' => 'documentos_table_widget',
-                                'expediente_id' => $documento->expediente_id,
-                                'documento_id' => $documento->idDocumento,
-                            ],
-                        ));
-                    })
-                    ->disabled(fn () => !$this->expedienteSeleccionado),
+                $this->buildCreateDocumentAction('proyecto'),
+                $this->buildCreateDocumentAction('aprobacion'),
+                $this->buildCreateDocumentAction('cesion'),
+                $this->buildCreateDocumentAction('contratacion'),
+                $this->buildCreateDocumentAction('ejecucion'),
+                $this->buildCreateDocumentAction('justificacion'),
             ])
             ->recordActions([
                 EditAction::make()
@@ -372,6 +226,177 @@ class DocumentosTable extends BaseWidget
             ->emptyStateIcon('heroicon-o-document');
     }
 
+    private function buildCreateDocumentAction(string $phase): Action
+    {
+        $phaseLabel = DocumentoGenerico::phaseLabel($phase);
+
+        return Action::make("subir_documento_{$phase}")
+            ->label("Añadir {$phaseLabel}")
+            ->icon('heroicon-o-plus')
+            ->color('primary')
+            ->modalHeading("Añadir documento de {$phaseLabel}")
+            ->fillForm(fn (): array => $this->resolveCreateDocumentDefaults($phase))
+            ->schema($this->buildCreateDocumentFormSchema($phase))
+            ->action(fn (array $data) => $this->handleDocumentCreate($data, $phase))
+            ->disabled(fn (): bool => blank($this->expedienteSeleccionado));
+    }
+
+    private function buildCreateDocumentFormSchema(string $phase): array
+    {
+        return [
+            Section::make()
+                ->schema([
+                    Select::make('expediente_id')
+                        ->label('Expediente')
+                        ->searchable()
+                        ->preload()
+                        ->default(fn () => $this->expedienteSeleccionado)
+                        ->disabled()
+                        ->dehydrated()
+                        ->required(),
+                    TextInput::make('Codigo_Plan')
+                        ->label('Código plan')
+                        ->readOnly()
+                        ->default(fn () => $this->resolveCreateDocumentDefaults($phase)['Codigo_Plan'] ?? null)
+                        ->required(),
+                    TextInput::make('plan_denominacion')
+                        ->label('Denominación del plan')
+                        ->readOnly()
+                        ->default(fn () => $this->resolveCreateDocumentDefaults($phase)['plan_denominacion'] ?? null)
+                        ->dehydrated(false),
+                    TextInput::make('referencia')
+                        ->label('Número obra')
+                        ->readOnly()
+                        ->default(fn () => $this->resolveCreateDocumentDefaults($phase)['referencia'] ?? null)
+                        ->required()
+                        ->numeric(),
+                    TextInput::make('subreferencia')
+                        ->label('Subreferencia')
+                        ->readOnly()
+                        ->default(fn () => $this->resolveCreateDocumentDefaults($phase)['subreferencia'] ?? null)
+                        ->numeric(),
+                    TextInput::make('ao_ejecucion')
+                        ->label('Año ejecución')
+                        ->readOnly()
+                        ->default(fn () => $this->resolveCreateDocumentDefaults($phase)['ao_ejecucion'] ?? null)
+                        ->required()
+                        ->numeric(),
+                    TextInput::make('municipio_nombre')
+                        ->label('Municipio')
+                        ->readOnly()
+                        ->default(fn () => $this->resolveCreateDocumentDefaults($phase)['municipio_nombre'] ?? null)
+                        ->dehydrated(false),
+                    TextInput::make('estado_nombre')
+                        ->label('Estado de la obra')
+                        ->readOnly()
+                        ->default(fn () => $this->resolveCreateDocumentDefaults($phase)['estado_nombre'] ?? null)
+                        ->dehydrated(false),
+                    TextInput::make('forma_ejecucion_nombre')
+                        ->label('Forma de ejecución')
+                        ->readOnly()
+                        ->default(fn () => $this->resolveCreateDocumentDefaults($phase)['forma_ejecucion_nombre'] ?? null)
+                        ->dehydrated(false),
+                    Select::make('cod_documento')
+                        ->label('Tipo Documento')
+                        ->options(DocumentoGenerico::getOptionsForPhase($phase))
+                        ->searchable()
+                        ->required()
+                        ->preload(),
+                    Textarea::make('descripcion')
+                        ->label('Descripción'),
+                    DatePicker::make('fechaincorporacion')
+                        ->label('Fecha Incorporación'),
+                    TextInput::make('archivo')
+                        ->label('Ruta o URL del PDF')
+                        ->placeholder('X:\\docs\\expediente_ie\\nombrearchivo.pdf o https://...')
+                        ->maxLength(1000)
+                        ->helperText('Admite una ruta física del servidor o un enlace web al PDF.')
+                        ->default(null),
+                    TextInput::make('csv')
+                        ->maxLength(255)
+                        ->default(null),
+                    TextInput::make('nregistro')
+                        ->maxLength(45)
+                        ->default(null),
+                    TextInput::make('nsecuencia')
+                        ->label('Nº secuencia')
+                        ->readOnly()
+                        ->numeric()
+                        ->default(fn () => $this->resolveCreateDocumentDefaults($phase)['nsecuencia'] ?? null),
+                    DatePicker::make('fechaHelp'),
+                    Select::make('estado')
+                        ->relationship('estados', 'nombre')
+                        ->required(),
+                    Select::make('team_id')
+                        ->label('Municipio')
+                        ->relationship('team', 'name')
+                        ->default(fn () => $this->resolveCreateDocumentDefaults($phase)['team_id'] ?? Filament::getTenant()?->id),
+                    Select::make('destino')
+                        ->relationship('destinos', 'destino')
+                        ->label('Destino'),
+                    Select::make('procedencia')
+                        ->relationship('procedencias', 'destino')
+                        ->label('Procedencia'),
+                ])
+                ->columns(2),
+        ];
+    }
+
+    private function handleDocumentCreate(array $data, string $phase): void
+    {
+        $documentType = DocumentoGenerico::query()->find($data['cod_documento'] ?? null);
+
+        if ($documentType && ! $this->documentTypeMatchesPhase($documentType, $phase)) {
+            throw ValidationException::withMessages([
+                'cod_documento' => 'El tipo de documento seleccionado no corresponde a la fase ' . DocumentoGenerico::phaseLabel($phase) . '.',
+            ]);
+        }
+
+        if ($documentType && $this->isJustificationDocument($documentType)) {
+            $plazoJustificacion = PlazoObraActivo::query()
+                ->where('expediente_id', $this->expedienteSeleccionado)
+                ->where('fase', 'justificacion')
+                ->where('activo', true)
+                ->orderByDesc('id')
+                ->first();
+
+            if ($plazoJustificacion) {
+                $rulesService = app(ProrrogaRulesService::class);
+
+                if (! $rulesService->allowJustificationUpload($plazoJustificacion, Carbon::now())) {
+                    throw ValidationException::withMessages([
+                        'cod_documento' => 'No se puede subir documentación de justificación fuera del plazo vigente. La fecha límite actual es '.Carbon::parse((string) $plazoJustificacion->fecha_fin)->format('d/m/Y').'.',
+                    ]);
+                }
+            }
+        }
+
+        $data['expediente_id'] = $this->expedienteSeleccionado;
+        $data = DocumentoExpediente::applyExpedienteDefaults($data);
+        $documento = DocumentoExpediente::create($data);
+
+        event(new SystemEventOccurred(
+            eventType: 'documento_subido_widget',
+            title: 'Documento incorporado al expediente',
+            message: "Se ha incorporado el documento {$documento->descripcion} al expediente {$documento->expediente_id}.",
+            type: 'info',
+            toAllUsers: false,
+            userIds: [],
+            teamId: $documento->team_id,
+            entity: $documento,
+            meta: [
+                'origin' => 'documentos_table_widget',
+                'expediente_id' => $documento->expediente_id,
+                'documento_id' => $documento->idDocumento,
+            ],
+        ));
+    }
+
+    private function documentTypeMatchesPhase(DocumentoGenerico $documentType, string $phase): bool
+    {
+        return DocumentoGenerico::normalizePhase($documentType->fase_doc) === DocumentoGenerico::normalizePhase($phase);
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -382,7 +407,7 @@ class DocumentosTable extends BaseWidget
         return str_contains(strtolower($phase), 'justific');
     }
 
-    private function resolveCreateDocumentDefaults(): array
+    private function resolveCreateDocumentDefaults(?string $phase = null): array
     {
         $defaults = GetDatosGenerales::getDatosGenerales($this->expedienteSeleccionado);
         $documentDefaults = DocumentoExpediente::applyExpedienteDefaults([

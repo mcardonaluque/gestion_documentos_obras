@@ -29,19 +29,18 @@ class ImportesPorOrganismoResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $añoActual = now()->year;
-
         $añoAnterior2 = now()->subYears(2)->year;
 
-
         return parent::getEloquentQuery()
-        ->select('ImportesPorOrganismo.*') // Selecciona todas las columnas de la tabla "obras"
-            ->leftJoin('DatosInicioDeObras', 'DatosInicioDeObras.expediente_id', '=', 'ImportesPorOrganismo.expediente_id') // Join con la tabla "municipios"
-            //->addSelect(trim('TablaDeMunicipios.nombre_municipio'))
-           // ->WhereNotNull('carretera');  //->with('municipios');
+            ->select('ImportesPorOrganismo.*')
+            ->where(function (Builder $query): void {
+                $query->whereNotNull('ImportesPorOrganismo.expediente_id')
+                    ->whereRaw("LTRIM(RTRIM(COALESCE(CAST([ImportesPorOrganismo].[expediente_id] AS NVARCHAR(255)), ''))) NOT IN ('', '0', '0.0', '0,0', '0.00', '0,00')")
+                    ->whereRaw("LTRIM(RTRIM(COALESCE(CAST([ImportesPorOrganismo].[importe_aprobado] AS NVARCHAR(255)), ''))) NOT IN ('', '0', '0.0', '0,0', '0.00', '0,00')")
+                    ->whereRaw("LTRIM(RTRIM(COALESCE(CAST([ImportesPorOrganismo].[Importe_a_contratar] AS NVARCHAR(255)), ''))) NOT IN ('', '0', '0.0', '0,0', '0.00', '0,00')");
+            })
             ->where('ImportesPorOrganismo.ao_ejecucion', '>=', $añoAnterior2)
             ->where('ImportesPorOrganismo.ao_ejecucion', '<=', $añoActual);
-            //->where('codigo_municipio','=', )
-
     }
     public static function form(Schema $schema): Schema
     {

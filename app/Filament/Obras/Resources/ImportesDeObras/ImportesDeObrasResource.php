@@ -34,18 +34,15 @@ class ImportesDeObrasResource extends Resource
     }
     public static function getEloquentQuery(): Builder
     {
-        $añoActual = now()->year;
+        $tenantId = Filament::getTenant()?->id;
 
-        $añoAnterior2 = now()->subYears(2)->year;
+        $query = parent::getEloquentQuery();
 
-        return parent::getEloquentQuery()
-        ->with('obra')
-        ->whereHas('obra', function ($query) {
-            $query->where('team_id', Filament::getTenant()->id);
-        })
-        ->where('ao_ejecucion', '>=', $añoAnterior2)
-        ->where('ao_ejecucion', '<=', $añoActual);
+        if ($tenantId !== null) {
+            $query->where('team_id', $tenantId);
+        }
 
+        return $query;
     }
     public static function form(Schema $schema): Schema
     {
@@ -74,7 +71,9 @@ class ImportesDeObrasResource extends Resource
         return $table
             ->columns([
                 //
-                TextColumn::make('obra.expediente_id'),
+                TextColumn::make('expediente_id')
+                    ->label('Expediente')
+                    ->searchable(),
                 TextColumn::make('importe_aprobado'),
                 TextColumn::make('importe_a_contratar'),
             ])

@@ -3,6 +3,7 @@
 namespace App\Filament\Shared\Resources\Documentoexpedientes;
 
 use App\Models\DocumentoExpediente;
+use App\Models\DocumentoGenerico;
 use App\Models\Planes;
 use Filament\Facades\Filament;
 use Filament\Actions\Action;
@@ -19,6 +20,7 @@ use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 abstract class DocumentoexpedienteResourceBase extends Resource
 {
@@ -26,8 +28,15 @@ abstract class DocumentoexpedienteResourceBase extends Resource
 
     protected static ?string $tenantOwnershipRelationshipName = 'team';
 
+    protected static function getCurrentPhase(): ?string
+    {
+        return DocumentoGenerico::normalizePhase((string) request()->query('fase'));
+    }
+
     public static function form(Schema $schema): Schema
     {
+        $initialExpedienteId = request()->query('expediente_id');
+
         return $schema
             ->components([
                 Select::make('expediente_id')
@@ -36,6 +45,7 @@ abstract class DocumentoexpedienteResourceBase extends Resource
                     ->searchable()
                     ->preload()
                     ->live()
+                    ->default($initialExpedienteId)
                     ->afterStateUpdated(function ($state, callable $set, callable $get): void {
                         $defaults = DocumentoExpediente::applyExpedienteDefaults([
                             'expediente_id' => $state,
@@ -120,7 +130,10 @@ abstract class DocumentoexpedienteResourceBase extends Resource
                     ->required(),
                 DatePicker::make('fechaHelp'),
                 Select::make('cod_documento')
-                    ->relationship('tipodocumentos', 'nombre')
+                    ->label('Tipo de documento')
+                    ->options(fn (): array => DocumentoGenerico::getOptionsForPhase(self::getCurrentPhase()))
+                    ->searchable()
+                    ->preload()
                     ->required(),
                 TextInput::make('archivo')
                     ->label('Ruta o URL del PDF')
@@ -259,5 +272,34 @@ abstract class DocumentoexpedienteResourceBase extends Resource
         return [
             //
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery()->with(['expedientes' => function ($expedienteQuery): void {
+            $expedienteQuery->with('documentos');
+        }]);
+        $phase = static::getCurrentPhase();
+
+        if ($phase) {
+            $query->whereHas('tipodocumentos', function ($documentTypeQuery) use ($phase): void {
+                $documentTypeQuery->where(function ($subQuery) use ($phase): void {
+                    match (DocumentoGenerico::normalizePhase($phase)) {
+                        'justificacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%justific%']),
+                        'ejecucion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%ejecuc%']),
+                        'contratacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%contrat%']),
+                        'cesion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%cesi%']),
+                        'aprobacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%aproba%']),
+                        default => $subQuery->where(function ($projectQuery): void {
+                            $projectQuery
+                                ->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyect%'])
+                                ->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyecto%']);
+                        }),
+                    };
+                });
+            });
+        }
+
+        return $query;
     }
 }

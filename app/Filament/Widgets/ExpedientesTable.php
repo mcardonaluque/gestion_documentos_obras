@@ -6,6 +6,7 @@ use App\Filament\Traits\CommonFilters;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\Action;
 use App\Models\Expediente;
+use Filament\Facades\Filament;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
@@ -28,9 +29,12 @@ class ExpedientesTable extends BaseWidget
 
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
+        $tenant = Filament::getTenant();
 
-        if (! $user?->hasGlobalAyuntamientosAccess()) {
-            $query->where('team_id', filament()->getTenant()->id);
+        if ($tenant) {
+            $query->where('team_id', $tenant->getKey());
+        } elseif (! $user?->hasGlobalAyuntamientosAccess()) {
+            $query->where('team_id', filament()->getTenant()?->id);
         }
 
         return $table

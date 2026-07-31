@@ -5,6 +5,7 @@
     use Illuminate\Database\Eloquent\Model;
     use Illuminate\Database\Eloquent\Relations\BelongsTo;
     use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+    use Illuminate\Database\Eloquent\Relations\HasMany;
 
 
     /**
@@ -70,6 +71,11 @@
             return $this->HasMany(ImportesPorOrganismo::class, 'expediente_id', 'expediente_id');
 
         }
+
+        public function importesPorOrganismo(): HasMany
+        {
+            return $this->importesOrganismo();
+        }
         public function planes(): BelongsTo{
             return $this->belongsTo(Planes::class, 'codigo_plan', 'codigo_plan');
     }
@@ -85,5 +91,10 @@
             return $this->belongsToMany(User::class, 'expediente_user_assignments', 'expediente_id', 'user_id', 'expediente_id', 'id')
                 ->withPivot(['assigned_by', 'team_id'])
                 ->withTimestamps();
+        }
+
+        public function solicitudesProrroga(): HasMany
+        {
+            return $this->hasMany(Prorroga::class, 'expediente_id', 'expediente_id');
         }
     }

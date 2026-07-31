@@ -2,6 +2,7 @@
 
 namespace App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers;
 
+use App\Models\Expediente;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\CreateAction;
@@ -28,7 +29,11 @@ class ImportesPorOrganismoRelationManager extends RelationManager
 
     protected function getInverseRelationship(): string
     {
-        return 'obra'; // esto debe ser el nombre de la relación inversa en el modelo ImportesporOrganismo
+        if ($this->getOwnerRecord() instanceof Expediente) {
+            return 'expedientes';
+        }
+
+        return 'obra';
     }
 
     public function getTableRecordKey(Model | array $record): string

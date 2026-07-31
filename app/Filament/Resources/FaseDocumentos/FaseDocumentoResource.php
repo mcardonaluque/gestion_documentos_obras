@@ -52,6 +52,7 @@ class FaseDocumentoResource extends Resource
                     ->required()
                     ->maxLength(80),
                 TextInput::make('descripcion')
+                    ->required()
                     ->maxLength(510),
             ]);
     }

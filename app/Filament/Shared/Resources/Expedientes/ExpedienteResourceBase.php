@@ -104,9 +104,9 @@ abstract class ExpedienteResourceBase extends Resource
     {
         return $table
             ->columns([
-                ViewColumn::make('documentos')
+                /*ViewColumn::make('documentos')
                     ->label('docs')
-                    ->view('expediente-documentos'),
+                    ->view('expediente-documentos'),*/
 
                 TextColumn::make('id')
                     ->label('ID')

@@ -10,10 +10,10 @@
         "@tailwindcss/postcss": "^4.1.13",
         "@tailwindcss/typography": "^0.5.16",
         "axios": "^1.7.4",
-        "laravel-vite-plugin": "^1.0",
+        "laravel-vite-plugin": "^3.1",
         "postcss": "^8.5.3",
         "tailwindcss": "^4.1.13",
-        "vite": "^6.2.1"
+        "vite": "^8.2.0"
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.13",

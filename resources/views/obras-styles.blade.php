@@ -356,9 +356,7 @@
                 <a href="/obras/datos-de-inicio-de-obras" class="custom-submenu-item">
                     🏗️ Inicio de Obras
                 </a>
-                    <a href="/obras/normativa-ppacs" class="custom-submenu-item">
-                        📜 Normativa PPAC
-                    </a>
+
                     <a href="/obras/prorrogas-ejecucion" class="custom-submenu-item">
                         📅 Prórrogas y plazos
                     </a>
@@ -463,7 +461,9 @@
                 <a href="/obras/contratistas" class="custom-submenu-item">
                     👷 Contratistas
                 </a>
-
+                 <a href="/obras/normativa-ppacs" class="custom-submenu-item">
+                        📜 Normativa PPAC
+                    </a>
                 @if(auth()->user()->hasRole('super_admin') || auth()->user()->hasAnyRole(['Abogado', 'abogado']))
                 <a href="/obras/expediente-user-assignments" class="custom-submenu-item">
                     👤 Asignación de Expedientes

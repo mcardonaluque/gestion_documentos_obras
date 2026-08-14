@@ -6,6 +6,7 @@
     use Illuminate\Database\Eloquent\Relations\BelongsTo;
     use Illuminate\Database\Eloquent\Relations\BelongsToMany;
     use Illuminate\Database\Eloquent\Relations\HasMany;
+    use Illuminate\Database\Eloquent\Relations\HasOne;
 
 
     /**
@@ -32,6 +33,10 @@
         public function obraEjecucion(){
             return $this->hasOne(DatosEjecucionObras::class, 'expediente_id', 'expediente_id');
 
+        }
+        public function proyecto(): HasOne
+        {
+            return $this->hasOne(Proyecto::class, 'expediente_id', 'expediente_id');
         }
         public Function obraJustificacion(){
             return $this->hasOne(Justificacion_Obra::class, 'expediente_id', 'expediente_id');

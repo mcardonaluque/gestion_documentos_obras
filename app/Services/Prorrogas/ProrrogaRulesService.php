@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Prorrogas;
 
 use App\DTOs\Prorrogas\ProrrogaValidationResult;
+use App\Models\Expediente;
+use App\Models\NormativaPpac;
 use App\Models\PlazoObraActivo;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
@@ -17,6 +19,46 @@ use Carbon\CarbonInterface;
  */
 final class ProrrogaRulesService
 {
+    /**
+     * @return array{fase: string, tipo: string, fecha_limite: ?Carbon, fecha_maxima_solicitud: ?Carbon, normativa: ?NormativaPpac}
+     */
+    public function getRequestWindow(Expediente $expediente, PlazoObraActivo $plazo): array
+    {
+        $normativa = $plazo->normativa
+            ?? NormativaPpac::query()->where('ao_plan', $expediente->ao_ejecucion)->first();
+        $fase = (string) $plazo->fase;
+        $redaccionDiputacion = in_array($fase, ['proyecto_memoria', 'documentacion'], true)
+            && (bool) ($expediente->proyecto?->SubvencionEconRedaccion ?? false);
+
+        $fechaLimite = match ($fase) {
+            'proyecto_memoria' => $redaccionDiputacion
+                ? $normativa?->fecha_limite_presentacion_proyectoD
+                : $normativa?->fecha_limite_presentacion_proyectoA,
+            'documentacion' => $redaccionDiputacion
+                ? $normativa?->fecha_limite_presentacion_documentacionD
+                : $normativa?->fecha_limite_presentacion_documentacionA,
+            'ejecucion' => $normativa?->fecha_limite_terminacion_plan,
+            'justificacion' => $normativa?->fecha_limite_justificacion,
+            default => $plazo->fecha_fin,
+        };
+
+        $fechaLimite = $fechaLimite ? Carbon::parse($fechaLimite)->endOfDay() : null;
+
+        return [
+            'fase' => $fase,
+            'tipo' => match ($fase) {
+                'proyecto_memoria' => 'proyecto',
+                'documentacion' => 'documentacion',
+                'ejecucion' => 'ejecucion',
+                'justificacion' => 'justificacion',
+                default => 'normativa',
+            },
+            'fecha_limite' => $fechaLimite,
+            'fecha_maxima_solicitud' => $fechaLimite?->copy()->subDays(15),
+            'normativa' => $normativa,
+        ];
+    }
+
     /**
      * Valida si una solicitud de prórroga es admisible para un plazo activo.
      *

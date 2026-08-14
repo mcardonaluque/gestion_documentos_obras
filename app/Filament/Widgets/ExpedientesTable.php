@@ -2,11 +2,14 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Ayuntamientos\Resources\Expedientes\RelationManagers\SolicitudesProrrogaRelationManager;
 use App\Filament\Traits\CommonFilters;
+use App\Services\Prorrogas\ProrrogaRulesService;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\Action;
 use App\Models\Expediente;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
@@ -70,6 +73,31 @@ class ExpedientesTable extends BaseWidget
             ->filtersLayout(FiltersLayout::AboveContent)
             ->filtersFormColumns(4)
             ->deferFilters(false)
+            ->headerActions([
+                Action::make('solicitar_prorroga')
+                    ->label('Solicitar prórroga')
+                    ->icon('heroicon-o-calendar-days')
+                    ->visible(fn (): bool => filled($this->expedienteSeleccionado))
+                    ->schema(SolicitudesProrrogaRelationManager::getFormComponents())
+                    ->modalHeading('Solicitar prórroga')
+                    ->modalSubmitActionLabel('Enviar solicitud')
+                    ->action(function (array $data): void {
+                        $expediente = Expediente::query()
+                            ->where('expediente_id', $this->expedienteSeleccionado)
+                            ->first();
+
+                        if (! $expediente) {
+                            Notification::make()
+                                ->title('No se ha encontrado el expediente seleccionado')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        SolicitudesProrrogaRelationManager::createForExpediente($expediente, $data);
+                    }),
+            ])
             ->recordActions([
                 Action::make('seleccionar')
                     ->label(function (Expediente $record){
@@ -96,6 +124,44 @@ class ExpedientesTable extends BaseWidget
                         $this->expedienteSeleccionado = $record->expediente_id;
                         // Emitir evento para el otro widget
                         $this->dispatch('expedienteSeleccionado', expedienteId: $record->expediente_id);
+
+                        $plazo = $record->obraEjecucion?->plazosActivos()
+                            ->where('activo', true)
+                            ->orderByDesc('id')
+                            ->first();
+
+                        if (! $plazo) {
+                            Notification::make()
+                                ->title('No hay un plazo activo para solicitar prórrogas')
+                                ->warning()
+                                ->send();
+
+                            return;
+                        }
+
+                        $requestWindow = app(ProrrogaRulesService::class)->getRequestWindow($record, $plazo);
+                        $fechaMaxima = $requestWindow['fecha_maxima_solicitud'];
+
+                        if (! $fechaMaxima) {
+                            Notification::make()
+                                ->title('No se ha configurado la fecha límite de la normativa aplicable')
+                                ->warning()
+                                ->send();
+
+                            return;
+                        }
+
+                        Notification::make()
+                            ->title('Plazo para solicitar prórroga')
+                            ->body(
+                                'Fase: ' . $requestWindow['fase'] . '. Tipo: ' . $requestWindow['tipo']
+                                . '. La solicitud debe presentarse como máximo 15 días antes de la fecha límite ('
+                                . $requestWindow['fecha_limite']->format('d/m/Y') . '), es decir, antes del '
+                                . $fechaMaxima->format('d/m/Y') . '.'
+                            )
+                            ->color(now()->greaterThan($fechaMaxima) ? 'danger' : 'warning')
+                            ->persistent()
+                            ->send();
                     })
 
                     ->extraAttributes(function (Expediente $record) {

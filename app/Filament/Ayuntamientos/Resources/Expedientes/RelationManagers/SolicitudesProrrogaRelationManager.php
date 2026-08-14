@@ -6,8 +6,10 @@ use App\Enums\ProrrogaAlcance;
 use App\Enums\ProrrogaOrigen;
 use App\Enums\ProrrogaTipo;
 use App\Models\DocumentoExpediente;
+use App\Models\Expediente;
 use App\Models\PlazoObraActivo;
 use App\Models\Prorroga;
+use App\Services\Prorrogas\ProrrogaRulesService;
 use App\Services\Prorrogas\SolicitudProrrogaService;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\DatePicker;
@@ -31,7 +33,12 @@ class SolicitudesProrrogaRelationManager extends RelationManager
     {
         return $schema
             ->columns(2)
-            ->components([
+            ->components(static::getFormComponents());
+    }
+
+    public static function getFormComponents(): array
+    {
+        return [
                 Select::make('tipo_prorroga')
                     ->label('Tipo de prórroga')
                     ->options(ProrrogaTipo::options())
@@ -68,7 +75,96 @@ class SolicitudesProrrogaRelationManager extends RelationManager
                 Textarea::make('observaciones_tramitacion')
                     ->label('Observaciones')
                     ->columnSpanFull(),
-            ]);
+        ];
+    }
+
+    public static function createForExpediente(Expediente $owner, array $data): void
+    {
+        $plazo = $owner->obraEjecucion?->plazosActivos()->where('activo', true)->orderByDesc('id')->first();
+
+        if (! $plazo) {
+            Notification::make()->title('No hay un plazo activo para este expediente')->danger()->send();
+            return;
+        }
+
+        $rulesService = app(ProrrogaRulesService::class);
+        $requestWindow = $rulesService->getRequestWindow($owner, $plazo);
+
+        if (! $requestWindow['fecha_maxima_solicitud']) {
+            Notification::make()->title('No se ha configurado la fecha límite de la normativa aplicable')->danger()->send();
+            return;
+        }
+
+        if (($data['tipo_prorroga'] ?? null) !== $requestWindow['tipo']) {
+            Notification::make()
+                ->title('El tipo de prórroga no corresponde a la fase activa')
+                ->body("Para la fase {$requestWindow['fase']} debe solicitarse una prórroga de {$requestWindow['tipo']}.")
+                ->danger()
+                ->send();
+            return;
+        }
+
+        if (now()->greaterThan($requestWindow['fecha_maxima_solicitud'])) {
+            Notification::make()
+                ->title('La solicitud está fuera de plazo')
+                ->body('Debía presentarse antes del ' . $requestWindow['fecha_maxima_solicitud']->format('d/m/Y') . '.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        $service = app(SolicitudProrrogaService::class);
+        $requestData = $service->buildRequestData($plazo, $requestWindow['normativa'], $data);
+
+        if (! $requestData['valid']) {
+            Notification::make()->title($requestData['message'])->danger()->send();
+            return;
+        }
+
+        $phaseRule = $service->validatePhaseRestriction($plazo, (string) ($data['tipo_prorroga'] ?? ''));
+        if (! $phaseRule['valid']) {
+            Notification::make()->title($phaseRule['message'])->danger()->send();
+            return;
+        }
+
+        $payload = [
+            'NumSec' => ((int) (Prorroga::query()->max('NumSec') ?? 0)) + 1,
+            'expediente_id' => $owner->expediente_id,
+            'team_id' => $owner->team_id,
+            'tipo_prorroga' => $data['tipo_prorroga'],
+            'alcance_prorroga' => $data['alcance_prorroga'] ?? null,
+            'origen_prorroga' => ProrrogaOrigen::SOLICITUD->value,
+            'fecha_limite_anterior' => $requestData['fecha_limite_anterior'],
+            'fecha_limite_nueva' => $requestData['fecha_limite_nueva'],
+            'dias_concedidos' => $requestData['dias_solicitados'],
+            'MotivoProrroga' => $data['MotivoProrroga'],
+            'observaciones_tramitacion' => $data['observaciones_tramitacion'] ?? null,
+            'FecSolicitudProrrogaDeCont' => now(),
+        ];
+
+        $owner->obraEjecucion?->prorrogas()->create($payload);
+
+        if (! empty($data['archivo_solicitud'])) {
+            $documentoPayload = [
+                'expediente_id' => $owner->expediente_id,
+                'referencia' => $owner->referencia,
+                'subreferencia' => $owner->subreferencia,
+                'ao_ejecucion' => $owner->ao_ejecucion,
+                'descripcion' => 'Solicitud de prórroga',
+                'cod_documento' => null,
+                'fechaincorporacion' => now()->toDateString(),
+                'nsecuencia' => DocumentoExpediente::nextSequenceForExpediente($owner->expediente_id),
+                'csv' => $data['archivo_solicitud'],
+                'archivo' => $data['archivo_solicitud'],
+                'estado' => 'Nuevo',
+                'team_id' => $owner->team_id,
+            ];
+
+            $documentoPayload = DocumentoExpediente::applyExpedienteDefaults($documentoPayload);
+            $owner->documentos()->create($documentoPayload);
+        }
+
+        Notification::make()->title('Solicitud de prórroga creada')->success()->send();
     }
 
     public function table(Table $table): Table
@@ -92,62 +188,7 @@ class SolicitudesProrrogaRelationManager extends RelationManager
                 CreateAction::make()
                     ->label('Solicitar prórroga')
                     ->action(function (array $data, RelationManager $livewire): void {
-                        $owner = $livewire->getOwnerRecord();
-                        $plazo = $owner->obraEjecucion?->plazosActivos()->where('activo', true)->orderByDesc('id')->first();
-                        $normativa = $plazo?->normativa;
-
-                        $service = app(SolicitudProrrogaService::class);
-                        $requestData = $service->buildRequestData($plazo ?? new PlazoObraActivo(['dias_base' => 0, 'fecha_fin' => now()->toDateString()]), $normativa, $data);
-
-                        if (! $requestData['valid']) {
-                            Notification::make()->title($requestData['message'])->danger()->send();
-                            return;
-                        }
-
-                        $phaseRule = $service->validatePhaseRestriction($plazo ?? new PlazoObraActivo(['fase' => 'ejecucion']), (string) ($data['tipo_prorroga'] ?? ''));
-                        if (! $phaseRule['valid']) {
-                            Notification::make()->title($phaseRule['message'])->danger()->send();
-                            return;
-                        }
-
-                        $payload = [
-                            'NumSec' => ((int) (Prorroga::query()->max('NumSec') ?? 0)) + 1,
-                            'expediente_id' => $owner->expediente_id,
-                            'team_id' => $owner->team_id,
-                            'tipo_prorroga' => $data['tipo_prorroga'],
-                            'alcance_prorroga' => $data['alcance_prorroga'] ?? null,
-                            'origen_prorroga' => ProrrogaOrigen::SOLICITUD->value,
-                            'fecha_limite_anterior' => $requestData['fecha_limite_anterior'],
-                            'fecha_limite_nueva' => $requestData['fecha_limite_nueva'],
-                            'dias_concedidos' => $requestData['dias_solicitados'],
-                            'MotivoProrroga' => $data['MotivoProrroga'],
-                            'observaciones_tramitacion' => $data['observaciones_tramitacion'] ?? null,
-                            'FecSolicitudProrrogaDeCont' => now(),
-                        ];
-
-                        $owner->obraEjecucion?->prorrogas()->create($payload);
-
-                        if (! empty($data['archivo_solicitud'])) {
-                            $documentoPayload = [
-                                'expediente_id' => $owner->expediente_id,
-                                'referencia' => $owner->referencia,
-                                'subreferencia' => $owner->subreferencia,
-                                'ao_ejecucion' => $owner->ao_ejecucion,
-                                'descripcion' => 'Solicitud de prórroga',
-                                'cod_documento' => null,
-                                'fechaincorporacion' => now()->toDateString(),
-                                'nsecuencia' => DocumentoExpediente::nextSequenceForExpediente($owner->expediente_id),
-                                'csv' => $data['archivo_solicitud'],
-                                'archivo' => $data['archivo_solicitud'],
-                                'estado' => 'Nuevo',
-                                'team_id' => $owner->team_id,
-                            ];
-
-                            $documentoPayload = DocumentoExpediente::applyExpedienteDefaults($documentoPayload);
-                            $owner->documentos()->create($documentoPayload);
-                        }
-
-                        Notification::make()->title('Solicitud de prórroga creada')->success()->send();
+                        static::createForExpediente($livewire->getOwnerRecord(), $data);
                     }),
             ]);
     }

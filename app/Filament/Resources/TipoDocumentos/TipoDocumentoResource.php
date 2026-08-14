@@ -51,11 +51,13 @@ class TipoDocumentoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('IdTipo')
             ->columns([
                 TextColumn::make('Id')
                 ->hidden(),
                 TextColumn::make('IdTipo')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('nombre')
                     ->searchable(),
                 TextColumn::make('descripcion')

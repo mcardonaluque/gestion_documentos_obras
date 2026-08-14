@@ -86,9 +86,11 @@ class AyudaTecnicaResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('Codigo_Plan')
             ->columns([
                 TextColumn::make('Codigo_Plan')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('numero_obra')
                     ->numeric()
                     ->sortable(),

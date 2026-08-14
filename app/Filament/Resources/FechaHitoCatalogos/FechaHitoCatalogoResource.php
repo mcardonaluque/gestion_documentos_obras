@@ -74,6 +74,7 @@ class FechaHitoCatalogoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('codigo_hito')
             ->columns([
                 TextColumn::make('codigo_hito')->searchable()->sortable(),
                 TextColumn::make('descripcion')->searchable()->wrap(),

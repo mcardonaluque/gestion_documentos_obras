@@ -99,6 +99,7 @@ class AlertaResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('nombre')
             ->columns([
                 TextColumn::make('nombre')->sortable()->searchable(),
                 TextColumn::make('descripcion')->sortable()->searchable(),

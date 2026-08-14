@@ -87,10 +87,12 @@ class TablaDeEstadosResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('cod_estado')
             ->columns([
                 TextColumn::make('cod_estado')
                     ->label('Código')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('estado')
                     ->label('Descripción')
                     ->searchable(),

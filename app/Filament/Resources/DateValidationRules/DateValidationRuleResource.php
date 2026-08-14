@@ -125,6 +125,7 @@ class DateValidationRuleResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('nombre')
             ->columns([
                 TextColumn::make('nombre')->searchable()->sortable(),
                 TextColumn::make('tabla1')->label('Tabla')->searchable(),

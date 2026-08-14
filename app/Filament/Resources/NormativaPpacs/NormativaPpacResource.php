@@ -224,22 +224,28 @@ class NormativaPpacResource extends Resource
 
                 TextColumn::make('fecha_limite_cesion_obra')
                     ->label('Límite cesión obra')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->sortable(),
                 TextColumn::make('fecha_limite_contratacion')
                     ->label('Límite contratación')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->sortable(),
                 TextColumn::make('fecha_documentacionD_asiguiente')
                     ->label('Doc. D sig.')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->sortable(),
                 TextColumn::make('fecha_documentacionA_asiguiente')
                     ->label('Doc. A sig.')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->sortable(),
                 TextColumn::make('fecha_proyectoD_siguiente')
                     ->label('Proj. D sig.')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->sortable(),
                 TextColumn::make('fecha_proyectoA_siguiente')
                     ->label('Proj. A sig.')
-                    ->dateTime(),
+                    ->dateTime()
+                    ->sortable(),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -48,11 +48,13 @@ class TiposAvisoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('TipoAviso')
             ->columns([
                 //
 
                 TextColumn::make('TipoAviso')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('Des')
                     ->searchable(),
             ])

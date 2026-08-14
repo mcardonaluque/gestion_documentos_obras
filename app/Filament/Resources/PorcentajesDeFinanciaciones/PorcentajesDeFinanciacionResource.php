@@ -46,6 +46,7 @@ class PorcentajesDeFinanciacionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('Codigo_Plan')
             ->columns([
                 TextColumn::make('Codigo_Plan')->label('Codigo plan')->sortable()->searchable(),
                 TextColumn::make('Ao_ejecucion')->label('Ao ejecucion')->sortable(),

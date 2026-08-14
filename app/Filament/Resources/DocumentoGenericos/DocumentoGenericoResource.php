@@ -131,6 +131,7 @@ class DocumentoGenericoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('nombre')
             ->columns([
                 TextColumn::make('nombre')
                     ->sortable()

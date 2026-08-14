@@ -91,6 +91,7 @@ class TablaDeDepartamentoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('CODIGO_DPTO')
             ->columns([
                 TextColumn::make('CODIGO_DPTO')
                     ->numeric()

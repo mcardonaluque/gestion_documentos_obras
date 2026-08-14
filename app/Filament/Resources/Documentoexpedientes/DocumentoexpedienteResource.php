@@ -27,13 +27,15 @@ class DocumentoexpedienteResource extends Resource
     protected static ?string $model = Documentoexpediente::class;
     protected static string | \UnitEnum | null $navigationGroup="Documentación";
     protected static ?string $navigationLabel = 'Documentos de Expedientes';
+    protected static ?string $modelLabel = 'Documento de Expediente';
+    protected static ?string $pluralModelLabel = 'Documentos de Expedientes';
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextInput::make('cod_plan')
+                TextInput::make('Codigo_Plan')
                     ->required()
                     ->maxLength(45),
                 TextInput::make('referencia')
@@ -75,9 +77,11 @@ class DocumentoexpedienteResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('Codigo_Plan')
             ->columns([
-                TextColumn::make('cod_plan')
-                    ->searchable(),
+                TextColumn::make('Codigo_Plan')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('referencia')
                     ->numeric()
                     ->sortable(),

@@ -94,6 +94,7 @@ class TecnicoObraResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('NombreTec')
             ->columns([
                 IconColumn::make('PJuridica')
                     ->boolean(),

@@ -62,6 +62,7 @@ class AvisoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('Referencia')
             ->columns([
                 TextColumn::make('Referencia')->sortable()->searchable(),
                 TextColumn::make('tipodeaviso.Des')->label('Tipo de Aviso')->sortable(), // Mostrar el nombre del tipo de aviso

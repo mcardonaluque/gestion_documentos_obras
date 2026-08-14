@@ -53,6 +53,7 @@ class PorcentajesProyectosResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('AoProyecto')
             ->columns([
                 TextColumn::make('AoProyecto')->label('Ano proyecto')->sortable()->searchable(),
                 TextColumn::make('GG')->label('GG (%)')->numeric(2)->sortable(),

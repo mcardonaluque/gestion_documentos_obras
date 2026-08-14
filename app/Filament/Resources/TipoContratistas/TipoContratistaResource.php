@@ -39,9 +39,11 @@ class TipoContratistaResource extends Resource
     {
         return $table
             ->recordTitleAttribute('Denominacion')
+            ->defaultSort('Tipo_contratista')
             ->columns([
                 Tables\Columns\TextColumn::make('Tipo_contratista')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('Denominacion')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('Ultimo_codigo')

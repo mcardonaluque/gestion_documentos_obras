@@ -39,12 +39,14 @@ class DestinoDeDocumentosResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('id', 'desc')
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('destino')
+                    ->sortable()
                     ->searchable(),
             ])
             ->filters([

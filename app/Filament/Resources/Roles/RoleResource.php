@@ -51,6 +51,7 @@ class RoleResource extends BaseRoleResource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('id')
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')

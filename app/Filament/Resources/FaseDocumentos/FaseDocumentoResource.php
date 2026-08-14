@@ -60,13 +60,17 @@ class FaseDocumentoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('cod_fase')
             ->columns([
                 TextColumn::make('cod_fase')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('nombre')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('descripcion')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
             ])
             ->filters([
                 //

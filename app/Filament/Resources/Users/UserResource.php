@@ -71,10 +71,12 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('name')
             ->columns([
                 //
                 TextColumn::make('name')
-                ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('email')
                 ->searchable(),
                 TextColumn::make('roles.name')

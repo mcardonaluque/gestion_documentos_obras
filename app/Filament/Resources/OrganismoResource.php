@@ -38,9 +38,11 @@ class OrganismoResource extends Resource
     {
         return $table
             ->recordTitleAttribute('organismo')
+            ->defaultSort('codigo_organismo')
             ->columns([
                 Tables\Columns\TextColumn::make('codigo_organismo')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('denominacion')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('abreviatura')

@@ -84,6 +84,7 @@ class TablaDeMunicipioResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('codigo_municipio')
             ->columns([
                 TextColumn::make('codigo_municipio')
                     ->numeric()

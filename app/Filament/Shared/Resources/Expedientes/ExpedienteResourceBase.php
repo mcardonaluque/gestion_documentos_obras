@@ -55,7 +55,8 @@ abstract class ExpedienteResourceBase extends Resource
                     ->disabled()
                     ->required()
                     ->maxLength(510),
-                TextInput::make('codigo_plan')
+                TextInput::make('Codigo_Plan')
+                    ->label('Código del plan')
                     ->disabled()
                     ->required()
                     ->maxLength(510),
@@ -174,7 +175,7 @@ abstract class ExpedienteResourceBase extends Resource
                         $nombrePlan = '';
                         if ($codigoPlan !== '') {
                             $nombrePlan = (string) (Planes::query()
-                                ->where('codigo_plan', $codigoPlan)
+                                ->where('Codigo_plan', $codigoPlan)
                                 ->value('denominacion_plan') ?? '');
                         }
 

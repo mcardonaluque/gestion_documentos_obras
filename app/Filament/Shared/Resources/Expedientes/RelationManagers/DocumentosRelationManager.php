@@ -3,6 +3,7 @@
 namespace App\Filament\Shared\Resources\Expedientes\RelationManagers;
 
 use App\Models\DocumentoExpediente;
+use App\Models\DocumentoGenerico;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -30,11 +31,9 @@ class DocumentosRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Select::make('cod_plan')
-                    ->relationship('planes', 'codigo_plan')
+                TextInput::make('Codigo_Plan')
                     ->label('Código plan')
-                    ->disabled()
-                    ->default(fn () => $this->getOwnerRecord()?->codigo_plan)
+                    ->readOnly()
                     ->required(),
                 TextInput::make('referencia')
                     ->label('Número obra')
@@ -62,6 +61,13 @@ class DocumentosRelationManager extends RelationManager
                 DatePicker::make('fechaHelp'),
                 Select::make('cod_documento')
                     ->relationship('tipodocumentos', 'nombre')
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set): void {
+                        $documentType = DocumentoGenerico::query()->find($state);
+
+                        $set('destino', $documentType?->cod_destino ?: null);
+                        $set('procedencia', $documentType?->cod_origen ?: null);
+                    })
                     ->required(),
                 TextInput::make('archivo')
                     ->label('Ruta o URL del PDF')
@@ -102,7 +108,8 @@ class DocumentosRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('expediente_id')
             ->columns([
-                TextColumn::make('cod_plan')
+                TextColumn::make('Codigo_Plan')
+                    ->label('Código plan')
                     ->searchable(),
                 TextColumn::make('referencia')
                     ->numeric()
@@ -137,6 +144,19 @@ class DocumentosRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->fillForm(function (): array {
+                        $ownerRecord = $this->getOwnerRecord();
+
+                        return [
+                            'Codigo_Plan' => $ownerRecord?->Codigo_Plan,
+                            'referencia' => $ownerRecord?->referencia,
+                            'subreferencia' => $ownerRecord?->subreferencia,
+                            'ao_ejecucion' => $ownerRecord?->ao_ejecucion,
+                            'expediente_id' => $ownerRecord?->expediente_id,
+                            'nsecuencia' => ((int) ($ownerRecord?->documentos()?->max('nsecuencia') ?? 0)) + 1,
+                            'fechaincorporacion' => now(),
+                        ];
+                    })
                     ->mutateDataUsing(function (array $data): array {
                         $ownerRecord = $this->getOwnerRecord();
                         $data['expediente_id'] = $ownerRecord?->expediente_id;

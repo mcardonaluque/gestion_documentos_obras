@@ -26,6 +26,13 @@
 
         protected $keyType = 'string';
 
+        public function getCodigoPlanAttribute(): ?string
+        {
+            return $this->attributes['codigo_plan']
+                ?? $this->attributes['Codigo_Plan']
+                ?? null;
+        }
+
         /** Ficha de inicio de obra asociada al expediente. */
         public function obraInicio(){
             return $this->hasOne (DatosDeInicioDeObras::class, 'expediente_id', 'expediente_id');

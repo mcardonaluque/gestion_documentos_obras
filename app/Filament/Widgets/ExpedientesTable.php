@@ -121,6 +121,13 @@ class ExpedientesTable extends BaseWidget
                             : 'primary'
                     )
                     ->action(function (Expediente $record) {
+                        if ($this->expedienteSeleccionado === $record->expediente_id) {
+                            $this->expedienteSeleccionado = null;
+                            $this->dispatch('expedienteSeleccionado', expedienteId: null);
+
+                            return;
+                        }
+
                         $this->expedienteSeleccionado = $record->expediente_id;
                         // Emitir evento para el otro widget
                         $this->dispatch('expedienteSeleccionado', expedienteId: $record->expediente_id);

@@ -39,7 +39,7 @@ class ExpedientesResource extends Resource
                 TextInput::make('expediente_id')
                     ->required()
                     ->maxLength(510),
-                TextInput::make('codigo_plan')
+                TextInput::make('Codigo_plan')
                     ->required()
                     ->maxLength(510),
                 TextInput::make('ao_ejecucion')
@@ -73,7 +73,7 @@ class ExpedientesResource extends Resource
             ->columns([
                 TextColumn::make('expediente_id')
                     ->searchable(),
-                TextColumn::make('codigo_plan')
+                TextColumn::make('Codigo_plan')
                     ->searchable(),
                 TextColumn::make('ao_ejecucion')
                     ->numeric()

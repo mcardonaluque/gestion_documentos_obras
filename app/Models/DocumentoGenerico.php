@@ -120,14 +120,15 @@ class DocumentoGenerico extends Model
         if ($normalizedPhase) {
             $query->where(function ($subQuery) use ($normalizedPhase): void {
                 match ($normalizedPhase) {
-                    'justificacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%justific%']),
-                    'ejecucion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%ejecuc%']),
-                    'contratacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%contrat%']),
-                    'cesion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%cesi%']),
-                    'aprobacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%aproba%']),
+                    'justificacion' => $subQuery->whereIn('fase_doc', ['ALL', 'JST'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%justific%']),
+                    'ejecucion' => $subQuery->whereIn('fase_doc', ['ALL', 'EJE'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%ejecuc%']),
+                    'contratacion' => $subQuery->whereIn('fase_doc', ['ALL'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%contrat%']),
+                    'cesion' => $subQuery->whereIn('fase_doc', ['ALL', 'CES'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%cesi%']),
+                    'aprobacion' => $subQuery->whereIn('fase_doc', ['ALL', 'APR'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%aproba%']),
                     default => $subQuery->where(function ($projectQuery): void {
                         $projectQuery
-                            ->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyect%'])
+                            ->whereIn('fase_doc', ['ALL', 'INI'])
+                            ->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyect%'])
                             ->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyecto%']);
                     }),
                 };
@@ -147,14 +148,15 @@ class DocumentoGenerico extends Model
 
         return $query->where(function ($subQuery) use ($normalizedPhase): void {
             match ($normalizedPhase) {
-                'justificacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%justific%']),
-                'ejecucion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%ejecuc%']),
-                'contratacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%contrat%']),
-                'cesion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%cesi%']),
-                'aprobacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%aproba%']),
+                'justificacion' => $subQuery->whereIn('fase_doc', ['ALL', 'JST'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%justific%']),
+                'ejecucion' => $subQuery->whereIn('fase_doc', ['ALL', 'EJE'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%ejecuc%']),
+                'contratacion' => $subQuery->whereIn('fase_doc', ['ALL'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%contrat%']),
+                'cesion' => $subQuery->whereIn('fase_doc', ['ALL', 'CES'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%cesi%']),
+                'aprobacion' => $subQuery->whereIn('fase_doc', ['ALL', 'APR'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%aproba%']),
                 default => $subQuery->where(function ($projectQuery): void {
                     $projectQuery
-                        ->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyect%'])
+                        ->whereIn('fase_doc', ['ALL', 'INI'])
+                        ->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyect%'])
                         ->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyecto%']);
                 }),
             };

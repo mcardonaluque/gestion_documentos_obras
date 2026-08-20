@@ -2,8 +2,10 @@
 
 namespace App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers;
 
+use App\Models\DocumentoGenerico;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
@@ -41,9 +43,22 @@ class DocumentosRelationManager extends RelationManager
             DatePicker::make('fechaincorporacion')
                 ->required(),
             DatePicker::make('fechaHelp'),
-            TextInput::make('coddcoumento')
-                ->required()
-                ->numeric(),
+            Select::make('cod_documento')
+                ->label('Tipo de documento')
+                ->options(fn (): array => DocumentoGenerico::query()
+                    ->orderBy('nombre')
+                    ->pluck('nombre', 'id')
+                    ->all())
+                ->searchable()
+                ->preload()
+                ->live()
+                ->afterStateUpdated(function ($state, callable $set): void {
+                    $documentType = DocumentoGenerico::query()->find($state);
+
+                    $set('destino', $documentType?->cod_destino ?: null);
+                    $set('procedencia', $documentType?->cod_origen ?: null);
+                })
+                ->required(),
             TextInput::make('csv')
                 ->maxLength(50)
                 ->default(null),
@@ -88,8 +103,8 @@ class DocumentosRelationManager extends RelationManager
             TextColumn::make('fechaHelp')
                 ->date()
                 ->sortable(),
-            TextColumn::make('coddcoumento')
-                ->numeric()
+            TextColumn::make('tipodocumentos.nombre')
+                ->label('Tipo de documento')
                 ->sortable(),
             TextColumn::make('expediente_id')
                 ->searchable(),

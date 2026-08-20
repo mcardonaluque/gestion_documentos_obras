@@ -34,7 +34,7 @@ class DocumentosexpedientesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('expediente_id')
             ->columns([
-                TextColumn::make('cod_plan')
+                TextColumn::make('Codigo_plan')
                     ->searchable(),
                 TextColumn::make('referencia')
                     ->sortable(),

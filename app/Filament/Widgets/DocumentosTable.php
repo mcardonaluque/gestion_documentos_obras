@@ -394,7 +394,8 @@ class DocumentosTable extends BaseWidget
 
     private function documentTypeMatchesPhase(DocumentoGenerico $documentType, string $phase): bool
     {
-        return DocumentoGenerico::normalizePhase($documentType->fase_doc) === DocumentoGenerico::normalizePhase($phase);
+        return $documentType->fase_doc === 'ALL'
+            || DocumentoGenerico::normalizePhase($documentType->fase_doc) === DocumentoGenerico::normalizePhase($phase);
     }
 
     /**

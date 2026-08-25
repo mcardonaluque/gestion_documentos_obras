@@ -542,6 +542,15 @@ class ContratistaResource extends Resource
                             ->where('Provincia', $provincia)
                             ->where('Municipio', $municipio);
                     }),
+                Tables\Filters\Filter::make('Nombre')
+                    ->label('Nombre')
+                    ->form([
+                        Forms\Components\TextInput::make('nombre_valor')->label('Nombre'),
+                    ])
+                    ->query(fn ($query, array $data) => $query->when(
+                        filled($data['nombre_valor'] ?? null),
+                        fn ($q) => $q->where('Nombre', 'like', '%' . $data['nombre_valor'] . '%')
+                    )),
                 Tables\Filters\Filter::make('Cif')
                     ->label('CIF')
                     ->form([

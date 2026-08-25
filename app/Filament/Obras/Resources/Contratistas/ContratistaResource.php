@@ -173,7 +173,9 @@ class ContratistaResource extends Resource
                             ->toArray();
                     })
                     ->placeholder('Selecciona un municipio')
-                    ->searchable(),
+                    ->searchable()
+                    ->preload()
+                    ->disabled(fn (callable $get): bool => blank($get('Provincia'))),
                 Forms\Components\TextInput::make('DomicilioFiscal'),
                 Forms\Components\TextInput::make('CPostalFiscal')
                     ->numeric(),
@@ -197,6 +199,7 @@ class ContratistaResource extends Resource
 
                         return TbMunicipio::query()
                             ->where('Codigo_Provincia', $get('ProvinciaFiscal'))
+                    ->preload()
                             ->orderBy('Municipio')
                             ->get(['Codigo_Municipio', 'Municipio'])
                             ->mapWithKeys(fn ($municipio) => [
@@ -205,7 +208,9 @@ class ContratistaResource extends Resource
                             ->toArray();
                     })
                     ->placeholder('Selecciona un municipio fiscal')
-                    ->searchable(),
+                    ->searchable()
+                    ->preload()
+                    ->disabled(fn (callable $get): bool => blank($get('ProvinciaFiscal'))),
                 Forms\Components\TextInput::make('Telefono'),
                 Forms\Components\TextInput::make('Telefono2'),
                 Forms\Components\TextInput::make('Movil'),

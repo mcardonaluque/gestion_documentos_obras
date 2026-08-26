@@ -12,6 +12,7 @@ use Filament\Forms;
 use Filament\Infolists;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
@@ -86,6 +87,7 @@ class ContratistaResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema
+            ->columns(3)
             ->components([
                 Forms\Components\TextInput::make('Codigo_contratista')
                     ->label('Codigo de Contratista')
@@ -174,43 +176,45 @@ class ContratistaResource extends Resource
                     })
                     ->placeholder('Selecciona un municipio')
                     ->searchable()
-                    ->preload()
                     ->disabled(fn (callable $get): bool => blank($get('Provincia'))),
-                Forms\Components\TextInput::make('DomicilioFiscal'),
-                Forms\Components\TextInput::make('CPostalFiscal')
-                    ->numeric(),
-                Forms\Components\TextInput::make('LocalidadFiscal'),
-                Forms\Components\Select::make('ProvinciaFiscal')
-                    ->label('Provincia Fiscal')
-                    ->options(fn () => TbProvincias::orderBy('PR')
-                        ->get()
-                        ->mapWithKeys(fn ($p) => [$p->PR => trim($p->NOMBRE_PR)])
-                        ->toArray())
-                    ->placeholder('Selecciona una provincia fiscal')
-                    ->searchable()
-                    ->live()
-                    ->afterStateUpdated(fn (callable $set) => $set('MunicipioFiscal', null)),
-                Forms\Components\Select::make('MunicipioFiscal')
-                    ->label('Municipio Fiscal')
-                    ->options(function (callable $get): array {
-                        if (blank($get('ProvinciaFiscal'))) {
-                            return [];
-                        }
+                Section::make('Datos fiscales')
+                    ->columnSpanFull()
+                    ->columns(3)
+                    ->schema([
+                        Forms\Components\TextInput::make('DomicilioFiscal'),
+                        Forms\Components\TextInput::make('CPostalFiscal')
+                            ->numeric(),
+                        Forms\Components\TextInput::make('LocalidadFiscal'),
+                        Forms\Components\Select::make('ProvinciaFiscal')
+                            ->label('Provincia Fiscal')
+                            ->options(fn () => TbProvincias::orderBy('PR')
+                                ->get()
+                                ->mapWithKeys(fn ($p) => [$p->PR => trim($p->NOMBRE_PR)])
+                                ->toArray())
+                            ->placeholder('Selecciona una provincia fiscal')
+                            ->searchable()
+                            ->live()
+                            ->afterStateUpdated(fn (callable $set) => $set('MunicipioFiscal', null)),
+                        Forms\Components\Select::make('MunicipioFiscal')
+                            ->label('Municipio Fiscal')
+                            ->options(function (callable $get): array {
+                                if (blank($get('ProvinciaFiscal'))) {
+                                    return [];
+                                }
 
-                        return TbMunicipio::query()
-                            ->where('Codigo_Provincia', $get('ProvinciaFiscal'))
-                    ->preload()
-                            ->orderBy('Municipio')
-                            ->get(['Codigo_Municipio', 'Municipio'])
-                            ->mapWithKeys(fn ($municipio) => [
-                                $municipio->Codigo_Municipio => trim((string) $municipio->Municipio),
-                            ])
-                            ->toArray();
-                    })
-                    ->placeholder('Selecciona un municipio fiscal')
-                    ->searchable()
-                    ->preload()
-                    ->disabled(fn (callable $get): bool => blank($get('ProvinciaFiscal'))),
+                                return TbMunicipio::query()
+                                    ->where('Codigo_Provincia', $get('ProvinciaFiscal'))
+                                    ->orderBy('Municipio')
+                                    ->get(['Codigo_Municipio', 'Municipio'])
+                                    ->mapWithKeys(fn ($municipio) => [
+                                        $municipio->Codigo_Municipio => trim((string) $municipio->Municipio),
+                                    ])
+                                    ->toArray();
+                            })
+                            ->placeholder('Selecciona un municipio fiscal')
+                            ->searchable()
+                            ->disabled(fn (callable $get): bool => blank($get('ProvinciaFiscal'))),
+                    ]),
                 Forms\Components\TextInput::make('Telefono'),
                 Forms\Components\TextInput::make('Telefono2'),
                 Forms\Components\TextInput::make('Movil'),

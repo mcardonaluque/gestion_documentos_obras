@@ -150,13 +150,9 @@ class ContratistaResource extends Resource
                 Forms\Components\TextInput::make('Localidad'),
                 Forms\Components\Select::make('Provincia')
                     ->label('Provincia')
-                    ->options(fn () => TbProvincias::orderBy('PR')
-                        ->get()
-                        ->mapWithKeys(fn ($p) => [$p->PR => trim($p->NOMBRE_PR)])
-                        ->toArray())
+                    ->relationship('provincia', 'NOMBRE_PR', fn (Builder $query) => $query->orderBy('PR'))
                     ->placeholder('Selecciona una provincia')
                     ->native(true)
-                    ->searchable()
                     ->live()
                     ->afterStateUpdated(fn (callable $set) => $set('Municipio', null)),
                 Forms\Components\Select::make('Municipio')
@@ -177,7 +173,6 @@ class ContratistaResource extends Resource
                     })
                     ->placeholder('Selecciona un municipio')
                     ->native(true)
-                    ->searchable()
                     ->disabled(fn (callable $get): bool => blank($get('Provincia'))),
                 Section::make('Datos fiscales')
                     ->columnSpanFull()
@@ -189,13 +184,9 @@ class ContratistaResource extends Resource
                         Forms\Components\TextInput::make('LocalidadFiscal'),
                         Forms\Components\Select::make('ProvinciaFiscal')
                             ->label('Provincia Fiscal')
-                            ->options(fn () => TbProvincias::orderBy('PR')
-                                ->get()
-                                ->mapWithKeys(fn ($p) => [$p->PR => trim($p->NOMBRE_PR)])
-                                ->toArray())
+                            ->relationship('provinciaFiscal', 'NOMBRE_PR', fn (Builder $query) => $query->orderBy('PR'))
                             ->placeholder('Selecciona una provincia fiscal')
                             ->native(true)
-                            ->searchable()
                             ->live()
                             ->afterStateUpdated(fn (callable $set) => $set('MunicipioFiscal', null)),
                         Forms\Components\Select::make('MunicipioFiscal')
@@ -216,7 +207,6 @@ class ContratistaResource extends Resource
                             })
                             ->placeholder('Selecciona un municipio fiscal')
                             ->native(true)
-                            ->searchable()
                             ->disabled(fn (callable $get): bool => blank($get('ProvinciaFiscal'))),
                     ]),
                 Forms\Components\TextInput::make('Telefono'),

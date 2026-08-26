@@ -18,6 +18,11 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\DateValidationRuleSeeder::class,
                 \Database\Seeders\FechaHitoCatalogoSeeder::class,
             CatalogoFuncionesComunesSeeder::class,
+            CatalogoFuncionesEspecificasSeeder::class,
+            CatalogoDuracionProcedimientoSeeder::class,
+            CatalogoEfectosSilencioSeeder::class,
+            CatalogoTiposDocumentalesSeeder::class,
+            CatalogoEstadosElaboracionDocumentoSeeder::class,
         ]);
 
     }

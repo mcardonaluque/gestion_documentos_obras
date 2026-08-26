@@ -155,7 +155,7 @@ class ContratistaResource extends Resource
                         ->mapWithKeys(fn ($p) => [$p->PR => trim($p->NOMBRE_PR)])
                         ->toArray())
                     ->placeholder('Selecciona una provincia')
-                    ->native(false)
+                    ->native(true)
                     ->searchable()
                     ->live()
                     ->afterStateUpdated(fn (callable $set) => $set('Municipio', null)),
@@ -176,7 +176,7 @@ class ContratistaResource extends Resource
                             ->toArray();
                     })
                     ->placeholder('Selecciona un municipio')
-                    ->native(false)
+                    ->native(true)
                     ->searchable()
                     ->disabled(fn (callable $get): bool => blank($get('Provincia'))),
                 Section::make('Datos fiscales')
@@ -194,7 +194,7 @@ class ContratistaResource extends Resource
                                 ->mapWithKeys(fn ($p) => [$p->PR => trim($p->NOMBRE_PR)])
                                 ->toArray())
                             ->placeholder('Selecciona una provincia fiscal')
-                            ->native(false)
+                            ->native(true)
                             ->searchable()
                             ->live()
                             ->afterStateUpdated(fn (callable $set) => $set('MunicipioFiscal', null)),
@@ -215,7 +215,7 @@ class ContratistaResource extends Resource
                                     ->toArray();
                             })
                             ->placeholder('Selecciona un municipio fiscal')
-                            ->native(false)
+                            ->native(true)
                             ->searchable()
                             ->disabled(fn (callable $get): bool => blank($get('ProvinciaFiscal'))),
                     ]),

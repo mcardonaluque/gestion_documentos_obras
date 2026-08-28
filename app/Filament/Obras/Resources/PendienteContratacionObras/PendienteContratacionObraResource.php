@@ -36,7 +36,7 @@ final class PendienteContratacionObraResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Pendientes de contratación';
 
-    protected static ?string $recordTitleAttribute = 'exoediente_id';
+    protected static ?string $recordTitleAttribute = 'expediente_id';
 
     public static function getEloquentQuery(): Builder
     {
@@ -48,7 +48,7 @@ final class PendienteContratacionObraResource extends Resource
         return $schema
             ->columns(4)
             ->components([
-                TextInput::make('exoediente_id')->label('Expediente')->required()->maxLength(255),
+                TextInput::make('expediente_id')->label('Expediente')->required()->maxLength(255),
                 TextInput::make('PlanObra')->label('Plan de obra')->required()->maxLength(20),
                 TextInput::make('NumObra')->label('Núm. obra')->required()->numeric(),
                 TextInput::make('SubRef')->label('Subref.')->required()->numeric(),
@@ -64,6 +64,36 @@ final class PendienteContratacionObraResource extends Resource
                         ->all())
                     ->searchable()
                     ->native(false),
+                Select::make('CodClaseexpediente')
+                    ->label('Clase de expediente')
+                    ->options(fn (): array => app('db')->connection('Obras')
+                        ->table('TbClasesExpedientes')
+                        ->orderBy('claseexped')
+                        ->pluck('claseexped', 'codclaseexped')
+                        ->mapWithKeys(fn (string $name, mixed $code): array => [(string) $code => trim($name)])
+                        ->all())
+                    ->searchable()
+                    ->native(false),
+                Select::make('Codprocedimiento')
+                    ->label('Procedimiento')
+                    ->options(fn (): array => app('db')->connection('Obras')
+                        ->table('TbTiposProcedimientos')
+                        ->orderBy('procedimiento')
+                        ->pluck('procedimiento', 'codprocedimiento')
+                        ->mapWithKeys(fn (string $name, mixed $code): array => [(string) $code => trim($name)])
+                        ->all())
+                    ->searchable()
+                    ->native(false),
+                Select::make('CodFormaContrata')
+                    ->label('Forma de contratación')
+                    ->options(fn (): array => app('db')->connection('Obras')
+                        ->table('TbFormasContratacion')
+                        ->orderBy('FormaContratacion')
+                        ->pluck('FormaContratacion', 'CodFormaContra')
+                        ->mapWithKeys(fn (string $name, mixed $code): array => [(string) $code => trim($name)])
+                        ->all())
+                    ->searchable()
+                    ->native(false),
                 DateTimePicker::make('FechaAdjudicacion')->label('Fecha adjudicación'),
                 DateTimePicker::make('FechaContrato')->label('Fecha contrato'),
                 TextInput::make('ImporteAdjudicacion')->label('Importe adjudicación')->numeric(),
@@ -75,7 +105,7 @@ final class PendienteContratacionObraResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('exoediente_id')->label('Expediente')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('expediente_id')->label('Expediente')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('PlanObra')->label('Plan de obra')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('NumObra')->label('Núm. obra')->sortable(),
                 Tables\Columns\TextColumn::make('SubRef')->label('Subref.')->sortable(),

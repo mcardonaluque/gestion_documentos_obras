@@ -381,7 +381,7 @@
                 <a href="/obras/obra-cedidas" class="custom-submenu-item">
                     📦 Cesión de Obras
                 </a>
-                 <a href="/obras/obra-contratadas" class="custom-submenu-item">
+                 <a href="/obras/pendiente-contratacion-obras" class="custom-submenu-item">
                     📄 Contratación de Obras
                 </a>
             </div>

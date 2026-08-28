@@ -10,7 +10,7 @@ class PendienteContratacionObra extends Model
     //
     protected $connection='Obras';
     protected $table='PendienteContratacionObras';
-    protected $primaryKey='exoediente_id';
+    protected $primaryKey='expediente_id';
     protected $keyType = 'string';
     protected $guarded = [];
 

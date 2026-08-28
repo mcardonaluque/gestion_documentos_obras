@@ -15,7 +15,7 @@ final class PendienteContratacionObraQueryService
     public function applySearchFilters(Builder $query, array $filters): Builder
     {
         foreach ([
-            'expediente_id' => 'exoediente_id',
+            'expediente_id' => 'expediente_id',
             'plan_obra' => 'PlanObra',
             'num_obra' => 'NumObra',
             'subref' => 'SubRef',

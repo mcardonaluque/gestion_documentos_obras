@@ -3,24 +3,28 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PendienteContratacionObra extends Model
 {
     //
     protected $connection='Obras';
     protected $table='PendienteContratacionObras';
-    protected $primaryKey='expediente_id';
+    protected $primaryKey='exoediente_id';
+    protected $keyType = 'string';
+    protected $guarded = [];
+
+    protected $casts = [
+        'FechaAdjudicacion' => 'datetime',
+        'FechaContrato' => 'datetime',
+        'ImporteAdjudicacion' => 'decimal:2',
+        'ImporteAdjudicacion_Pts' => 'decimal:2',
+    ];
 
     public $incrementing=false;
     public $timestamps=false;
-    public function contratista(){
-        return $this->belongsTo (Contratista::class,'Codcontratista','Codigo_contratista');
-    }
-    public function expediente(){
-        return $this->belongsTo (Expediente::class,'expediente_id','expediente_id');
-    }
-    public function obras()
+    public function contratista(): BelongsTo
     {
-        return $this->hasMany(DatosDeInicioDeObras::class, 'expediente_id', 'expediente_id');
+        return $this->belongsTo (Contratista::class,'Codcontratista','Codigo_contratista');
     }
 }

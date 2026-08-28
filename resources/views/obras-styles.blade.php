@@ -376,12 +376,14 @@
         </div>
            <!-- Tab Inicio -->
            <div class="custom-tab" data-tab="Cesión">
-            💸 Cesión
+            💸 Cesión/Contratación
             <div class="custom-submenu">
                 <a href="/obras/obra-cedidas" class="custom-submenu-item">
                     📦 Cesión de Obras
                 </a>
-
+                 <a href="/obras/obra-contratadas" class="custom-submenu-item">
+                    📄 Contratación de Obras
+                </a>
             </div>
         </div>
 

@@ -1,0 +1,7 @@
+$service = new App\Services\PendienteContratacionObraQueryService();
+$queryContratada = App\Models\PendienteContratacionObra::query();
+$queryPendiente = App\Models\PendienteContratacionObra::query();
+$service->applyContractingStatus($queryContratada, App\Enums\EstadoContratacionObra::Contratada);
+$service->applyContractingStatus($queryPendiente, App\Enums\EstadoContratacionObra::Pendiente);
+echo "CONTRATADA_COUNT:" . $queryContratada->count() . "\n";
+echo "PENDIENTE_COUNT:" . $queryPendiente->count() . "\n";

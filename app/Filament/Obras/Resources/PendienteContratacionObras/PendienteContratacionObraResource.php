@@ -19,6 +19,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -43,6 +44,21 @@ final class PendienteContratacionObraResource extends Resource
         return parent::getEloquentQuery()->with('contratista');
     }
 
+    public static function syncContratistaDetails(mixed $code, callable $set): void
+    {
+        $contratista = filled($code)
+            ? Contratista::query()->with(['municipio', 'provincia'])->find($code)
+            : null;
+
+        $set('contratista_nombre', $contratista?->Nombre);
+        $set('contratista_domicilio', $contratista?->Domicilio);
+        $set('contratista_cpostal', $contratista?->CPostal);
+        $set('contratista_localidad', $contratista?->Localidad);
+        $set('contratista_municipio', $contratista?->municipio_nombre);
+        $set('contratista_provincia', $contratista?->provincia?->NOMBRE_PR);
+        $set('contratista_telefono', $contratista?->Telefono);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -63,7 +79,26 @@ final class PendienteContratacionObraResource extends Resource
                         ])
                         ->all())
                     ->searchable()
+                    ->live()
+                    ->afterStateHydrated(static function (callable $set, mixed $state): void {
+                        static::syncContratistaDetails($state, $set);
+                    })
+                    ->afterStateUpdated(static function (mixed $state, callable $set): void {
+                        static::syncContratistaDetails($state, $set);
+                    })
                     ->native(false),
+                Section::make('Datos del contratista')
+                    ->visibleOn('edit')
+                    ->columns(4)
+                    ->schema([
+                        TextInput::make('contratista_nombre')->label('Nombre')->disabled()->dehydrated(false),
+                        TextInput::make('contratista_domicilio')->label('Domicilio')->disabled()->dehydrated(false),
+                        TextInput::make('contratista_cpostal')->label('C. postal')->disabled()->dehydrated(false),
+                        TextInput::make('contratista_localidad')->label('Localidad')->disabled()->dehydrated(false),
+                        TextInput::make('contratista_municipio')->label('Municipio')->disabled()->dehydrated(false),
+                        TextInput::make('contratista_provincia')->label('Provincia')->disabled()->dehydrated(false),
+                        TextInput::make('contratista_telefono')->label('Teléfono')->disabled()->dehydrated(false),
+                    ]),
                 Select::make('CodClaseexpediente')
                     ->label('Clase de expediente')
                     ->options(fn (): array => app('db')->connection('Obras')

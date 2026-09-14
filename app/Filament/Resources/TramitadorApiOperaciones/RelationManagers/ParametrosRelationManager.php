@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\TramitadorApiOperaciones\RelationManagers;
 
+use App\Models\TramitadorApiParametro;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -18,12 +19,21 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\ValidationException;
 
 class ParametrosRelationManager extends RelationManager
 {
     protected static string $relationship = 'parametros';
 
     protected static ?string $title = 'Parámetros';
+
+    private const PRIORIDAD_UBICACION_ENTRADA = [
+        'path' => 1,
+        'query' => 2,
+        'header' => 3,
+        'body' => 4,
+    ];
 
     public function form(Schema $schema): Schema
     {
@@ -89,7 +99,7 @@ class ParametrosRelationManager extends RelationManager
                     ->columnSpan(2),
                 TextInput::make('ruta_json')
                     ->label('Ruta JSON')
-                    ->helperText('Para respuestas, ejemplo: data.expediente.id')
+                    ->helperText('Solo salidas; relativa a data, ejemplo: expediente.id')
                     ->maxLength(500)
                     ->columnSpan(2),
                 Textarea::make('reglas_validacion')
@@ -107,7 +117,9 @@ class ParametrosRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->defaultSort('orden')
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query
+                ->orderBy('direccion')
+                ->orderBy('orden'))
             ->recordTitleAttribute('nombre')
             ->columns([
                 TextColumn::make('orden')
@@ -125,6 +137,9 @@ class ParametrosRelationManager extends RelationManager
                 TextColumn::make('tipo_dato')
                     ->label('Tipo')
                     ->badge(),
+                 TextColumn::make('ruta_json')
+                    ->label('Ruta JSON')
+                    ->badge(),
                 IconColumn::make('obligatorio')
                     ->label('Obligatorio')
                     ->boolean(),
@@ -133,7 +148,54 @@ class ParametrosRelationManager extends RelationManager
                     ->boolean(),
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->mutateDataUsing(function (array $data): array {
+                        // El orden es independiente para entradas y salidas.
+                        $parametros = TramitadorApiParametro::query()
+                            ->where('operacion_id', $this->getOwnerRecord()->getKey())
+                            ->where('direccion', $data['direccion']);
+
+                        if ($data['direccion'] !== 'entrada') {
+                            $data['orden'] = (int) $parametros->max('orden') + 1;
+
+                            return $data;
+                        }
+
+                        $prioridad = self::PRIORIDAD_UBICACION_ENTRADA[$data['ubicacion']] ?? PHP_INT_MAX;
+                        // Inserta las rutas antes de query, header y body.
+                        $orden = (int) (clone $parametros)
+                            ->whereRaw(
+                                'CASE ubicacion WHEN ? THEN 1 WHEN ? THEN 2 WHEN ? THEN 3 WHEN ? THEN 4 ELSE 5 END <= ?',
+                                ['path', 'query', 'header', 'body', $prioridad],
+                            )
+                            ->max('orden') + 1;
+
+                        $parametros
+                            ->where('orden', '>=', $orden)
+                            ->whereRaw(
+                                'CASE ubicacion WHEN ? THEN 1 WHEN ? THEN 2 WHEN ? THEN 3 WHEN ? THEN 4 ELSE 5 END > ?',
+                                ['path', 'query', 'header', 'body', $prioridad],
+                            )
+                            ->increment('orden');
+
+                        $data['orden'] = $orden;
+
+                        return $data;
+                    })
+                    ->before(function (array $data): void {
+                        $exists = TramitadorApiParametro::query()
+                            ->where('operacion_id', $this->getOwnerRecord()->getKey())
+                            ->where('direccion', $data['direccion'])
+                            ->where('ubicacion', $data['ubicacion'])
+                            ->where('nombre', $data['nombre'])
+                            ->exists();
+
+                        if ($exists) {
+                            throw ValidationException::withMessages([
+                                'data.nombre' => 'Ya existe un parámetro con esta dirección, ubicación y nombre para esta función API.',
+                            ]);
+                        }
+                    }),
             ])
             ->recordActions([
                 EditAction::make(),

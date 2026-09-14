@@ -64,6 +64,7 @@ class DatosEjecucionObrasResource extends Resource
             ->components([
                 ObraGeneralInfo::make('informacion_general')
                 ->label('Información General de la Obra')
+                ->columnSpan(7)
                 ->SetObraData($record ?? null),
                 TextInput::make('Codigo_Plan')
                     ->required()

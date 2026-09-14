@@ -10,6 +10,7 @@ use App\Filament\Obras\Resources\DatosEjecucionObras\DatosEjecucionObrasResource
 use App\Filament\Obras\Resources\Documentoexpedientes\DocumentoexpedienteResource;
 use App\Filament\Obras\Resources\Proyectos\ProyectoResource;
 use App\Filament\Obras\Resources\ObraCedidas\ObraCedidaResource;
+use App\Filament\Obras\Resources\PendienteContratacionObras\PendienteContratacionObraResource;
 use App\Models\DatosDeInicioDeObras;
 use App\Models\DatosEjecucionObras;
 use App\Models\DocumentoExpediente;
@@ -21,9 +22,11 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Filament\Traits\CommonFilters;
+use App\Models\PendienteContratacionObra;
 
 class UltimasObrasTableWidget extends BaseWidget
 {
@@ -147,14 +150,17 @@ class UltimasObrasTableWidget extends BaseWidget
                         ->label('Documentos del Expediente')
                         ->icon('heroicon-o-play')
                         ->color('info')
-                        /*->action(fn () => redirect(
-                            DatosDeInicioDeObrasResource::getUrl('edit', ['record' => $this->obraSeleccionadaId,'panel'=>'planes'])))*/
-                        ->url(function () {
-                            if (!$this->obraSeleccionadaId) return '#';
+                        ->action(function (): void {
                             $obra = DocumentoExpediente::where('expediente_id', $this->obraSeleccionadaId)->first();
-                            return $obra ? DocumentoexpedienteResource::getUrl('edit', ['record' => $obra])  : '#';
-                        })
-                        ->openUrlInNewTab(false)])
+
+                            if (! $obra) {
+                                $this->notifyMissingAssociatedRecord('documentos');
+
+                                return;
+                            }
+
+                            $this->redirect(DocumentoexpedienteResource::getUrl('edit', ['record' => $obra]));
+                        })])
                         ->label('Documentos')
                 ->icon('heroicon-o-cog')
                 ->color('primary')
@@ -167,24 +173,18 @@ class UltimasObrasTableWidget extends BaseWidget
                         ->label('Editar Ejecución')
                         ->icon('heroicon-o-cog')
                         ->color('warning')
-                        ->url(function () {
-                            if (!$this->obraSeleccionadaId) return '#';
+                        ->action(function (): void {
                             $obra = DatosEjecucionObras::find($this->obraSeleccionadaId);
-                            return $obra ? DatosEjecucionObrasResource::getUrl('edit', ['record' => $obra]) . '#ejecucion' : '#';
-                        })
 
-                        ->hidden(fn () => !$this->obraSeleccionadaId),
+                            if (! $obra) {
+                                $this->notifyMissingAssociatedRecord('ejecución');
 
-                    Action::make('editar_cesion')
-                        ->label('Editar Cesión')
-                        ->icon('heroicon-o-document-duplicate')
-                        ->color('success')
-                        ->url(function () {
-                            if (!$this->obraSeleccionadaId) return '#';
-                            $obra = ObraCedida::find($this->obraSeleccionadaId);
-                            return $obra ? ObraCedidaResource::getUrl('edit', ['record' => $obra]) . '#cesion' : '#';
+                                return;
+                            }
+
+                            $this->redirect(DatosEjecucionObrasResource::getUrl('edit', ['record' => $obra]));
                         })])
-                        ->label('Ejecución / Cesión')
+                        ->label('Ejecución')
                         ->icon('heroicon-o-cog')
                         ->color('primary')
                         ->button()
@@ -192,16 +192,57 @@ class UltimasObrasTableWidget extends BaseWidget
                         ->tooltip($this->obraSeleccionadaId ? 'Acciones para obra seleccionada' : 'Selecciona una obra primero')
                         ->hidden(fn () => !$this->obraSeleccionadaId),
                 ActionGroup::make([
+                    Action::make('editar_cesion')
+                        ->label('Editar Cesión')
+                        ->icon('heroicon-o-document-duplicate')
+                        ->color('success')
+                        ->action(function (): void {
+                            $obra = ObraCedida::find($this->obraSeleccionadaId);
+                            if (! $obra) {
+                                $this->notifyMissingAssociatedRecord('cesión');
+
+                                return;
+                            }
+
+                            $this->redirect(ObraCedidaResource::getUrl('edit', ['record' => $obra]));
+                        }),
+                    Action::make('editar_contrataciónn')
+                        ->label('Editar Contratación')
+                        ->icon('heroicon-o-document-duplicate')
+                        ->color('success')
+                        ->action(function (): void {
+                            $obra = PendienteContratacionObra::find($this->obraSeleccionadaId);
+                            if (! $obra) {
+                                $this->notifyMissingAssociatedRecord('contratación');
+
+                                return;
+                            }
+
+                            $this->redirect(PendienteContratacionObraResource::getUrl('edit', ['record' => $obra]));
+                        })])
+                         ->label('Ejecución / Cesión')
+                        ->icon('heroicon-o-cog')
+                        ->color('primary')
+                        ->button()
+                        ->dropdownPlacement('bottom-start')
+                        ->tooltip($this->obraSeleccionadaId ? 'Acciones para obra seleccionada' : 'Selecciona una obra primero')
+                        ->hidden(fn () => !$this->obraSeleccionadaId),
+
+                ActionGroup::make([
                     Action::make('editar_proyecto')
                         ->label('Editar Proyecto')
                         ->icon('heroicon-o-clipboard-document')
                         ->color('primary')
-                        ->url(function () {
-                            if (!$this->obraSeleccionadaId) return '#';
+                        ->action(function (): void {
                             $obra = Proyecto::find($this->obraSeleccionadaId);
-                            return $obra ? ProyectoResource::getUrl('edit', ['record' => $obra]) . '#proyecto' : '#';
-                        })
-                        ->hidden(fn () => !$this->obraSeleccionadaId),
+                            if (! $obra) {
+                                $this->notifyMissingAssociatedRecord('proyecto');
+
+                                return;
+                            }
+
+                            $this->redirect(ProyectoResource::getUrl('edit', ['record' => $obra]));
+                        }),
 
                     Action::make('ver_completo')
                         ->label('Ver Obra Completa')
@@ -210,8 +251,8 @@ class UltimasObrasTableWidget extends BaseWidget
                             if (!$this->obraSeleccionadaId) return '#';
                             $obra = DatosDeInicioDeObras::find($this->obraSeleccionadaId);
                             return $obra ? DatosDeInicioDeObrasResource::getUrl('view', ['record' => $obra,]) : '#';
-                        })
-                        ->hidden(fn () => !$this->obraSeleccionadaId),
+                        }),
+
 
                 ])
                 ->label('Proyecto / Obra Completa')
@@ -282,6 +323,15 @@ class UltimasObrasTableWidget extends BaseWidget
         return [
             'refreshWidget' => '$refresh',
         ];
+    }
+
+    protected function notifyMissingAssociatedRecord(string $resourceName): void
+    {
+        Notification::make()
+            ->title('No existe el registro asociado')
+            ->body("No hay datos de {$resourceName} para la obra seleccionada.")
+            ->warning()
+            ->send();
     }
 
     // Método para mostrar qué obra está seleccionada globalmente

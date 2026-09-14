@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             CatalogoEfectosSilencioSeeder::class,
             CatalogoTiposDocumentalesSeeder::class,
             CatalogoEstadosElaboracionDocumentoSeeder::class,
+            CatalogoTipoFirmasSeeder::class,
         ]);
 
     }

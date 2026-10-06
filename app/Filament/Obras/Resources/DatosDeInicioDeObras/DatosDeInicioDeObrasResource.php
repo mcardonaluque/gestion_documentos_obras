@@ -25,9 +25,14 @@ use App\Filament\Obras\Resources\Concerns\HasWordTemplatePrinting;
 use App\Filament\Traits\ZonasFilter;
 use App\Forms\Components\ImportesManagement;
 use App\Forms\Components\PlazosObraInfo;
+use App\Models\AyudaTecnica;
 use App\Models\DatosDeInicioDeObras;
 use App\Services\Importes\ImportesManagementRepository;
+use App\Services\Templates\PeticionActaReplanteoDocumentService;
+use App\Services\Templates\TechnicalAssistanceDocumentService;
+use Filament\Actions\Action;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource as BaseResource;
 use Filament\Tables;
@@ -143,9 +148,14 @@ class DatosDeInicioDeObrasResource extends BaseResource
                     ->columnSpan(2),
                     //->dehydrated(false)
                    // ->extraAttributes(['class' => 'compact-select']),
-                TextInput::make('TipoObra')
+                Select::make('TipoObra')
                     ->nullable()
-                    ->label('Tipo de Obra'),
+                    ->label('Tipo de Obra')
+                    ->options([
+                       'SB' => 'SB',
+                        'SBA' => 'SBA'
+
+                    ]),
 
                     //->required()
 
@@ -282,6 +292,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
                     ->label('Petición Repl. Previo')
                     ->reactive()
                     ->suffixAction(
+                        /* Acción anterior basada en DocumentoGenerico; se conserva como referencia.
                         self::makeWordPrintAction(
                             name: 'imprimir_notificacion',
                             label: 'Imprimir Notificación',
@@ -289,10 +300,44 @@ class DatosDeInicioDeObrasResource extends BaseResource
                             documentName: 'Petición Ayuda Técnica',
                             requiredStatePath: 'fecha_pet_acta_replanteo',
                             requiredMessage: 'Debe completar la fecha de notificación primero',
-                            fallbackTemplatePath: 'Modelos_Doc\\Petición Ayuda Técnica.dotx',
+                            fallbackTemplatePath: 'Modelos_Doc\\Petición Ayuda Técnica.dot',
                             downloadBaseName: 'peticion-ayuda-tecnica',
-                        ))
-                    ->required(),
+                        ), */
+                        Action::make('generar_peticion_acta_replanteo')
+                            ->label('Acta de Replanteo Previo')
+                            ->icon('heroicon-m-document-arrow-down')
+                            ->visible(static fn (?DatosDeInicioDeObras $record, callable $get): bool => ($record?->exists ?? false)
+                                && filled($get('fecha_pet_acta_replanteo')))
+                            ->action(static function (?DatosDeInicioDeObras $record, callable $get) {
+                                if (! $record instanceof DatosDeInicioDeObras) {
+                                    Notification::make()
+                                        ->title('Debe guardar la obra antes de generar el documento.')
+                                        ->warning()
+                                        ->send();
+
+                                    return null;
+                                }
+
+                                $fechaPeticion = $get('fecha_pet_acta_replanteo');
+
+                                try {
+                                    return app(PeticionActaReplanteoDocumentService::class)->downloadPdf(
+                                        $record,
+                                        is_scalar($fechaPeticion) ? (string) $fechaPeticion : null,
+                                    );
+                                } catch (\Throwable $exception) {
+                                    Notification::make()
+                                        ->title('No se pudo generar la petición de acta de replanteo')
+                                        ->body($exception->getMessage())
+                                        ->danger()
+                                        ->send();
+
+                                    return null;
+                                }
+                            })
+                            ->requiresConfirmation(),
+                    ),
+
                 DatePicker::make('fecha_acta_replanteo_previo')
                     ->nullable()
                     ->label('Acta de Repl. Previo'),
@@ -321,6 +366,39 @@ class DatosDeInicioDeObrasResource extends BaseResource
                 ->columns(4)
                 ->collapsible()
                 ->id('ayuda_tecnica')
+                ->headerActions([
+                    Action::make('generar_peticion_ayuda_tecnica')
+                        ->label('Generar petición')
+                        ->icon('heroicon-m-document-arrow-down')
+                        ->visible(static fn (?AyudaTecnica $record): bool => $record?->exists ?? false)
+                        ->action(static function (?AyudaTecnica $record) {
+                            $obra = $record instanceof AyudaTecnica
+                                ? DatosDeInicioDeObras::query()->find($record->expediente_id)
+                                : null;
+
+                            if (! $obra instanceof DatosDeInicioDeObras) {
+                                Notification::make()
+                                    ->title('Debe guardar la obra antes de generar el documento.')
+                                    ->warning()
+                                    ->send();
+
+                                return null;
+                            }
+
+                            try {
+                                return app(TechnicalAssistanceDocumentService::class)->downloadPdf($obra);
+                            } catch (\Throwable $exception) {
+                                Notification::make()
+                                    ->title('No se pudo generar la petición de ayuda técnica')
+                                    ->body($exception->getMessage())
+                                    ->danger()
+                                    ->send();
+
+                                return null;
+                            }
+                        })
+                        ->requiresConfirmation(),
+                ])
                 ->relationship('ayudaTecnica')
                 ->schema([
                 TextInput::make('expediente_id')

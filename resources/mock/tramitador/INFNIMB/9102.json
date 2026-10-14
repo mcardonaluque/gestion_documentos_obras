@@ -1,0 +1,52 @@
+{
+    "status": "ok",
+    "message": "Se obtiene la información del trámite de firma",
+    "data": {
+        "id_peticion": 9102,
+        "id_exp": 11190,
+        "concepto": "Firma de informe técnico",
+        "estado": "FIR",
+        "descripcion_estado": "Firmado",
+        "id_usu_tramitador": "usuarioprp01",
+        "documentos": [
+            {
+                "id_doc": 589410,
+                "nombre": "Informe_tecnico_11190.pdf"
+            }
+        ],
+        "firmantes": [
+            {
+                "orden": 1,
+                "tipo": "FIRMA",
+                "id_rol": "JSERV",
+                "id_usu": "usuarioprp02",
+                "id_firma": "usuarioprp02",
+                "fecha_firma": "2026-09-20T09:00:00",
+                "accion": "Firmado"
+            },
+            {
+                "orden": 2,
+                "tipo": "VALIDACION",
+                "id_rol": "INTER",
+                "id_usu": "usuarioprp05",
+                "id_firma": "usuarioprp05",
+                "fecha_firma": "2026-09-21T12:30:00",
+                "accion": "Validado"
+            }
+        ],
+        "traslados": [
+            {
+                "id_uo": "9017",
+                "id_rol": "ADM",
+                "id_usu": "usuarioprp04",
+                "fecha_traslado": "22/09/2026"
+            }
+        ],
+        "traslados_leidos": [
+            {
+                "id_usu": "usuarioprp04",
+                "fecha_leido": "23/09/2026"
+            }
+        ]
+    }
+}

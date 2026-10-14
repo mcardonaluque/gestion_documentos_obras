@@ -71,6 +71,11 @@ final class DateRuleEvaluator
                 $leftDate = $this->toDate($leftRaw);
                 $rightDate = $this->toDate($rightRaw);
 
+                // Sin una de las dos fechas no hay comparacion posible.
+                if ($rule->condicion->requiresSecondDate() && ($leftDate === null || $rightDate === null)) {
+                    continue;
+                }
+
                 $passed = $this->evaluateCondition($rule->condicion, $leftDate, $rightDate, $rule->plazo_dias, $rule->aviso_dias);
                 $triggered = $rule->dispara_si_cumple ? $passed : ! $passed;
                 $messageStage = $this->resolveMessageStage($rule->condicion, $passed);

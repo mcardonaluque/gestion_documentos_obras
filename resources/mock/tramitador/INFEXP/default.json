@@ -1,0 +1,31 @@
+{
+    "status":  200,
+    "message":  "OK",
+    "data":  {
+                 "id_exp":  1,
+                 "num_exp":  "1/2026",
+                 "identificador_ENI":  "ES_LA0003318_2026_EXP_1",
+                 "estado":  "ABI",
+                 "id_proc":  100,
+                 "asunto":  "Expediente de prueba genérico",
+                 "fecha_apertura":  "01/01/2026",
+                 "fecha_inicio_plazo":  "01/01/2026",
+                 "num_registro":  "REG-2026-1",
+                 "fecha_registro":  "01/01/2026",
+                 "id_uo":  "UO0001",
+                 "uo_nombre":  "Servicio de Obras y Contratación",
+                 "uo_dir3":  "LA0003318",
+                 "id_grp":  3,
+                 "grp_descripcion":  "Expedientes de obra municipal",
+                 "id_usu_tramitador":  "tramitador01",
+                 "id_usu_responsable":  "resp01",
+                 "id_tipo_duracion":  "MES",
+                 "duracion_meses":  6,
+                 "id_efecto_silencio":  "DES",
+                 "num_exp_antiguo":  null,
+                 "codigo_sia":  "201234",
+                 "descripcion_sia":  "Licencia de obra mayor",
+                 "id_cla_fun_comunes":  "FC01",
+                 "id_cla_fun_especificas":  "FE02"
+             }
+}

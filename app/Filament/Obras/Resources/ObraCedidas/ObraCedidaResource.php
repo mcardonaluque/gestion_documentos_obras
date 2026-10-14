@@ -16,6 +16,7 @@ use App\Filament\Obras\Resources\ObraCedidas\Pages\CreateObraCedida;
 use App\Filament\Obras\Resources\ObraCedidas\Pages\EditObraCedida;
 use App\Filament\Obras\Resources\ObraCedidaResource\Pages;
 use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
+use App\Filament\Support\DateFieldRules;
 use App\Filament\Traits\CommonFilters;
 use App\Filament\Traits\MunicipiosFilter;
 use App\Filament\Traits\ZonasFilter;
@@ -56,10 +57,10 @@ class ObraCedidaResource extends Resource
                 TextInput::make('ao_ejecucion')
                     ->required()
                     ->numeric(),
-                DateTimePicker::make('FechaRemisionAyto'),
-                DateTimePicker::make('FechaRecepcionCerti'),
-                DateTimePicker::make('FechaCesion'),
-                DateTimePicker::make('FechaAdjudicacion'),
+                DateFieldRules::apply(DateTimePicker::make('FechaRemisionAyto')),
+                DateFieldRules::apply(DateTimePicker::make('FechaRecepcionCerti')),
+                DateFieldRules::apply(DateTimePicker::make('FechaCesion')),
+                DateFieldRules::apply(DateTimePicker::make('FechaAdjudicacion')),
                 TextInput::make('ImporteAdjudicacion_Pts')
                     ->numeric(),
                 Section::make('Datos del Contratista')
@@ -79,8 +80,8 @@ class ObraCedidaResource extends Resource
                 TextInput::make('NIFContratista')
                     ->maxLength(15),
                 ]),
-                DateTimePicker::make('FechaContrato'),
-                DateTimePicker::make('FechaRemisionInterv'),
+                DateFieldRules::apply(DateTimePicker::make('FechaContrato')),
+                DateFieldRules::apply(DateTimePicker::make('FechaRemisionInterv')),
                 TextInput::make('ImporteAdjudicacion')
                     ->numeric(),
                 TextInput::make('TelefContratista')

@@ -1,0 +1,22 @@
+{
+    "status": "ok",
+    "message": "Se obtiene la información del informe ROF",
+    "data": {
+        "id_peticion": 9611190,
+        "id_exp": 11190,
+        "concepto": "Informe ROF",
+        "estado": "PTE_FIRM",
+        "descripcion_estado": "Pendiente de firma",
+        "id_usu_tramitador": "usuarioprp01",
+        "documento": {
+            "id_doc": 589410,
+            "nombre": "informe.pdf"
+        },
+        "firmante": {
+            "id_rol": "JEFE",
+            "id_usu_firma": null,
+            "fecha_firma": null,
+            "accion": null
+        }
+    }
+}

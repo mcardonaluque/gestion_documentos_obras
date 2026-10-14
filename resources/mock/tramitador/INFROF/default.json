@@ -1,0 +1,22 @@
+{
+    "status": "ok",
+    "message": "Se obtiene la información del informe ROF",
+    "data": {
+        "id_peticion": 1,
+        "id_exp": 11184,
+        "concepto": "Informe ROF de prueba",
+        "estado": "PEN",
+        "descripcion_estado": "Pendiente de firma",
+        "id_usu_tramitador": "usuario_mock",
+        "documento": {
+            "id_doc": 900100,
+            "nombre": "Informe_ROF_prueba.pdf"
+        },
+        "firmante": {
+            "id_rol": "ROF",
+            "id_usu_firma": null,
+            "fecha_firma": null,
+            "accion": null
+        }
+    }
+}

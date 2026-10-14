@@ -1,0 +1,15 @@
+{
+    "status":  200,
+    "message":  "OK",
+    "data":  {
+                 "documentos":  [
+                                    {
+                                        "nombre":  "Documento_generico.pdf",
+                                        "id_doc":  1,
+                                        "csv":  "00000000000000000001",
+                                        "fecha":  "01/01/2026 10:00:00"
+                                    }
+                                ],
+                 "id_exp":  1
+             }
+}

@@ -7,6 +7,7 @@ namespace App\Services\Tramitador;
 use App\Models\TramitadorApiOperacion;
 use App\Models\TramitadorApiParametro;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -21,49 +22,9 @@ use InvalidArgumentException;
  */
 class TramitadorApiOperationService
 {
-    /**
-     * Fuentes de catálogo autorizadas para futuras validaciones declarativas.
-     *
-     * La configuración almacenada debe referirse a la clave (por ejemplo,
-     * "tipo_firmas"), nunca a una conexión, tabla o columna arbitrarias.
-     */
-    private const ORIGENES_PERMITIDOS = [
-        'duracion_procedimiento' => [
-            'conexion' => 'Obras',
-            'tabla' => 'catalogo_duracion_procedimiento',
-            'columna' => 'identificador',
-        ],
-        'efectos_silencio' => [
-            'conexion' => 'Obras',
-            'tabla' => 'catalogo_efectos_silencio',
-            'columna' => 'identificador',
-        ],
-        'estados_elaboracion_documento' => [
-            'conexion' => 'Obras',
-            'tabla' => 'catalogo_estados_elaboracion_documento',
-            'columna' => 'identificador',
-        ],
-        'funciones_comunes' => [
-            'conexion' => 'Obras',
-            'tabla' => 'catalogo_funciones_comunes',
-            'columna' => 'IDENTIFICADOR',
-        ],
-        'funciones_especificas' => [
-            'conexion' => 'Obras',
-            'tabla' => 'catalogo_funciones_especificas',
-            'columna' => 'identificador',
-        ],
-        'tipos_documentales' => [
-            'conexion' => 'Obras',
-            'tabla' => 'catalogo_tipos_documentales',
-            'columna' => 'identificador',
-        ],
-        'tipo_firmas' => [
-            'conexion' => 'Obras',
-            'tabla' => 'catalogo_tipo_firmas',
-            'columna' => 'identificador',
-        ],
-    ];
+    public function __construct(private readonly TramitadorReglasCatalogo $reglasCatalogo)
+    {
+    }
 
     public function ejecutar(string $codigo, array $valores = []): Response
     {
@@ -102,13 +63,10 @@ class TramitadorApiOperationService
     {
         $reglas = [];
 
-        foreach ($parametros as $parametro) {
-            // reglas_validacion usa reglas Laravel separadas por "|".
+        foreach ($parametros->reject(fn (TramitadorApiParametro $p): bool => $this->esContenedor($p)) as $parametro) {
             $reglas[$parametro->nombre] = array_filter([
                 $parametro->obligatorio ? 'required' : 'nullable',
-                ...($parametro->reglas_validacion === null || $parametro->reglas_validacion === ''
-                    ? []
-                    : explode('|', $parametro->reglas_validacion)),
+                ...$this->reglasCatalogo->reglas($parametro->reglas_validacion, $valores),
             ]);
         }
 
@@ -147,11 +105,40 @@ class TramitadorApiOperationService
         foreach ($parametros->where('ubicacion', $ubicacion) as $parametro) {
             $valor = $valores[$parametro->nombre] ?? $parametro->valor_por_defecto;
 
-            if ($valor !== null) {
-                $resultado[$parametro->nombre] = $valor;
+            if ($valor !== null && ! $this->esContenedor($parametro)) {
+                Arr::set($resultado, $this->clave($parametro, $ubicacion), $this->normalizar($parametro, $valor, $ubicacion));
             }
         }
 
         return $resultado;
+    }
+
+    /** Los objetos agrupan a sus hijos: no se validan ni se envían por sí mismos. */
+    private function esContenedor(TramitadorApiParametro $parametro): bool
+    {
+        return $parametro->tipo_dato === 'object';
+    }
+
+    /** En el body la clave sigue la ruta del catálogo (p. ej. documento.nombre) para anidar el JSON. */
+    private function clave(TramitadorApiParametro $parametro, string $ubicacion): string
+    {
+        $ruta = (string) $parametro->ruta_json;
+
+        return $ubicacion === 'body' && str_contains($ruta, '.') ? $ruta : $parametro->nombre;
+    }
+
+    /**
+     * En la query un booleano debe viajar como "true"/"false" (http_build_query
+     * lo enviaría como 1/0). En el body se conserva el booleano JSON.
+     */
+    private function normalizar(TramitadorApiParametro $parametro, mixed $valor, string $ubicacion): mixed
+    {
+        if ($parametro->tipo_dato !== 'boolean') {
+            return $valor;
+        }
+
+        $booleano = filter_var($valor, FILTER_VALIDATE_BOOLEAN);
+
+        return $ubicacion === 'query' ? ($booleano ? 'true' : 'false') : $booleano;
     }
 }

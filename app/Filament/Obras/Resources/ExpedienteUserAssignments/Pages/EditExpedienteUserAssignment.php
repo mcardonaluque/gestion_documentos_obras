@@ -10,6 +10,7 @@ use App\Models\ExpedienteUserAssignment;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Enums\Width;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
 class EditExpedienteUserAssignment extends EditRecord
@@ -38,7 +39,8 @@ class EditExpedienteUserAssignment extends EditRecord
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $expedienteId = (string) $data['expediente_id'];
+        // Un registro de asignación referencia un único expediente.
+        $expedienteId = (string) Arr::first(Arr::wrap($data['expediente_id']));
         $userId = (int) $data['user_id'];
 
         $alreadyAssigned = ExpedienteUserAssignment::query()

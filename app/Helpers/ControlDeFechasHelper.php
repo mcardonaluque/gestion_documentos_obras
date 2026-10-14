@@ -2,18 +2,25 @@
 
 namespace App\Helpers;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ControlDeFechasHelper
 {
-    public function validateDateRules(string $modelClass, array $data, int $recordId )
+    /**
+     * @param  class-string<Model>  $modelClass
+     * @param  array<string, mixed>  $data
+     */
+    public function validateDateRules(string $modelClass, array $data, ?int $recordId = null): void
     {
+        $table = (new $modelClass())->getTable();
+
         $rules = DB::table('reglas_validacion_fechas')
             ->where('activa', true)
-            ->where(function ($query) use ($modelClass) {
-                $query->where('campo', 'like', $modelClass->)
-                      ->orWhere('related_table', $modelClass::getTable());
+            ->where(function ($query) use ($table) {
+                $query->where('field_to_validate', 'like', $table . '.%')
+                      ->orWhere('related_table', $table);
             })
             ->get();
 

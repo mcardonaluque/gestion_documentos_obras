@@ -1,0 +1,36 @@
+{
+    "status": "ok",
+    "message": "Se obtiene la información de la notificación",
+    "data": {
+        "id_peticion": 9311190,
+        "id_exp": 11190,
+        "tipo_envio": "NOT",
+        "fecha_solicitud": "08/10/2026",
+        "fecha_envio_prog": null,
+        "concepto": "Requerimiento",
+        "documento_notificacion": {
+            "id_doc": "589403",
+            "nombre": "Requerimiento_11190.pdf"
+        },
+        "titular": {
+            "nombre": "Ana",
+            "apellidos": "García López",
+            "nif": "12345678Z",
+            "telefono": "600123456",
+            "email": "ana.garcia@example.com"
+        },
+        "destinatario": {
+            "nombre": "Luis",
+            "apellidos": "Pérez Ruiz",
+            "nif": "87654321X",
+            "telefono": null,
+            "email": "luis.perez@example.com"
+        },
+        "tipo_notificacion": "medios electrónicos",
+        "estado_notificacion": "Pendiente de Comparecencia",
+        "estado": "EN_PROCESO",
+        "descripcion_estado": "Notificación en proceso",
+        "id_usu_tramitador": "usuarioprp01",
+        "callback_url": "https://mi-app.test/callback"
+    }
+}

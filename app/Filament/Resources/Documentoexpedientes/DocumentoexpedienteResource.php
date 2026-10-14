@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Documentoexpedientes;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
@@ -65,9 +66,9 @@ class DocumentoexpedienteResource extends Resource
                 TextInput::make('nsecuencia')
                     ->numeric()
                     ->default(null),
-                TextInput::make('estado.nombre')
-                    ->required()
-                    ->numeric(),
+                Select::make('estado')
+                    ->relationship('estados', 'nombre')
+                    ->required(),
                 TextInput::make('descripcion')
                     ->maxLength(255)
                     ->default(null),
@@ -97,7 +98,7 @@ class DocumentoexpedienteResource extends Resource
                 TextColumn::make('fechaHelp')
                     ->date()
                     ->sortable(),
-                TextColumn::make('cod_dcoumento')
+                TextColumn::make('cod_documento')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('expediente_id')
@@ -109,8 +110,9 @@ class DocumentoexpedienteResource extends Resource
                 TextColumn::make('nsecuencia')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('estado.nombre')
-                    ->numeric()
+                TextColumn::make('estados.nombre')
+                    ->label('Estado')
+                    ->formatStateUsing(fn (?string $state): string => trim((string) $state))
                     ->sortable(),
                 TextColumn::make('descripcion')
                     ->searchable(),
@@ -126,6 +128,11 @@ class DocumentoexpedienteResource extends Resource
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('estados');
     }
 
     public static function getRelations(): array

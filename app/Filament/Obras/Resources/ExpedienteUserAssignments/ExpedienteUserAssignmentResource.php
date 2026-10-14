@@ -147,7 +147,7 @@ class ExpedienteUserAssignmentResource extends Resource
                         ->toArray())
                     ->searchable()
                     ->preload()
-                    ->multiple(true)
+                    ->multiple(static fn (string $operation): bool => $operation === 'create')
                     ->live()
                     ->required()
                     ->helperText('Selecciona el año para cargar solo los expedientes correspondientes.'),

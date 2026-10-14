@@ -99,7 +99,7 @@ class ExpedienteWorkFlowService
         return;
     }
 
-    $dir3 = config('tramite.dir3_emisor');
+    $dir3 = config('tramitador.dir3_emisor');
 
     $response = TramitadorApiClient::postFile(
         "{$dir3}/exp/{$doc->expediente_id}/csv",
@@ -168,7 +168,7 @@ class ExpedienteWorkFlowService
     protected static function getUploadUrl(DocumentoExpediente $doc): string
     {
         return "https://api-se.diputacion.malaga.es/api/v1/"
-            . config('tramite.dir3_emisor')
+            . config('tramitador.dir3_emisor')
             . "/exp/{$doc->expediente_id}/csv";
     }
 }

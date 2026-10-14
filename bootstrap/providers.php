@@ -7,4 +7,5 @@ return [
     App\Providers\Filament\AyuntamientosPanelProvider::class,
     App\Providers\Filament\ObrasPanelProvider::class,
     App\Providers\Filament\PlanesPanelProvider::class,
+    App\Providers\TramitadorMockServiceProvider::class,
 ];

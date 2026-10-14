@@ -1,0 +1,27 @@
+{
+    "status":  200,
+    "message":  "OK",
+    "data":  {
+                 "documentos":  [
+                                    {
+                                        "nombre":  "Informe_tecnico_final.pdf",
+                                        "id_doc":  589403,
+                                        "csv":  "52DBEE34DBF7C31201B2",
+                                        "fecha":  "03/03/2026 12:30:00"
+                                    },
+                                    {
+                                        "nombre":  "Resolucion_aprobacion_proyecto.pdf",
+                                        "id_doc":  589402,
+                                        "csv":  "370DAB14F5D87C68F4CA",
+                                        "fecha":  "15/02/2026 09:15:42"
+                                    },
+                                    {
+                                        "nombre":  "Memoria_valorada.pdf",
+                                        "id_doc":  589401,
+                                        "csv":  "E2F006424B7C56504B38",
+                                        "fecha":  "10/01/2026 10:00:00"
+                                    }
+                                ],
+                 "id_exp":  5894
+             }
+}

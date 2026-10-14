@@ -3,12 +3,15 @@
 namespace App\Filament\Obras\Resources\DatosDeInicioDeObras\Pages;
 
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\DatosDeInicioDeObrasResource;
+use App\Filament\Support\Concerns\NotifiesAndValidatesDates;
 use App\Services\Importes\ImportesManagementRepository;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditDatosDeInicioDeObra extends EditRecord
 {
+    use NotifiesAndValidatesDates;
+
     protected static string $resource = DatosDeInicioDeObrasResource::class;
 
     protected function getHeaderActions(): array

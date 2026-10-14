@@ -1,0 +1,33 @@
+{
+    "status": "ok",
+    "message": "Se obtiene la información de la notificación",
+    "data": {
+        "id_peticion": 9302,
+        "id_exp": 11190,
+        "tipo_envio": "COM",
+        "fecha_solicitud": "01/10/2026",
+        "fecha_envio_prog": "02/10/2026",
+        "concepto": "Comunicación de resolución",
+        "documento_notificacion": {
+            "id_doc": "589410",
+            "nombre": "Comunicacion_11190.pdf"
+        },
+        "titular": {
+            "nombre": "Ana",
+            "apellidos": "García López",
+            "nif": "12345678Z",
+            "telefono": null,
+            "email": null
+        },
+        "tipo_notificacion": "medios electrónicos",
+        "estado_notificacion": "Leido",
+        "documento_certificacion": {
+            "id_doc": 589411,
+            "nombre": "Certificado_comunicacion_11190.pdf"
+        },
+        "estado": "FIN",
+        "descripcion_estado": "Finalizado",
+        "id_usu_tramitador": "usuarioprp01",
+        "callback_url": "https://mi-app.test/callback"
+    }
+}

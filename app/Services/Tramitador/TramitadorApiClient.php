@@ -24,7 +24,7 @@ class TramitadorApiClient
 
     protected static function url(string $path): string
     {
-        return rtrim(config('tramite.base_url'), '/') . '/' . ltrim($path, '/');
+        return rtrim(config('tramitador.base_url'), '/') . '/' . ltrim($path, '/');
     }
 
     public static function get(string $path): Response

@@ -1,0 +1,15 @@
+{
+    "status":  200,
+    "message":  "OK",
+    "data":  {
+                 "documentos":  [
+                                    {
+                                        "nombre":  "Solicitud_inicio_obra.pdf",
+                                        "id_doc":  589501,
+                                        "csv":  "A1B2C3D4E5F6A7B8C9D0",
+                                        "fecha":  "05/04/2026 08:45:10"
+                                    }
+                                ],
+                 "id_exp":  5895
+             }
+}

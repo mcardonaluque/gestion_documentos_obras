@@ -1,0 +1,26 @@
+{
+    "status":  "ok",
+    "message":  "Se obtiene el documento con identificador 1",
+    "data":  {
+                 "id_doc":  1,
+                 "nombre":  "Documento_generico.pdf",
+                 "csv":  "00000000000000000001",
+                 "fecha":  "01/01/2026 10:00:00",
+                 "hash":  "326055445ff5ba75847dc351d870706c2468602d3c679ff2795c82913530cdeca9d7e615b8b5861dd8ab6e32f7ee53d972f98212bbcb6619fd4a29548775fe48",
+                 "original_contenido":  "JVBERi0xLjQKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqCjIgMCBvYmo8PC9UeXBlL1BhZ2VzL0tpZHNbMyAwIFJdL0NvdW50IDE+PmVuZG9iagozIDAgb2JqPDwvVHlwZS9QYWdlL1BhcmVudCAyIDAgUi9NZWRpYUJveFswIDAgMjAwIDIwMF0+PmVuZG9iagp0cmFpbGVyPDwvUm9vdCAxIDAgUj4+CiUlRU9G",
+                 "caratula_contenido":  "JVBERi0xLjQKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqCjIgMCBvYmo8PC9UeXBlL1BhZ2VzL0tpZHNbMyAwIFJdL0NvdW50IDE+PmVuZG9iagozIDAgb2JqPDwvVHlwZS9QYWdlL1BhcmVudCAyIDAgUi9NZWRpYUJveFswIDAgMjAwIDIwMF0+PmVuZG9iagp0cmFpbGVyPDwvUm9vdCAxIDAgUj4+CiUlRU9G",
+                 "metadatos":  {
+                                   "version_NTI":  "http://administracionelectronica.gob.es/ENI/XSD/v1.0/documento-e",
+                                   "identificador_ENI":  "ES_LA0003318_2026_DOC_1",
+                                   "organo":  "LA0003318",
+                                   "fecha_captura":  "01/01/2026",
+                                   "origen":  true,
+                                   "estado_elaboracion":  "EE01",
+                                   "formato":  "PDF",
+                                   "tipo_documental":  "TD14",
+                                   "tipo_firma":  "TF01",
+                                   "csv":  "00000000000000000001",
+                                   "regulacion_csv":  "Orden de creación del CSV de la Diputación"
+                               }
+             }
+}

@@ -87,10 +87,9 @@ final class ImpresionPlantillaSqlServerService
             $values[$variable] = is_scalar($value) || $value instanceof \Stringable ? (string) $value : '';
         }
 
+        // Se añaden aunque no estén en RegistroDatos: la plantilla puede usar nombres que el catálogo no lista.
         foreach ($valoresVariables as $variable => $value) {
-            if (array_key_exists($variable, $values)) {
-                $values[$variable] = $value;
-            }
+            $values[$variable] = $value;
         }
 
         return $values;

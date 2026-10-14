@@ -1,0 +1,31 @@
+{
+    "status": "ok",
+    "message": "Se obtiene la información del trámite de firma",
+    "data": {
+        "id_peticion": 9511190,
+        "id_exp": 11190,
+        "concepto": "Firma",
+        "estado": "PEN",
+        "descripcion_estado": "Pendiente de firma",
+        "id_usu_tramitador": "usuarioprp01",
+        "documentos": [
+            {
+                "id_doc": 589403,
+                "nombre": "a.pdf"
+            }
+        ],
+        "firmantes": [
+            {
+                "orden": 1,
+                "tipo": "F",
+                "id_rol": "JEFE",
+                "id_usu": null,
+                "id_firma": null,
+                "fecha_firma": null,
+                "accion": null
+            }
+        ],
+        "traslados": [],
+        "traslados_leidos": []
+    }
+}

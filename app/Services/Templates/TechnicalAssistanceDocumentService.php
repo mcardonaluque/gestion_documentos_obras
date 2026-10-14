@@ -22,6 +22,7 @@ final class TechnicalAssistanceDocumentService
     /** @var array<string, string> */
     private const LEGACY_VARIABLE_COLUMNS = [
         'WD_DEFIPLAN' => 'denominacion_plan',
+        'WD_DEFPLAN' => 'denominacion_plan',
         'WD_LOCALIDAD' => 'nombre_municipio',
         'WD_IMPORTEAPROBADO' => 'importe_aprobado',
         'WD_FORMAEJE' => 'DEN_CONTRATA',
@@ -48,6 +49,72 @@ final class TechnicalAssistanceDocumentService
             ],
             self::LEGACY_VARIABLE_COLUMNS,
             'peticion-ayuda-tecnica',
+            $this->buildComputedValues($obra),
         );
+    }
+
+    /**
+     * Variables que el procedimiento no devuelve y se calculan desde la obra.
+     *
+     * @return array<string, string>
+     */
+    private function buildComputedValues(DatosDeInicioDeObras $obra): array
+    {
+        $referencia = sprintf(
+            '%s-%s-%s/%s',
+            trim((string) $obra->Codigo_Plan),
+            $obra->numero_obra,
+            $obra->subreferencia,
+            $obra->ao_ejecucion,
+        );
+
+        $nombreObra = trim(implode(' ', array_filter([
+            trim((string) $obra->nombre_obra1),
+            trim((string) $obra->nombre_obra2),
+            trim((string) $obra->nombre_obra3),
+        ], static fn (string $part): bool => $part !== '')));
+
+        return [
+            'WD_REF' => $referencia,
+            'WD_REFOBRA' => $referencia,
+            'WD_NOMBREOBRA' => $nombreObra,
+            'WD_OBRA' => $nombreObra,
+            'WD_TIPOAYUDA' => $this->resolveTipoAyuda($obra),
+            'WD_DIRECTECNICA' => $this->resolveDirectecnica($obra),
+        ];
+    }
+
+    /** Misma regla que el código VB heredado. */
+    private function resolveDirectecnica(DatosDeInicioDeObras $obra): string
+    {
+        $direccion = trim((string) $obra->ayudaTecnica?->departamento_direccion);
+        $reservado = trim((string) $obra->planes?->codigo_depar_reservado);
+
+        if ($reservado !== $direccion) {
+            return trim((string) $obra->ayudaTecnica?->ayudaD?->DENOMINACION);
+        }
+
+        return $direccion === '' || $direccion === '0' ? 'Técnico Ajeno' : 'Técnico Contratado';
+    }
+
+    private function resolveTipoAyuda(DatosDeInicioDeObras $obra): string
+    {
+        $ayuda = $obra->ayudaTecnica;
+        $tipos = [];
+
+        if ($this->isYes($ayuda?->AyuTecRed)) {
+            $tipos[] = 'redacción';
+        }
+
+        if ($this->isYes($ayuda?->AyuTecDir)) {
+            $tipos[] = 'dirección';
+        }
+
+        return implode(' y ', $tipos);
+    }
+
+    private function isYes(mixed $value): bool
+    {
+        return in_array(mb_strtoupper(trim((string) $value)), ['SI', 'SÍ'], true);
     }
 }

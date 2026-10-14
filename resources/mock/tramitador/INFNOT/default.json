@@ -1,0 +1,29 @@
+{
+    "status": "ok",
+    "message": "Se obtiene la información de la notificación",
+    "data": {
+        "id_peticion": 0,
+        "id_exp": 11190,
+        "tipo_envio": "NOT",
+        "fecha_solicitud": "08/10/2026",
+        "fecha_envio_prog": null,
+        "concepto": "Notificación de prueba",
+        "documento_notificacion": {
+            "id_doc": "1",
+            "nombre": "Documento_prueba.pdf"
+        },
+        "titular": {
+            "nombre": "Titular",
+            "apellidos": "De Prueba",
+            "nif": "00000000T",
+            "telefono": null,
+            "email": null
+        },
+        "tipo_notificacion": "medios electrónicos",
+        "estado_notificacion": "Pendiente de Comparecencia",
+        "estado": "EN_PROCESO",
+        "descripcion_estado": "Notificación en proceso",
+        "id_usu_tramitador": "usuarioprp01",
+        "callback_url": "https://mi-app.test/callback"
+    }
+}

@@ -1,0 +1,51 @@
+{
+    "status": "ok",
+    "message": "Se obtiene la información del trámite de firma",
+    "data": {
+        "id_peticion": 9101,
+        "id_exp": 11184,
+        "concepto": "Firma de resolución de concesión de subvención",
+        "estado": "PEN",
+        "descripcion_estado": "Pendiente de firma",
+        "id_usu_tramitador": "usuarioprp01",
+        "documentos": [
+            {
+                "id_doc": 589403,
+                "nombre": "Resolucion_concesion_11184.pdf"
+            },
+            {
+                "id_doc": 589404,
+                "nombre": "Anexo_I_11184.pdf"
+            }
+        ],
+        "firmantes": [
+            {
+                "orden": 1,
+                "tipo": "FIRMA",
+                "id_rol": "JSERV",
+                "id_usu": "usuarioprp02",
+                "id_firma": "usuarioprp02",
+                "fecha_firma": "2026-10-05T10:15:00",
+                "accion": "Firmado"
+            },
+            {
+                "orden": 2,
+                "tipo": "FIRMA",
+                "id_rol": "DIPUT",
+                "id_usu": "usuarioprp03",
+                "id_firma": null,
+                "fecha_firma": null,
+                "accion": null
+            }
+        ],
+        "traslados": [
+            {
+                "id_uo": "9017",
+                "id_rol": "ADM",
+                "id_usu": "usuarioprp04",
+                "fecha_traslado": "05/10/2026"
+            }
+        ],
+        "traslados_leidos": []
+    }
+}

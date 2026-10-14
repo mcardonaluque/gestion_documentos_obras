@@ -1,0 +1,22 @@
+{
+    "status": "ok",
+    "message": "Se obtiene la información del informe ROF",
+    "data": {
+        "id_peticion": 9001,
+        "id_exp": 11184,
+        "concepto": "Informe ROF para subvención de obras",
+        "estado": "PEN",
+        "descripcion_estado": "Pendiente de firma",
+        "id_usu_tramitador": "usuarioprp01",
+        "documento": {
+            "id_doc": 900101,
+            "nombre": "Informe_ROF_11184.pdf"
+        },
+        "firmante": {
+            "id_rol": "ROF",
+            "id_usu_firma": null,
+            "fecha_firma": null,
+            "accion": null
+        }
+    }
+}

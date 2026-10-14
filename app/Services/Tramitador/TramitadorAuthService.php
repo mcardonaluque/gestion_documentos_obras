@@ -15,8 +15,8 @@ class TramitadorAuthService
         return Cache::remember(self::CACHE_KEY, now()->addMinutes(50), function () {
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . config('tramite.api_token_fijo'),
-            ])->get(config('tramite.base_url') . '/login');
+                'Authorization' => 'Bearer ' . config('tramitador.api_token_fijo'),
+            ])->get(config('tramitador.base_url') . '/login');
 
             if (!$response->successful()) {
                 throw new RuntimeException('Error autenticando con el tramitador');

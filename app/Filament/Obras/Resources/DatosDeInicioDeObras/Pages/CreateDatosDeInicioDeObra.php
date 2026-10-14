@@ -3,10 +3,13 @@
 namespace App\Filament\Obras\Resources\DatosDeInicioDeObras\Pages;
 
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\DatosDeInicioDeObrasResource;
+use App\Filament\Support\Concerns\NotifiesAndValidatesDates;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateDatosDeInicioDeObra extends CreateRecord
 {
+    use NotifiesAndValidatesDates;
+
     protected static string $resource = DatosDeInicioDeObrasResource::class;
 
 protected function mutateFormDataBeforeFill(array $data): array

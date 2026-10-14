@@ -1,0 +1,22 @@
+{
+    "status": "ok",
+    "message": "Se obtiene la información del informe ROF",
+    "data": {
+        "id_peticion": 9002,
+        "id_exp": 11184,
+        "concepto": "Informe ROF para subvención de obras",
+        "estado": "FIN",
+        "descripcion_estado": "Firmado",
+        "id_usu_tramitador": "usuarioprp01",
+        "documento": {
+            "id_doc": 900102,
+            "nombre": "Informe_ROF_11184_firmado.pdf"
+        },
+        "firmante": {
+            "id_rol": "ROF",
+            "id_usu_firma": "usuprp",
+            "fecha_firma": "07/10/2026 11:30:00",
+            "accion": "FIR"
+        }
+    }
+}

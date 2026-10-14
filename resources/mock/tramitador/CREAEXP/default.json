@@ -1,0 +1,9 @@
+{
+    "status": "ok",
+    "message": "Se crea el expediente",
+    "data": {
+        "id_exp": 11200,
+        "num_exp": "40/2026",
+        "ref_emisor": "REF-DEFECTO"
+    }
+}

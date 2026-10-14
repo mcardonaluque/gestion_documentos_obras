@@ -1,0 +1,89 @@
+{
+    "status":  "ok",
+    "message":  "Se obtiene el listado de expedientes",
+    "data":  {
+                 "ejercicio":  2022,
+                 "id_uo":  "9017",
+                 "total":  6,
+                 "expedientes":  [
+                                     {
+                                         "id_exp":  11184,
+                                         "num_exp":  "28/2022",
+                                         "ejercicio":  2022,
+                                         "estado":  "CER",
+                                         "id_proc":  1,
+                                         "asunto":  "Subvención: azl 1",
+                                         "fecha_apertura":  "01/08/2022",
+                                         "id_uo":  "9017",
+                                         "uo_nombre":  "Servicio de Compras",
+                                         "id_grp":  3095,
+                                         "grp_descripcion":  "Prueba grupo 9017 (11)"
+                                     },
+                                     {
+                                         "id_exp":  11190,
+                                         "num_exp":  "31/2022",
+                                         "ejercicio":  2022,
+                                         "estado":  "ABI",
+                                         "id_proc":  1,
+                                         "asunto":  "Subvención: azl 2",
+                                         "fecha_apertura":  "15/09/2022",
+                                         "id_uo":  "9017",
+                                         "uo_nombre":  "Servicio de Compras",
+                                         "id_grp":  3095,
+                                         "grp_descripcion":  "Prueba grupo 9017 (11)"
+                                     },
+                                     {
+                                         "id_exp":  11250,
+                                         "num_exp":  "2/2023",
+                                         "ejercicio":  2023,
+                                         "estado":  "ABI",
+                                         "id_proc":  2,
+                                         "asunto":  "Contratación de suministro de mobiliario",
+                                         "fecha_apertura":  "10/01/2023",
+                                         "id_uo":  "9017",
+                                         "uo_nombre":  "Servicio de Compras",
+                                         "id_grp":  null,
+                                         "grp_descripcion":  null
+                                     },
+                                     {
+                                         "id_exp":  11301,
+                                         "num_exp":  "14/2023",
+                                         "ejercicio":  2023,
+                                         "estado":  "CER",
+                                         "id_proc":  2,
+                                         "asunto":  "Reforma del pabellón deportivo municipal",
+                                         "fecha_apertura":  "22/03/2023",
+                                         "id_uo":  "9018",
+                                         "uo_nombre":  "Servicio de Obras",
+                                         "id_grp":  3100,
+                                         "grp_descripcion":  "Obras municipales"
+                                     },
+                                     {
+                                         "id_exp":  11420,
+                                         "num_exp":  "5/2026",
+                                         "ejercicio":  2026,
+                                         "estado":  "ABI",
+                                         "id_proc":  3,
+                                         "asunto":  "Pavimentación de calle Mayor",
+                                         "fecha_apertura":  "05/02/2026",
+                                         "id_uo":  "9018",
+                                         "uo_nombre":  "Servicio de Obras",
+                                         "id_grp":  3100,
+                                         "grp_descripcion":  "Obras municipales"
+                                     },
+                                     {
+                                         "id_exp":  11433,
+                                         "num_exp":  "9/2026",
+                                         "ejercicio":  2026,
+                                         "estado":  "ABI",
+                                         "id_proc":  3,
+                                         "asunto":  "Licencia de obra mayor: edificio plurifamiliar",
+                                         "fecha_apertura":  "18/03/2026",
+                                         "id_uo":  "9018",
+                                         "uo_nombre":  "Servicio de Obras",
+                                         "id_grp":  null,
+                                         "grp_descripcion":  null
+                                     }
+                                 ]
+             }
+}

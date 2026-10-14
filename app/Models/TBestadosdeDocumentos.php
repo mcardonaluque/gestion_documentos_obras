@@ -16,7 +16,7 @@ class TBestadosdeDocumentos extends Model
                                                                                                                                                                                                                                                                                            public $incrementing = true;
 
    public function documentos(){
-    return $this->hasMany (DocumentoExpediente::class,'id','estado');
+    return $this->hasMany (DocumentoExpediente::class,'estado','id');
 }
 }
 

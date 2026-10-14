@@ -22,6 +22,7 @@ use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\AyudaRela
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\DocumentosRelationManager;
 use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
 use App\Filament\Obras\Resources\Concerns\HasWordTemplatePrinting;
+use App\Filament\Support\DateFieldRules;
 use App\Filament\Traits\ZonasFilter;
 use App\Forms\Components\ImportesManagement;
 use App\Forms\Components\PlazosObraInfo;
@@ -285,10 +286,10 @@ class DatosDeInicioDeObrasResource extends BaseResource
                 //->id('ayuda')
                 //->relationship('ayuda')
                 ->schema([
-                    DatePicker::make('fecha_notificacion_ayto')
+                    DateFieldRules::apply(DatePicker::make('fecha_notificacion_ayto')
                     ->nullable()
-                    ->label('Notifif. Ayuntamiento'),
-                    DatePicker::make('fecha_pet_acta_replanteo')
+                    ->label('Notifif. Ayuntamiento')),
+                    DateFieldRules::apply(DatePicker::make('fecha_pet_acta_replanteo')
                     ->label('Petición Repl. Previo')
                     ->reactive()
                     ->suffixAction(
@@ -336,29 +337,29 @@ class DatosDeInicioDeObrasResource extends BaseResource
                                 }
                             })
                             ->requiresConfirmation(),
-                    ),
+                    )),
 
-                DatePicker::make('fecha_acta_replanteo_previo')
+                DateFieldRules::apply(DatePicker::make('fecha_acta_replanteo_previo')
                     ->nullable()
-                    ->label('Acta de Repl. Previo'),
-                DatePicker::make('fecha_rem_pet_ayuda')
+                    ->label('Acta de Repl. Previo')),
+                DateFieldRules::apply(DatePicker::make('fecha_rem_pet_ayuda')
                     ->nullable()
-                    ->label('Petición de ayuda técnica'),
-                DatePicker::make('fecha_envio_fiscalizacion')
+                    ->label('Petición de ayuda técnica')),
+                DateFieldRules::apply(DatePicker::make('fecha_envio_fiscalizacion')
                     ->nullable()
-                    ->label('Envio a Fiscalizar'),
-                DatePicker::make('fecha_fiscalizacion')
+                    ->label('Envio a Fiscalizar')),
+                DateFieldRules::apply(DatePicker::make('fecha_fiscalizacion')
                     ->nullable()
-                    ->label('Fecha Fiscalización'),
-                DatePicker::make('fecha_prev_comienzo_obra')
+                    ->label('Fecha Fiscalización')),
+                DateFieldRules::apply(DatePicker::make('fecha_prev_comienzo_obra')
                     ->nullable()
-                    ->label('Prevista Comienzo'),
-                DatePicker::make('fecha_prev_term_obra')
+                    ->label('Prevista Comienzo')),
+                DateFieldRules::apply(DatePicker::make('fecha_prev_term_obra')
                     ->nullable()
-                    ->label('Prevista Terminación'),
-                DatePicker::make('FechaMediosMatAyto')
+                    ->label('Prevista Terminación')),
+                DateFieldRules::apply(DatePicker::make('FechaMediosMatAyto')
                     ->nullable()
-                    ->label('Medios Materiales Ayto.'),
+                    ->label('Medios Materiales Ayto.')),
                 ]),
 
             Section::make('Ayuda Técnica')

@@ -1,0 +1,31 @@
+{
+    "status": "ok",
+    "message": "Se obtiene la información del trámite de firma",
+    "data": {
+        "id_peticion": 0,
+        "id_exp": 0,
+        "concepto": "Trámite de firma de prueba",
+        "estado": "PEN",
+        "descripcion_estado": "Pendiente de firma",
+        "id_usu_tramitador": "usuarioprp01",
+        "documentos": [
+            {
+                "id_doc": 1,
+                "nombre": "Documento_prueba.pdf"
+            }
+        ],
+        "firmantes": [
+            {
+                "orden": 1,
+                "tipo": "FIRMA",
+                "id_rol": "JSERV",
+                "id_usu": "usuarioprp02",
+                "id_firma": null,
+                "fecha_firma": null,
+                "accion": null
+            }
+        ],
+        "traslados": [],
+        "traslados_leidos": []
+    }
+}

@@ -10,4 +10,9 @@ use Filament\Resources\Pages\ListRecords;
 final class ListPendienteContratacionObras extends ListRecords
 {
     protected static string $resource = PendienteContratacionObraResource::class;
+
+    public function getHeading(): string
+    {
+        return '';
+    }
 }

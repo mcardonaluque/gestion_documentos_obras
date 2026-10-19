@@ -31,11 +31,11 @@ final class PendienteContratacionObraResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentMagnifyingGlass;
 
-    protected static ?string $navigationLabel = 'Pendientes de contratación';
+    protected static ?string $navigationLabel = 'Contratación de Obras';
 
     protected static ?string $modelLabel = 'obra pendiente de contratación';
 
-    protected static ?string $pluralModelLabel = 'Pendientes de contratación';
+    protected static ?string $pluralModelLabel = 'Contratación de Obras';
 
     protected static ?string $recordTitleAttribute = 'expediente_id';
 
@@ -62,31 +62,70 @@ final class PendienteContratacionObraResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema
-            ->columns(4)
+            ->columns(1)
             ->components([
-                TextInput::make('expediente_id')->label('Expediente')->required()->maxLength(255),
-                TextInput::make('PlanObra')->label('Plan de obra')->required()->maxLength(20),
-                TextInput::make('NumObra')->label('Núm. obra')->required()->numeric(),
-                TextInput::make('SubRef')->label('Subref.')->required()->numeric(),
-                TextInput::make('AoObra')->label('Año ejecución')->required()->numeric(),
-                Select::make('CodContratista')
-                    ->label('Contratista')
-                    ->options(fn (): array => Contratista::query()
-                        ->orderBy('Nombre')
-                        ->get(['Codigo_contratista', 'Nombre', 'Empresa'])
-                        ->mapWithKeys(fn (Contratista $contratista): array => [
-                            (string) $contratista->Codigo_contratista => trim((string) ($contratista->Nombre ?: $contratista->Empresa)),
-                        ])
-                        ->all())
-                    ->searchable()
-                    ->live()
-                    ->afterStateHydrated(static function (callable $set, mixed $state): void {
-                        static::syncContratistaDetails($state, $set);
-                    })
-                    ->afterStateUpdated(static function (mixed $state, callable $set): void {
-                        static::syncContratistaDetails($state, $set);
-                    })
-                    ->native(false),
+            Section::make('Datos del contratista')
+                ->visibleOn('edit')
+                ->columns(4)
+                ->schema([
+                    TextInput::make('expediente_id')->label('Expediente')->required()->maxLength(255),
+                    TextInput::make('PlanObra')->label('Plan de obra')->required()->maxLength(20),
+                    TextInput::make('NumObra')->label('Núm. obra')->required()->numeric(),
+                    TextInput::make('SubRef')->label('Subref.')->required()->numeric(),
+                    TextInput::make('AoObra')->label('Año ejecución')->required()->numeric(),
+                    Select::make('CodClaseexpediente')
+                        ->label('Clase de expediente')
+                        ->options(fn (): array => app('db')->connection('Obras')
+                            ->table('TbClasesExpedientes')
+                            ->orderBy('claseexped')
+                            ->pluck('claseexped', 'codclaseexped')
+                            ->mapWithKeys(fn (string $name, mixed $code): array => [(string) $code => trim($name)])
+                            ->all())
+                        ->searchable()
+                        ->native(false),
+                    Select::make('Codprocedimiento')
+                        ->label('Procedimiento')
+                        ->options(fn (): array => app('db')->connection('Obras')
+                            ->table('TbTiposProcedimientos')
+                            ->orderBy('procedimiento')
+                            ->pluck('procedimiento', 'codprocedimiento')
+                            ->mapWithKeys(fn (string $name, mixed $code): array => [(string) $code => trim($name)])
+                            ->all())
+                        ->searchable()
+                        ->native(false),
+                    Select::make('CodFormaContrata')
+                        ->label('Forma de contratación')
+                        ->options(fn (): array => app('db')->connection('Obras')
+                            ->table('TbFormasContratacion')
+                            ->orderBy('FormaContratacion')
+                            ->pluck('FormaContratacion', 'CodFormaContra')
+                            ->mapWithKeys(fn (string $name, mixed $code): array => [(string) $code => trim($name)])
+                            ->all())
+                        ->searchable()
+                        ->native(false),
+                    DateTimePicker::make('FechaAdjudicacion')->label('Fecha adjudicación'),
+                    DateTimePicker::make('FechaContrato')->label('Fecha contrato'),
+                    TextInput::make('ImporteAdjudicacion')->label('Importe adjudicación')->numeric(),
+                    TextInput::make('ImporteAdjudicacion_Pts')->label('Importe adjudicación (pts.)')->numeric(),
+                    Select::make('CodContratista')
+                        ->label('Contratista')
+                        ->options(fn (): array => Contratista::query()
+                            ->orderBy('Nombre')
+                            ->get(['Codigo_contratista', 'Nombre', 'Empresa'])
+                            ->mapWithKeys(fn (Contratista $contratista): array => [
+                                (string) $contratista->Codigo_contratista => trim((string) ($contratista->Nombre ?: $contratista->Empresa)),
+                            ])
+                            ->all())
+                        ->searchable()
+                        ->live()
+                        ->afterStateHydrated(static function (callable $set, mixed $state): void {
+                            static::syncContratistaDetails($state, $set);
+                        })
+                        ->afterStateUpdated(static function (mixed $state, callable $set): void {
+                            static::syncContratistaDetails($state, $set);
+                        })
+                        ->native(false),
+                ]),
                 Section::make('Datos del contratista')
                     ->visibleOn('edit')
                     ->columns(4)
@@ -99,46 +138,20 @@ final class PendienteContratacionObraResource extends Resource
                         TextInput::make('contratista_provincia')->label('Provincia')->disabled()->dehydrated(false),
                         TextInput::make('contratista_telefono')->label('Teléfono')->disabled()->dehydrated(false),
                     ]),
-                Select::make('CodClaseexpediente')
-                    ->label('Clase de expediente')
-                    ->options(fn (): array => app('db')->connection('Obras')
-                        ->table('TbClasesExpedientes')
-                        ->orderBy('claseexped')
-                        ->pluck('claseexped', 'codclaseexped')
-                        ->mapWithKeys(fn (string $name, mixed $code): array => [(string) $code => trim($name)])
-                        ->all())
-                    ->searchable()
-                    ->native(false),
-                Select::make('Codprocedimiento')
-                    ->label('Procedimiento')
-                    ->options(fn (): array => app('db')->connection('Obras')
-                        ->table('TbTiposProcedimientos')
-                        ->orderBy('procedimiento')
-                        ->pluck('procedimiento', 'codprocedimiento')
-                        ->mapWithKeys(fn (string $name, mixed $code): array => [(string) $code => trim($name)])
-                        ->all())
-                    ->searchable()
-                    ->native(false),
-                Select::make('CodFormaContrata')
-                    ->label('Forma de contratación')
-                    ->options(fn (): array => app('db')->connection('Obras')
-                        ->table('TbFormasContratacion')
-                        ->orderBy('FormaContratacion')
-                        ->pluck('FormaContratacion', 'CodFormaContra')
-                        ->mapWithKeys(fn (string $name, mixed $code): array => [(string) $code => trim($name)])
-                        ->all())
-                    ->searchable()
-                    ->native(false),
-                DateTimePicker::make('FechaAdjudicacion')->label('Fecha adjudicación'),
-                DateTimePicker::make('FechaContrato')->label('Fecha contrato'),
-                TextInput::make('ImporteAdjudicacion')->label('Importe adjudicación')->numeric(),
-                TextInput::make('ImporteAdjudicacion_Pts')->label('Importe adjudicación (pts.)')->numeric(),
+
+
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->heading(static function ($livewire): string {
+                $value = $livewire->tableFilters['estado_contratacion']['value'] ?? null;
+                $status = is_string($value) ? EstadoContratacionObra::tryFrom($value) : null;
+
+                return $status?->label() ?? 'Obras contratadas y pendientes de contratación';
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('expediente_id')->label('Expediente')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('PlanObra')->label('Plan de obra')->searchable()->sortable(),
@@ -151,21 +164,14 @@ final class PendienteContratacionObraResource extends Resource
                 Tables\Columns\TextColumn::make('ImporteAdjudicacion')->label('Importe adjudicación')->numeric(decimalPlaces: 2)->placeholder('-'),
             ])
             ->filters([
-                Tables\Filters\Filter::make('busqueda_obra')
-                    ->label('Datos de obra')
-                    ->form([
-                        TextInput::make('expediente_id')->label('Expediente'),
-                        TextInput::make('plan_obra')->label('Plan de obra'),
-                        TextInput::make('num_obra')->label('Núm. obra')->numeric(),
-                        TextInput::make('subref')->label('Subref.')->numeric(),
-                        TextInput::make('ao_ejecucion')->label('Año ejecución')->numeric(),
-                    ])
-                    ->query(static function (Builder $query, array $data): Builder {
-                        /** @var array{expediente_id?: string|null, plan_obra?: string|null, num_obra?: string|null, subref?: string|null, ao_ejecucion?: string|null} $data */
-                        return app(PendienteContratacionObraQueryService::class)->applySearchFilters($query, $data);
-                    }),
+                self::textFilter('expediente_id', 'Expediente'),
+                self::textFilter('plan_obra', 'Plan de obra'),
+                self::textFilter('num_obra', 'Núm. obra', true),
+                self::textFilter('subref', 'Subref.', true),
+                self::textFilter('ao_ejecucion', 'Año de la obra', true),
                 Tables\Filters\SelectFilter::make('estado_contratacion')
                     ->label('Estado de contratación')
+                    ->default(EstadoContratacionObra::Pendiente->value)
                     ->options([
                         EstadoContratacionObra::Contratada->value => EstadoContratacionObra::Contratada->label(),
                         EstadoContratacionObra::Pendiente->value => EstadoContratacionObra::Pendiente->label(),
@@ -186,6 +192,24 @@ final class PendienteContratacionObraResource extends Resource
                 CreateAction::make()->label('Añadir contratación'),
             ])
             ->defaultSort('AoObra', 'desc');
+    }
+
+    private static function textFilter(string $name, string $label, bool $numeric = false): Tables\Filters\Filter
+    {
+        $input = TextInput::make($name)->label($label);
+
+        if ($numeric) {
+            $input->numeric();
+        }
+
+        return Tables\Filters\Filter::make($name)
+            ->label($label)
+            ->form([$input])
+            ->query(static fn (Builder $query, array $data): Builder => app(PendienteContratacionObraQueryService::class)
+                ->applySearchFilters($query, [$name => $data[$name] ?? null]))
+            ->indicateUsing(static fn (array $data): ?string => filled($data[$name] ?? null)
+                ? $label . ': ' . $data[$name]
+                : null);
     }
 
     public static function getRelations(): array

@@ -13,7 +13,6 @@ use App\Filament\Obras\Resources\ObraCedidas\ObraCedidaResource;
 use App\Filament\Obras\Resources\PendienteContratacionObras\PendienteContratacionObraResource;
 use App\Models\DatosDeInicioDeObras;
 use App\Models\DatosEjecucionObras;
-use App\Models\DocumentoExpediente;
 use App\Models\Proyecto;
 use App\Models\ObraCedida;
 use App\Models\User;
@@ -151,22 +150,20 @@ class UltimasObrasTableWidget extends BaseWidget
                         ->icon('heroicon-o-play')
                         ->color('info')
                         ->action(function (): void {
-                            $obra = DocumentoExpediente::where('expediente_id', $this->obraSeleccionadaId)->first();
-
-                            if (! $obra) {
-                                $this->notifyMissingAssociatedRecord('documentos');
-
+                            if (blank($this->obraSeleccionadaId)) {
                                 return;
                             }
 
-                            $this->redirect(DocumentoexpedienteResource::getUrl('edit', ['record' => $obra]));
+                            $this->redirect(DocumentoexpedienteResource::getUrl('index', [
+                                'expediente_id' => $this->obraSeleccionadaId,
+                            ]));
                         })])
                         ->label('Documentos')
                 ->icon('heroicon-o-cog')
                 ->color('primary')
                 ->button()
                 ->dropdownPlacement('bottom-start')
-                ->tooltip($this->obraSeleccionadaId ? 'Editar Documentos del Expediente para obra seleccionada' : 'Selecciona una obra primero')
+                ->tooltip($this->obraSeleccionadaId ? 'Ver Documentos del Expediente para obra seleccionada' : 'Selecciona una obra primero')
                 ->hidden(fn () => !$this->obraSeleccionadaId),
                 ActionGroup::make([
                     Action::make('editar_ejecucion')
@@ -345,5 +342,3 @@ class UltimasObrasTableWidget extends BaseWidget
         return $obra ? "Obra seleccionada: {$obra->nombre} ({$obra->expediente_id})" : 'Obra no encontrada';
     }
 }
-
-

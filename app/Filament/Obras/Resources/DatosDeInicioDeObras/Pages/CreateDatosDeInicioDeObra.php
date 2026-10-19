@@ -45,6 +45,12 @@ protected function mutateFormDataBeforeFill(array $data): array
     }
     return $data;
 }
+protected function mutateFormDataBeforeCreate(array $data): array
+{
+    DatosDeInicioDeObrasResource::validateActaReplanteoPetition($data);
+
+    return $data;
+}
 protected function mutateFormDataBeforeSave(array $data): array
 {
     // Si necesitas manipular los datos antes de guardarlos, hazlo aquí

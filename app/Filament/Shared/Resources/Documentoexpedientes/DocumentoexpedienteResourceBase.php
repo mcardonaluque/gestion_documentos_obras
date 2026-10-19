@@ -38,6 +38,7 @@ abstract class DocumentoexpedienteResourceBase extends Resource
         $initialExpedienteId = request()->query('expediente_id');
 
         return $schema
+            ->columns(4)
             ->components([
                 Select::make('expediente_id')
                     ->label('Expediente')
@@ -298,6 +299,11 @@ abstract class DocumentoexpedienteResourceBase extends Resource
                     };
                 });
             });
+        }
+
+        $expedienteId = request()->query('expediente_id');
+        if (filled($expedienteId)) {
+            $query->where('expediente_id', $expedienteId);
         }
 
         return $query;

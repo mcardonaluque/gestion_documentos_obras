@@ -292,6 +292,10 @@ class DatosDeInicioDeObrasResource extends BaseResource
                     DateFieldRules::apply(DatePicker::make('fecha_pet_acta_replanteo')
                     ->label('Petición Repl. Previo')
                     ->reactive()
+                    ->disabled(static fn (?DatosDeInicioDeObras $record): bool => ! self::allowsActaReplanteoPetition($record?->forma_ejecucion))
+                    ->helperText(static fn (?DatosDeInicioDeObras $record): ?string => self::allowsActaReplanteoPetition($record?->forma_ejecucion)
+                        ? null
+                        : 'La petición del acta de replanteo solo está permitida para obras con forma de ejecución DIP.')
                     ->suffixAction(
                         /* Acción anterior basada en DocumentoGenerico; se conserva como referencia.
                         self::makeWordPrintAction(
@@ -308,11 +312,21 @@ class DatosDeInicioDeObrasResource extends BaseResource
                             ->label('Acta de Replanteo Previo')
                             ->icon('heroicon-m-document-arrow-down')
                             ->visible(static fn (?DatosDeInicioDeObras $record, callable $get): bool => ($record?->exists ?? false)
+                                && self::allowsActaReplanteoPetition($record?->forma_ejecucion)
                                 && filled($get('fecha_pet_acta_replanteo')))
                             ->action(static function (?DatosDeInicioDeObras $record, callable $get) {
                                 if (! $record instanceof DatosDeInicioDeObras) {
                                     Notification::make()
                                         ->title('Debe guardar la obra antes de generar el documento.')
+                                        ->warning()
+                                        ->send();
+
+                                    return null;
+                                }
+
+                                if (! self::allowsActaReplanteoPetition($record->forma_ejecucion)) {
+                                    Notification::make()
+                                        ->title('La petición del acta de replanteo solo está permitida para obras con forma de ejecución DIP.')
                                         ->warning()
                                         ->send();
 
@@ -659,6 +673,33 @@ class DatosDeInicioDeObrasResource extends BaseResource
         ]);
     }
 
+    public static function allowsActaReplanteoPetition(?string $formaEjecucion): bool
+    {
+        return strtoupper(trim((string) $formaEjecucion)) === 'DIP';
+    }
+
+    public static function validateActaReplanteoPetition(array $data, ?DatosDeInicioDeObras $record = null): void
+    {
+        $fechaPeticion = $data['fecha_pet_acta_replanteo'] ?? null;
+
+        if (blank($fechaPeticion)) {
+            return;
+        }
+
+        $fechaAnterior = $record?->getRawOriginal('fecha_pet_acta_replanteo');
+        if ($record && filled($fechaAnterior) && substr((string) $fechaPeticion, 0, 10) === substr((string) $fechaAnterior, 0, 10)) {
+            return;
+        }
+
+        if (self::allowsActaReplanteoPetition($record?->forma_ejecucion)) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'fecha_pet_acta_replanteo' => 'La petición del acta de replanteo solo está permitida para obras con forma de ejecución DIP.',
+        ]);
+    }
+
     public static function persistImportesManagementState(?string $expedienteId, array $state): void
     {
         if (blank($expedienteId)) {
@@ -728,4 +769,3 @@ class DatosDeInicioDeObrasResource extends BaseResource
     }
 
 }
-

@@ -75,6 +75,8 @@ class EditDatosDeInicioDeObra extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        DatosDeInicioDeObrasResource::validateActaReplanteoPetition($data, $this->getRecord());
+
         [$data, $importesState] = DatosDeInicioDeObrasResource::extractImportesManagementStateFromData($data);
 
         DatosDeInicioDeObrasResource::validateImportesManagementState($importesState);

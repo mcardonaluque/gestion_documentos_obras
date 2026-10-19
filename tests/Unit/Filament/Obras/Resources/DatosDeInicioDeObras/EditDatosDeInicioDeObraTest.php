@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\Unit\Filament\Obras\Resources\DatosDeInicioDeObras;
 
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\Pages\EditDatosDeInicioDeObra;
+use App\Filament\Obras\Resources\DatosDeInicioDeObras\DatosDeInicioDeObrasResource;
 use App\Models\DatosDeInicioDeObras;
 use App\Services\Importes\ImportesManagementRepository;
+use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionMethod;
 use Tests\TestCase;
@@ -75,5 +77,56 @@ final class EditDatosDeInicioDeObraTest extends TestCase
         self::assertSame('ejecucion', $result['stage']);
         self::assertSame(1200.0, $result['master']['approved_total']);
         self::assertSame('DIP', $result['rows'][0]['organismo']);
+    }
+
+    #[Test]
+    public function it_rejects_a_new_acta_replanteo_petition_when_execution_is_not_dip(): void
+    {
+        $record = new DatosDeInicioDeObras();
+        $record->setRawAttributes([
+            'forma_ejecucion' => 'OTRO',
+            'fecha_pet_acta_replanteo' => null,
+        ], true);
+
+        try {
+            DatosDeInicioDeObrasResource::validateActaReplanteoPetition([
+                'fecha_pet_acta_replanteo' => '2026-10-14',
+            ], $record);
+            self::fail('Expected the petition to be rejected for a non-DIP execution.');
+        } catch (ValidationException $exception) {
+            self::assertArrayHasKey('fecha_pet_acta_replanteo', $exception->errors());
+        }
+    }
+
+    #[Test]
+    public function it_allows_a_new_acta_replanteo_petition_for_dip_execution(): void
+    {
+        $record = new DatosDeInicioDeObras();
+        $record->setRawAttributes([
+            'forma_ejecucion' => 'DIP',
+            'fecha_pet_acta_replanteo' => null,
+        ], true);
+
+        DatosDeInicioDeObrasResource::validateActaReplanteoPetition([
+            'fecha_pet_acta_replanteo' => '2026-10-14',
+        ], $record);
+
+        self::assertTrue(DatosDeInicioDeObrasResource::allowsActaReplanteoPetition('DIP'));
+    }
+
+    #[Test]
+    public function it_preserves_an_existing_petition_for_a_non_dip_record(): void
+    {
+        $record = new DatosDeInicioDeObras();
+        $record->setRawAttributes([
+            'forma_ejecucion' => 'OTRO',
+            'fecha_pet_acta_replanteo' => '2026-10-14 00:00:00.000',
+        ], true);
+
+        DatosDeInicioDeObrasResource::validateActaReplanteoPetition([
+            'fecha_pet_acta_replanteo' => '2026-10-14',
+        ], $record);
+
+        self::assertFalse(DatosDeInicioDeObrasResource::allowsActaReplanteoPetition('OTRO'));
     }
 }

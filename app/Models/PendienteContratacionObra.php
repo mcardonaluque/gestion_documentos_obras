@@ -25,6 +25,6 @@ class PendienteContratacionObra extends Model
     public $timestamps=false;
     public function contratista(): BelongsTo
     {
-        return $this->belongsTo (Contratista::class,'Codcontratista','Codigo_contratista');
+        return $this->belongsTo (Contratista::class,'CodContratista','Codigo_contratista');
     }
 }

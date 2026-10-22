@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DocumentoExpediente;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
@@ -39,6 +40,21 @@ class DocumentoPdfController extends Controller
         return response()->file($pdfPath, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="' . basename($pdfPath) . '"',
+        ]);
+    }
+
+    /**
+     * Muestra un PDF subido que todavía no se ha asociado a ningún documento.
+     */
+    public function showTemporary(string $archivo): BinaryFileResponse
+    {
+        $path = Storage::disk('local')->path('previsualizaciones-pdf/' . basename($archivo));
+
+        abort_unless(is_file($path), 404, 'La vista previa ya no está disponible.');
+
+        return response()->file($path, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="previsualizacion.pdf"',
         ]);
     }
 

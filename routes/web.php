@@ -14,6 +14,11 @@ Route::middleware('auth')->get('/documentos-expediente/{documento}/pdf', [Docume
 Route::middleware('auth')->get('/documentos-expediente/{documento}/pdf/download', [DocumentoPdfController::class, 'download'])
     ->name('documentos.pdf.download');
 
+// Vista previa de un PDF recién subido, antes de guardar el documento.
+Route::middleware(['auth', 'signed'])->get('/documentos-expediente/previsualizacion/{archivo}', [DocumentoPdfController::class, 'showTemporary'])
+    ->where('archivo', '[A-Za-z0-9\-]+\.pdf')
+    ->name('documentos.pdf.temporal');
+
 Route::middleware('auth')->get('/informes/expedientes/imprimir', ImprimirInformeExpedientesController::class)
     ->name('informes.expedientes.imprimir');
 

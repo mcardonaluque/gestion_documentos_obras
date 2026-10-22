@@ -275,7 +275,7 @@ abstract class ExpedienteResourceBase extends Resource
                                     ->default(false),
 
                                 TextInput::make('csv')
-                                    ->label('Ruta o URL del PDF')
+                                    ->label('CSV')
                                     ->placeholder('X:\\docs\\expediente_ie\\nombrearchivo.pdf o https://...')
                                     ->maxLength(1000),
 
@@ -431,9 +431,7 @@ abstract class ExpedienteResourceBase extends Resource
 
     private static function isJustificationDocumentStatic(DocumentoGenerico $documentType): bool
     {
-        $phase = (string) ($documentType->fase_doc ?? '');
-
-        return str_contains(strtolower($phase), 'justific');
+        return $documentType->isJustification();
     }
 
     public static function getRelations(): array

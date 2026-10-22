@@ -136,8 +136,8 @@ abstract class DocumentoexpedienteResourceBase extends Resource
                     ->searchable()
                     ->preload()
                     ->required(),
-                TextInput::make('archivo')
-                    ->label('Ruta o URL del PDF')
+                TextInput::make('csv')
+                    ->label('CSV')
                     ->placeholder('X:\\docs\\expediente_ie\\nombrearchivo.pdf o https://...')
                     ->maxLength(1000)
                     ->default(null),
@@ -284,20 +284,7 @@ abstract class DocumentoexpedienteResourceBase extends Resource
 
         if ($phase) {
             $query->whereHas('tipodocumentos', function ($documentTypeQuery) use ($phase): void {
-                $documentTypeQuery->where(function ($subQuery) use ($phase): void {
-                    match (DocumentoGenerico::normalizePhase($phase)) {
-                        'justificacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%justific%']),
-                        'ejecucion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%ejecuc%']),
-                        'contratacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%contrat%']),
-                        'cesion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%cesi%']),
-                        'aprobacion' => $subQuery->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%aproba%']),
-                        default => $subQuery->where(function ($projectQuery): void {
-                            $projectQuery
-                                ->whereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyect%'])
-                                ->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyecto%']);
-                        }),
-                    };
-                });
+                $documentTypeQuery->forPhase($phase);
             });
         }
 

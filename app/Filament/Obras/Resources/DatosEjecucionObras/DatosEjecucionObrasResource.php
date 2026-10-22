@@ -31,6 +31,8 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Forms\Components\ObraGeneralInfo;
 use App\Filament\Traits\CommonFilters;
 use App\Filament\Traits\MunicipiosFilter;
+use App\Filament\Widgets\DocumentosTable;
+use Filament\Schemas\Components\Livewire;
 class DatosEjecucionObrasResource extends Resource
 {
     use MunicipiosFilter;
@@ -83,6 +85,13 @@ class DatosEjecucionObrasResource extends Resource
                     ->disabled(),
                 Select::make('team_id')
                     ->relationship('team', 'name'),
+                Livewire::make(DocumentosTable::class, [
+                    'expedienteSeleccionado' => (string) ($record?->expediente_id ?? ''),
+                    'fases' => ['contratacion', 'cesion', 'ejecucion'],
+                ])
+                    ->key('documentos-ejecucion-' . ($record?->expediente_id ?? 'nuevo'))
+                    ->visible(filled($record?->expediente_id))
+                    ->columnSpanFull(),
             ]);
     }
     use CommonFilters;

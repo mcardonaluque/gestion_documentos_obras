@@ -112,7 +112,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
                 //
             ObraGeneralInfo::make('informacion_general')
                 ->label('Información General de la Obra')
-                ->columnSpan(1)
+                ->columnSpan(2)
                 ->SetObraData($record ?? null),
             // ImportesInfo::make('importes')
             //     ->label('Importes de la Obra')
@@ -121,7 +121,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
             Livewire::make(DocumentosTable::class, [
                 'expedienteSeleccionado' => (string) ($record?->expediente_id ?? ''),
             ])
-                ->columnSpan(1),
+                ->columnSpan(2),
             PlazosObraInfo::make('plazos_obra_info')
                 ->label('Plazos activos')
                 ->columnSpanFull(),

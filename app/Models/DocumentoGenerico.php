@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property int|string $id
@@ -112,55 +113,93 @@ class DocumentoGenerico extends Model
         };
     }
 
-    public static function getOptionsForPhase(?string $phase): array
-    {
-        $query = static::query()->orderBy('nombre');
-        $normalizedPhase = self::normalizePhase($phase);
+    /**
+     * Códigos de fase_doc que corresponden a cada fase. ALL aplica a todas las fases.
+     */
+    private const PHASE_CODES = [
+        'proyecto' => ['INI', 'PPR'],
+        'aprobacion' => ['APR'],
+        'cesion' => ['CES'],
+        'contratacion' => [],
+        'ejecucion' => ['EJE'],
+        'justificacion' => ['JST'],
+    ];
 
-        if ($normalizedPhase) {
-            $query->where(function ($subQuery) use ($normalizedPhase): void {
-                match ($normalizedPhase) {
-                    'justificacion' => $subQuery->whereIn('fase_doc', ['ALL', 'JST'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%justific%']),
-                    'ejecucion' => $subQuery->whereIn('fase_doc', ['ALL', 'EJE'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%ejecuc%']),
-                    'contratacion' => $subQuery->whereIn('fase_doc', ['ALL'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%contrat%']),
-                    'cesion' => $subQuery->whereIn('fase_doc', ['ALL', 'CES'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%cesi%']),
-                    'aprobacion' => $subQuery->whereIn('fase_doc', ['ALL', 'APR'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%aproba%']),
-                    default => $subQuery->where(function ($projectQuery): void {
-                        $projectQuery
-                            ->whereIn('fase_doc', ['ALL', 'INI'])
-                            ->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyect%'])
-                            ->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyecto%']);
-                    }),
-                };
-            });
-        }
-
-        return $query->pluck('nombre', 'id')->toArray();
-    }
-
+    /**
+     * Restringe los tipos de documento a los definidos para la fase indicada.
+     */
     public function scopeForPhase(Builder $query, ?string $phase): Builder
     {
-        $normalizedPhase = self::normalizePhase($phase);
+        return $this->scopeForPhases($query, [$phase]);
+    }
 
-        if (! $normalizedPhase) {
+    /**
+     * Restringe los tipos de documento a los definidos para cualquiera de las fases indicadas.
+     *
+     * @param array<int, string|null> $phases
+     */
+    public function scopeForPhases(Builder $query, array $phases): Builder
+    {
+        $normalizedPhases = array_filter(array_map(self::normalizePhase(...), $phases));
+
+        if ($normalizedPhases === []) {
             return $query;
         }
 
-        return $query->where(function ($subQuery) use ($normalizedPhase): void {
-            match ($normalizedPhase) {
-                'justificacion' => $subQuery->whereIn('fase_doc', ['ALL', 'JST'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%justific%']),
-                'ejecucion' => $subQuery->whereIn('fase_doc', ['ALL', 'EJE'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%ejecuc%']),
-                'contratacion' => $subQuery->whereIn('fase_doc', ['ALL'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%contrat%']),
-                'cesion' => $subQuery->whereIn('fase_doc', ['ALL', 'CES'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%cesi%']),
-                'aprobacion' => $subQuery->whereIn('fase_doc', ['ALL', 'APR'])->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%aproba%']),
-                default => $subQuery->where(function ($projectQuery): void {
-                    $projectQuery
-                        ->whereIn('fase_doc', ['ALL', 'INI'])
-                        ->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyect%'])
-                        ->orWhereRaw("LOWER(COALESCE(fase_doc, '')) LIKE ?", ['%proyecto%']);
-                }),
-            };
-        });
+        $codes = ['ALL'];
+
+        foreach ($normalizedPhases as $normalizedPhase) {
+            $codes = array_merge($codes, self::PHASE_CODES[$normalizedPhase] ?? []);
+        }
+
+        return $query->whereIn(DB::raw("UPPER(LTRIM(RTRIM(COALESCE({$this->getTable()}.fase_doc, ''))))"), array_unique($codes));
+    }
+
+    /**
+     * @param array<int, string|null> $phases
+     */
+    public static function getOptionsForPhases(array $phases): array
+    {
+        return static::query()
+            ->forPhases($phases)
+            ->orderBy('nombre')
+            ->pluck('nombre', 'id')
+            ->toArray();
+    }
+
+    /**
+     * @param array<int, string|null> $phases
+     */
+    public function belongsToPhases(array $phases): bool
+    {
+        return static::query()
+            ->whereKey($this->getKey())
+            ->forPhases($phases)
+            ->exists();
+    }
+
+    public function belongsToPhase(?string $phase): bool
+    {
+        return static::query()
+            ->whereKey($this->getKey())
+            ->forPhase($phase)
+            ->exists();
+    }
+
+    public function isJustification(): bool
+    {
+        $phase = strtolower(trim((string) ($this->fase_doc ?? '')));
+
+        return $phase === 'jst' || str_contains($phase, 'justific');
+    }
+
+    public static function getOptionsForPhase(?string $phase): array
+    {
+        return static::query()
+            ->forPhase($phase)
+            ->orderBy('nombre')
+            ->pluck('nombre', 'id')
+            ->toArray();
     }
 
     public function fasedoc(): BelongsTo

@@ -10,6 +10,16 @@ use App\Services\Prorrogas\ProrrogaRulesService;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\View;
+use Illuminate\Http\File;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -18,6 +28,7 @@ use Filament\Schemas\Components\Livewire;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
 use App\Models\DocumentoExpediente;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -37,6 +48,14 @@ class DocumentosTable extends BaseWidget
 {
     public ?string $expedienteSeleccionado = null;
     public ?string $documentoSeleccionado = null;
+
+    /**
+     * Si se informa, el widget muestra un único botón "Añadir documento" que ofrece
+     * los tipos de estas fases (más los de "todas las fases") en lugar de un botón por fase.
+     *
+     * @var array<int, string>
+     */
+    public array $fases = [];
     protected static ?string $heading = 'Documentos del Expediente';
     protected int | string | array $columnSpan = 'full';
 
@@ -112,14 +131,16 @@ class DocumentosTable extends BaseWidget
                         default => 'gray',
                     }),
             ])
-            ->headerActions([
-                $this->buildCreateDocumentAction('proyecto'),
-                $this->buildCreateDocumentAction('aprobacion'),
-                $this->buildCreateDocumentAction('cesion'),
-                $this->buildCreateDocumentAction('contratacion'),
-                $this->buildCreateDocumentAction('ejecucion'),
-                $this->buildCreateDocumentAction('justificacion'),
-            ])
+            ->headerActions($this->fases !== []
+                ? [$this->buildCreateDocumentAction($this->fases)]
+                : [
+                    $this->buildCreateDocumentAction('proyecto'),
+                    $this->buildCreateDocumentAction('aprobacion'),
+                    $this->buildCreateDocumentAction('cesion'),
+                    $this->buildCreateDocumentAction('contratacion'),
+                    $this->buildCreateDocumentAction('ejecucion'),
+                    $this->buildCreateDocumentAction('justificacion'),
+                ])
             ->recordActions([
                 EditAction::make()
                     ->schema([
@@ -226,24 +247,36 @@ class DocumentosTable extends BaseWidget
             ->emptyStateIcon('heroicon-o-document');
     }
 
-    private function buildCreateDocumentAction(string $phase): Action
+    /**
+     * @param string|array<int, string> $phase Una fase, o varias para un único botón combinado.
+     */
+    private function buildCreateDocumentAction(string|array $phase): Action
     {
-        $phaseLabel = DocumentoGenerico::phaseLabel($phase);
+        $isCombined = is_array($phase);
+        $phaseLabel = $isCombined
+            ? 'documento'
+            : DocumentoGenerico::phaseLabel($phase);
 
-        return Action::make("subir_documento_{$phase}")
-            ->label("Añadir {$phaseLabel}")
+        return Action::make($isCombined ? 'subir_documento' : "subir_documento_{$phase}")
+            ->label($isCombined ? 'Añadir documento' : "Añadir {$phaseLabel}")
             ->icon('heroicon-o-plus')
             ->color('primary')
-            ->modalHeading("Añadir documento de {$phaseLabel}")
+            ->modalHeading($isCombined ? 'Añadir documento' : "Añadir documento de {$phaseLabel}")
+            ->modalWidth('4xl')
+            ->stickyModalHeader()
+            ->stickyModalFooter()
             ->fillForm(fn (): array => $this->resolveCreateDocumentDefaults($phase))
             ->schema($this->buildCreateDocumentFormSchema($phase))
             ->action(fn (array $data) => $this->handleDocumentCreate($data, $phase))
             ->disabled(fn (): bool => blank($this->expedienteSeleccionado));
     }
 
-    private function buildCreateDocumentFormSchema(string $phase): array
+    private function buildCreateDocumentFormSchema(string|array $phase): array
     {
         return [
+            Grid::make(1)
+                ->extraAttributes(['class' => 'pdf-split'])
+                ->schema([
             Section::make()
                 ->schema([
                     Select::make('expediente_id')
@@ -298,7 +331,7 @@ class DocumentosTable extends BaseWidget
                         ->dehydrated(false),
                     Select::make('cod_documento')
                         ->label('Tipo Documento')
-                        ->options(DocumentoGenerico::getOptionsForPhase($phase))
+                        ->options(DocumentoGenerico::getOptionsForPhases((array) $phase))
                         ->searchable()
                         ->required()
                         ->preload(),
@@ -306,11 +339,25 @@ class DocumentosTable extends BaseWidget
                         ->label('Descripción'),
                     DatePicker::make('fechaincorporacion')
                         ->label('Fecha Incorporación'),
+                    FileUpload::make('archivo_subido')
+                        ->label('Subir archivo PDF')
+                        ->acceptedFileTypes(['application/pdf'])
+                        ->maxSize(10240)
+                        ->disk('public')
+                        ->directory('documentos-expedientes')
+                        ->preserveFilenames()
+                        ->live()
+                        ->afterStateUpdated(function ($state, callable $set): void {
+                            $set('preview_url', $this->buildTemporaryPreviewUrl($state));
+                        })
+                        ->columnSpanFull(),
+                    Hidden::make('preview_url')
+                        ->dehydrated(false),
                     TextInput::make('archivo')
                         ->label('Ruta o URL del PDF')
                         ->placeholder('X:\\docs\\expediente_ie\\nombrearchivo.pdf o https://...')
                         ->maxLength(1000)
-                        ->helperText('Admite una ruta física del servidor o un enlace web al PDF.')
+                        ->helperText('Alternativa a la subida: admite una ruta física del servidor o un enlace web al PDF.')
                         ->default(null),
                     TextInput::make('csv')
                         ->maxLength(255)
@@ -339,16 +386,38 @@ class DocumentosTable extends BaseWidget
                         ->label('Procedencia'),
                 ])
                 ->columns(2),
+            View::make('filament.widgets.documento-pdf-temp-preview')
+                ->viewData(fn (Get $get): array => ['previewUrl' => $get('preview_url')]),
+                ]),
         ];
     }
 
-    private function handleDocumentCreate(array $data, string $phase): void
+    private function buildTemporaryPreviewUrl(mixed $state): ?string
+    {
+        $file = is_array($state) ? Arr::first($state) : $state;
+
+        if (! $file instanceof TemporaryUploadedFile || ! is_file((string) $file->getRealPath())) {
+            return null;
+        }
+
+        $name = Str::uuid() . '.pdf';
+
+        Storage::disk('local')->putFileAs('previsualizaciones-pdf', new File($file->getRealPath()), $name);
+
+        return URL::temporarySignedRoute('documentos.pdf.temporal', now()->addMinutes(30), ['archivo' => $name]);
+    }
+
+    private function handleDocumentCreate(array $data, string|array $phase): void
     {
         $documentType = DocumentoGenerico::query()->find($data['cod_documento'] ?? null);
 
         if ($documentType && ! $this->documentTypeMatchesPhase($documentType, $phase)) {
+            $phaseNames = collect((array) $phase)
+                ->map(fn (string $item): string => DocumentoGenerico::phaseLabel($item))
+                ->implode(', ');
+
             throw ValidationException::withMessages([
-                'cod_documento' => 'El tipo de documento seleccionado no corresponde a la fase ' . DocumentoGenerico::phaseLabel($phase) . '.',
+                'cod_documento' => 'El tipo de documento seleccionado no corresponde a la fase ' . $phaseNames . '.',
             ]);
         }
 
@@ -371,6 +440,11 @@ class DocumentosTable extends BaseWidget
             }
         }
 
+        if (filled($data['archivo_subido'] ?? null)) {
+            $data['archivo'] = $data['archivo_subido'];
+        }
+        unset($data['archivo_subido']);
+
         $data['expediente_id'] = $this->expedienteSeleccionado;
         $data = DocumentoExpediente::applyExpedienteDefaults($data);
         $documento = DocumentoExpediente::create($data);
@@ -392,10 +466,9 @@ class DocumentosTable extends BaseWidget
         ));
     }
 
-    private function documentTypeMatchesPhase(DocumentoGenerico $documentType, string $phase): bool
+    private function documentTypeMatchesPhase(DocumentoGenerico $documentType, string|array $phase): bool
     {
-        return $documentType->fase_doc === 'ALL'
-            || DocumentoGenerico::normalizePhase($documentType->fase_doc) === DocumentoGenerico::normalizePhase($phase);
+        return $documentType->belongsToPhases((array) $phase);
     }
 
     /**
@@ -403,12 +476,10 @@ class DocumentosTable extends BaseWidget
      */
     private function isJustificationDocument(DocumentoGenerico $documentType): bool
     {
-        $phase = (string) ($documentType->fase_doc ?? '');
-
-        return str_contains(strtolower($phase), 'justific');
+        return $documentType->isJustification();
     }
 
-    private function resolveCreateDocumentDefaults(?string $phase = null): array
+    private function resolveCreateDocumentDefaults(string|array|null $phase = null): array
     {
         $defaults = GetDatosGenerales::getDatosGenerales($this->expedienteSeleccionado);
         $documentDefaults = DocumentoExpediente::applyExpedienteDefaults([

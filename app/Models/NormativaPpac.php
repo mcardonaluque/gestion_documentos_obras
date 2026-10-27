@@ -6,8 +6,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 /**
@@ -25,6 +28,7 @@ class NormativaPpac extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'Codigo_Plan',
         'ao_plan',
         'ao_fin_plan',
         'fecha_aprobacion_plan',
@@ -83,6 +87,99 @@ class NormativaPpac extends Model
         return $this->hasMany(PlazoObraActivo::class, 'normativa_ppac_id');
     }
 
+    /**
+     * @return BelongsTo<Planes, self>
+     */
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Planes::class, 'Codigo_Plan', 'codigo_plan');
+    }
+
+    /**
+     * Normativa aplicable a un año y plan: la específica del plan y, si no existe,
+     * la general del año (sin Codigo_Plan).
+     */
+    public static function resolveFor(int|string|null $aoPlan, ?string $codigoPlan = null): ?self
+    {
+        if (! is_numeric($aoPlan)) {
+            return null;
+        }
+
+        $codigoPlan = trim((string) $codigoPlan);
+
+        if ($codigoPlan !== '') {
+            $especifica = self::query()
+                ->where('ao_plan', (int) $aoPlan)
+                ->whereRaw('RTRIM(LTRIM(Codigo_Plan)) = ?', [$codigoPlan])
+                ->first();
+
+            if ($especifica !== null) {
+                return $especifica;
+            }
+        }
+
+        return self::query()
+            ->where('ao_plan', (int) $aoPlan)
+            ->where(fn ($query) => $query->whereNull('Codigo_Plan')->orWhereRaw("RTRIM(LTRIM(Codigo_Plan)) = ''"))
+            ->first();
+    }
+
+    /**
+     * Códigos de plan que ya tienen una normativa propia para el mismo año.
+     *
+     * @return list<string>
+     */
+    public function codigosPlanAsignados(): array
+    {
+        return self::query()
+            ->where('ao_plan', $this->ao_plan)
+            ->whereNotNull('Codigo_Plan')
+            ->pluck('Codigo_Plan')
+            ->map(fn (mixed $codigo): string => trim((string) $codigo))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Copia las fechas y plazos de esta normativa a cada plan indicado
+     * (una fila por año y plan). Devuelve el número de planes asignados.
+     *
+     * @param  list<string>  $codigosPlan
+     */
+    public function assignToPlans(array $codigosPlan): int
+    {
+        $datos = Arr::except($this->getAttributes(), ['id', 'Codigo_Plan', 'created_at', 'updated_at']);
+        $asignados = 0;
+
+        DB::connection($this->getConnectionName())->transaction(function () use ($codigosPlan, $datos, &$asignados): void {
+            foreach (array_unique(array_map('trim', $codigosPlan)) as $codigo) {
+                if ($codigo === '') {
+                    continue;
+                }
+
+                $existente = self::query()
+                    ->where('ao_plan', $this->ao_plan)
+                    ->whereRaw('RTRIM(LTRIM(Codigo_Plan)) = ?', [$codigo])
+                    ->first();
+
+                if ($existente !== null && $existente->getKey() === $this->getKey()) {
+                    $asignados++;
+
+                    continue;
+                }
+
+                $destino = $existente ?? new self();
+                $destino->forceFill($datos + ['Codigo_Plan' => $codigo]);
+                $destino->Codigo_Plan = $codigo;
+                $destino->save();
+                $asignados++;
+            }
+        });
+
+        return $asignados;
+    }
+
     public function syncDerivedFields(): void
     {
         if (is_numeric($this->ao_plan)) {
@@ -102,10 +199,14 @@ class NormativaPpac extends Model
         $this->fecha_proyectoA_siguiente = $projectDate;
     }
 
-    public static function aoPlanValidationRules(?int $ignoreId = null): array
+    public static function aoPlanValidationRules(?int $ignoreId = null, ?string $codigoPlan = null): array
     {
         $rules = ['required', 'integer', 'min:2000', 'max:2100'];
-        $uniqueRule = Rule::unique('NormativaPPAC', 'ao_plan');
+        $codigoPlan = trim((string) $codigoPlan);
+        $uniqueRule = Rule::unique('NormativaPPAC', 'ao_plan')
+            ->where(fn ($query) => $codigoPlan !== ''
+                ? $query->whereRaw('RTRIM(LTRIM(Codigo_Plan)) = ?', [$codigoPlan])
+                : $query->whereNull('Codigo_Plan'));
 
         if ($ignoreId !== null) {
             $uniqueRule = $uniqueRule->ignore($ignoreId);

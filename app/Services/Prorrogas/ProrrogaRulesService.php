@@ -25,7 +25,7 @@ final class ProrrogaRulesService
     public function getRequestWindow(Expediente $expediente, PlazoObraActivo $plazo): array
     {
         $normativa = $plazo->normativa
-            ?? NormativaPpac::query()->where('ao_plan', $expediente->ao_ejecucion)->first();
+            ?? NormativaPpac::resolveFor($expediente->ao_ejecucion, $expediente->codigo_plan);
         $fase = (string) $plazo->fase;
         $redaccionDiputacion = in_array($fase, ['proyecto_memoria', 'documentacion'], true)
             && (bool) ($expediente->proyecto?->SubvencionEconRedaccion ?? false);

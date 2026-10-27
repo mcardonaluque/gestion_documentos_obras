@@ -6,6 +6,9 @@ namespace App\Filament\Resources\NormativaPpacs;
 
 use App\Filament\Resources\NormativaPpacs\Pages;
 use App\Models\NormativaPpac;
+use App\Models\Planes;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -42,18 +45,9 @@ class NormativaPpacResource extends Resource
         return ['required', 'integer', 'min:2000', 'max:2100'];
     }
 
-    public static function aoPlanValidationRules(?int $ignoreId = null): array
+    public static function aoPlanValidationRules(?int $ignoreId = null, ?string $codigoPlan = null): array
     {
-        $rules = self::yearValidationRules();
-        $uniqueRule = Rule::unique('NormativaPPAC', 'ao_plan');
-
-        if ($ignoreId !== null) {
-            $uniqueRule = $uniqueRule->ignore($ignoreId);
-        }
-
-        $rules[] = $uniqueRule;
-
-        return $rules;
+        return NormativaPpac::aoPlanValidationRules($ignoreId, $codigoPlan);
     }
 
     public static function form(Schema $schema): Schema
@@ -61,12 +55,25 @@ class NormativaPpacResource extends Resource
         return $schema
             ->columns(2)
             ->components([
+                Select::make('Codigo_Plan')
+                    ->label('Plan (vacío = normativa general del año)')
+                    ->options(fn (): array => Planes::query()
+                        ->orderBy('codigo_plan')
+                        ->get(['codigo_plan', 'denominacion_plan'])
+                        ->mapWithKeys(fn (Planes $plan): array => [
+                            trim((string) $plan->codigo_plan) => trim((string) $plan->codigo_plan) . ' - ' . trim((string) $plan->denominacion_plan),
+                        ])
+                        ->all())
+                    ->searchable()
+                    ->nullable()
+                    ->live()
+                    ->columnSpanFull(),
                 TextInput::make('ao_plan')
                     ->label('Año plan')
                     ->required()
-                    ->rules(fn (?NormativaPpac $record): array => self::aoPlanValidationRules($record?->id))
+                    ->rules(fn (?NormativaPpac $record, Get $get): array => self::aoPlanValidationRules($record?->id, $get('Codigo_Plan')))
                     ->validationMessages([
-                        'unique' => 'Ya existe una normativa PPAC para ese año de plan.',
+                        'unique' => 'Ya existe una normativa PPAC para ese año y plan.',
                     ])
                     ->numeric()
                     ->step(1)

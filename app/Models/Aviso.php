@@ -13,11 +13,16 @@ class Aviso extends Model
     protected $connection='Obras';
     public $incrementing = true;
     protected $table='Avisos';
+    protected $dateFormat = 'Ymd H:i:s';
     protected $primaryKey='id';
    //protected $foreignKey = 'TipoAviso';
     //protected $keyType = 'string';
 
     protected $fillable = [
+        'codigo_hito',
+        'fecha_hito',
+        'expediente_id',
+        'team_id',
         'Referencia',
         'TipoAviso',
         'Codigo_Plan',

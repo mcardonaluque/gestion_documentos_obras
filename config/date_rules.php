@@ -59,4 +59,40 @@ return [
         ['codigo_hito' => 'doc_incorporacion', 'descripcion' => 'Fecha de incorporacion de documento', 'tabla_origen' => 'dbo.documentacionexpedientes', 'campo_origen' => 'fechaincorporacion', 'fase' => 'documental', 'obligatorio' => false, 'repetible' => true],
         ['codigo_hito' => 'doc_help', 'descripcion' => 'Fecha help de documento', 'tabla_origen' => 'dbo.documentacionexpedientes', 'campo_origen' => 'fechaHelp', 'fase' => 'documental', 'obligatorio' => false, 'repetible' => true],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hitos de la normativa PPAC
+    |--------------------------------------------------------------------------
+    | Fechas de NormativaPPAC (por año y plan) que son hitos para cada
+    | expediente. "campo" puede ser un único campo o variar según quien redacta
+    | el proyecto (diputacion / ayuntamiento). "plazo_fase" indica la fase de
+    | PlazosObraActivos cuya fecha vigente (con prórrogas) sustituye a la de la
+    | normativa. "cumplido_con" son hitos de expediente_fecha_hitos que, si
+    | existen, dan el hito por cumplido y evitan nuevos avisos.
+    */
+    'normativa_hitos' => [
+        ['codigo_hito' => 'normativa_proyecto', 'descripcion' => 'Fecha limite de presentacion del proyecto (normativa PPAC)', 'campo' => ['diputacion' => 'fecha_limite_presentacion_proyectoD', 'ayuntamiento' => 'fecha_limite_presentacion_proyectoA'], 'fase' => 'proyecto', 'plazo_fase' => 'proyecto_memoria', 'cumplido_con' => ['entrega_proyecto', 'recepcion_proyecto']],
+        ['codigo_hito' => 'normativa_documentacion', 'descripcion' => 'Fecha limite de presentacion de la documentacion (normativa PPAC)', 'campo' => ['diputacion' => 'fecha_limite_presentacion_documentacionD', 'ayuntamiento' => 'fecha_limite_presentacion_documentacionA'], 'fase' => 'proyecto', 'plazo_fase' => 'documentacion', 'cumplido_con' => ['aprobacion_proyecto_ayto', 'recepcion_proyecto']],
+        ['codigo_hito' => 'normativa_contratacion', 'descripcion' => 'Fecha limite de contratacion (normativa PPAC)', 'campo' => 'fecha_limite_contratacion', 'fase' => 'contratacion', 'plazo_fase' => null, 'cumplido_con' => ['cesion_contrato', 'cesion_adjudicacion']],
+        ['codigo_hito' => 'normativa_cesion', 'descripcion' => 'Fecha limite de cesion de la obra (normativa PPAC)', 'campo' => 'fecha_limite_cesion_obra', 'fase' => 'cesion', 'plazo_fase' => null, 'cumplido_con' => ['cesion_fecha']],
+        ['codigo_hito' => 'normativa_ejecucion', 'descripcion' => 'Fecha limite de ejecucion de obras (normativa PPAC)', 'campo' => 'fecha_limite_terminacion_plan', 'fase' => 'ejecucion', 'plazo_fase' => 'ejecucion', 'cumplido_con' => ['acta_recepcion_provisional']],
+        ['codigo_hito' => 'normativa_justificacion', 'descripcion' => 'Fecha limite de justificacion del plan (normativa PPAC)', 'campo' => 'fecha_limite_justificacion', 'fase' => 'justificacion', 'plazo_fase' => 'justificacion', 'cumplido_con' => []],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Avisos de hitos de normativa PPAC
+    |--------------------------------------------------------------------------
+    | aviso_dias: dias de antelacion del preaviso.
+    | max_dias_vencido: solo se avisa de hitos vencidos hace como maximo estos
+    | dias, para no generar avisos masivos de expedientes antiguos.
+    */
+    'normativa_avisos' => [
+        'anios_revision' => 3, // año en curso y los anteriores (3 = ao_ejecucion >= año-2)
+        'aviso_dias' => 30,
+        'max_dias_vencido' => 30,
+        'tipo_preaviso' => 10,
+        'tipo_vencido' => 11,
+    ],
 ];

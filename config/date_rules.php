@@ -30,6 +30,8 @@ return [
     | proyeccion unificada de fechas por expediente.
     */
     'hitos_catalogo' => [
+        ['codigo_hito' => 'aprobacion_plan_final', 'descripcion' => 'Final de aprobacion del plan', 'tabla_origen' => 'DatosInicioDeObras', 'campo_origen' => 'fecha_final_aprobacion_plan', 'fase' => 'previo', 'obligatorio' => true, 'repetible' => false],
+        ['codigo_hito' => 'convenio', 'descripcion' => 'Fecha de convenio', 'tabla_origen' => 'DatosInicioDeObras', 'campo_origen' => 'fecha_convenio', 'fase' => 'previo', 'obligatorio' => true, 'repetible' => false],
         ['codigo_hito' => 'notif_ayto', 'descripcion' => 'Notificacion al ayuntamiento', 'tabla_origen' => 'DatosInicioDeObras', 'campo_origen' => 'fecha_notificacion_ayto', 'fase' => 'inicio', 'obligatorio' => true, 'repetible' => false],
         ['codigo_hito' => 'pet_acta_replanteo_previo', 'descripcion' => 'Peticion de acta de replanteo previo', 'tabla_origen' => 'DatosInicioDeObras', 'campo_origen' => 'fecha_pet_acta_replanteo', 'fase' => 'inicio', 'obligatorio' => true, 'repetible' => false],
         ['codigo_hito' => 'acta_replanteo_previo', 'descripcion' => 'Acta de replanteo previo', 'tabla_origen' => 'DatosInicioDeObras', 'campo_origen' => 'fecha_acta_replanteo_previo', 'fase' => 'inicio', 'obligatorio' => false, 'repetible' => false],
@@ -58,26 +60,6 @@ return [
 
         ['codigo_hito' => 'doc_incorporacion', 'descripcion' => 'Fecha de incorporacion de documento', 'tabla_origen' => 'dbo.documentacionexpedientes', 'campo_origen' => 'fechaincorporacion', 'fase' => 'documental', 'obligatorio' => false, 'repetible' => true],
         ['codigo_hito' => 'doc_help', 'descripcion' => 'Fecha help de documento', 'tabla_origen' => 'dbo.documentacionexpedientes', 'campo_origen' => 'fechaHelp', 'fase' => 'documental', 'obligatorio' => false, 'repetible' => true],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Hitos de la normativa PPAC
-    |--------------------------------------------------------------------------
-    | Fechas de NormativaPPAC (por año y plan) que son hitos para cada
-    | expediente. "campo" puede ser un único campo o variar según quien redacta
-    | el proyecto (diputacion / ayuntamiento). "plazo_fase" indica la fase de
-    | PlazosObraActivos cuya fecha vigente (con prórrogas) sustituye a la de la
-    | normativa. "cumplido_con" son hitos de expediente_fecha_hitos que, si
-    | existen, dan el hito por cumplido y evitan nuevos avisos.
-    */
-    'normativa_hitos' => [
-        ['codigo_hito' => 'normativa_proyecto', 'descripcion' => 'Fecha limite de presentacion del proyecto (normativa PPAC)', 'campo' => ['diputacion' => 'fecha_limite_presentacion_proyectoD', 'ayuntamiento' => 'fecha_limite_presentacion_proyectoA'], 'fase' => 'proyecto', 'plazo_fase' => 'proyecto_memoria', 'cumplido_con' => ['entrega_proyecto', 'recepcion_proyecto']],
-        ['codigo_hito' => 'normativa_documentacion', 'descripcion' => 'Fecha limite de presentacion de la documentacion (normativa PPAC)', 'campo' => ['diputacion' => 'fecha_limite_presentacion_documentacionD', 'ayuntamiento' => 'fecha_limite_presentacion_documentacionA'], 'fase' => 'proyecto', 'plazo_fase' => 'documentacion', 'cumplido_con' => ['aprobacion_proyecto_ayto', 'recepcion_proyecto']],
-        ['codigo_hito' => 'normativa_contratacion', 'descripcion' => 'Fecha limite de contratacion (normativa PPAC)', 'campo' => 'fecha_limite_contratacion', 'fase' => 'contratacion', 'plazo_fase' => null, 'cumplido_con' => ['cesion_contrato', 'cesion_adjudicacion']],
-        ['codigo_hito' => 'normativa_cesion', 'descripcion' => 'Fecha limite de cesion de la obra (normativa PPAC)', 'campo' => 'fecha_limite_cesion_obra', 'fase' => 'cesion', 'plazo_fase' => null, 'cumplido_con' => ['cesion_fecha']],
-        ['codigo_hito' => 'normativa_ejecucion', 'descripcion' => 'Fecha limite de ejecucion de obras (normativa PPAC)', 'campo' => 'fecha_limite_terminacion_plan', 'fase' => 'ejecucion', 'plazo_fase' => 'ejecucion', 'cumplido_con' => ['acta_recepcion_provisional']],
-        ['codigo_hito' => 'normativa_justificacion', 'descripcion' => 'Fecha limite de justificacion del plan (normativa PPAC)', 'campo' => 'fecha_limite_justificacion', 'fase' => 'justificacion', 'plazo_fase' => 'justificacion', 'cumplido_con' => []],
     ],
 
     /*

@@ -1,5 +1,7 @@
 # Catalogo de hitos de fechas por obra
 
+> Visión completa del sistema (reglas, avisos, normativa PPAC): [sistema_control_fechas_hitos_avisos.md](./sistema_control_fechas_hitos_avisos.md)
+
 ## Objetivo
 
 Definir un catalogo funcional de hitos de fechas para:
@@ -17,7 +19,7 @@ Definir un catalogo funcional de hitos de fechas para:
 ## Convenciones
 
 - `codigo_hito`: clave estable para reglas y reportes.
-- `fase`: inicio, proyecto, ejecucion, recepcion, cesion, documental.
+- `fase`: previo, inicio, proyecto, ejecucion, recepcion, cesion, documental.
 - `obligatorio`: si el hito se espera en flujo normal.
 - `repetible`: si puede existir mas de una fecha por expediente.
 
@@ -25,6 +27,8 @@ Definir un catalogo funcional de hitos de fechas para:
 
 | codigo_hito                    | descripcion                                 | tabla_origen                 | campo_origen                      | fase       | obligatorio | repetible |
 | ------------------------------ | ------------------------------------------- | ---------------------------- | --------------------------------- | ---------- | ----------- | --------- |
+| aprobacion_plan_final          | Final de aprobacion del plan                | DatosInicioDeObras           | fecha_final_aprobacion_plan       | previo     | si          | no        |
+| convenio                       | Fecha de convenio                           | DatosInicioDeObras           | fecha_convenio                    | previo     | si          | no        |
 | notif_ayto                     | Notificacion al ayuntamiento                | DatosInicioDeObras           | fecha_notificacion_ayto           | inicio     | si          | no        |
 | pet_acta_replanteo_previo      | Peticion de acta de replanteo previo        | DatosInicioDeObras           | fecha_pet_acta_replanteo          | inicio     | si          | no        |
 | acta_replanteo_previo          | Fecha de acta de replanteo previo           | DatosInicioDeObras           | fecha_acta_replanteo_previo       | inicio     | no          | no        |

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers;
 
+use App\Models\DestinoDeDocumentos;
 use App\Models\DocumentoGenerico;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
@@ -68,16 +69,22 @@ class DocumentosRelationManager extends RelationManager
             TextInput::make('nsecuencia')
                 ->numeric()
                 ->default(null),
-            TextInput::make('estado')
-                ->required()
-                ->numeric(),
+            Select::make('estado')
+                ->relationship('estados', 'nombre')
+                ->searchable()
+                ->preload()
+                ->required(),
             TextInput::make('descripcion')
                 ->maxLength(255)
                 ->default(null),
-            TextInput::make('destino')
-                ->numeric(),
-            TextInput::make('procedencia')
-                ->numeric(),
+            Select::make('destino')
+                ->options(fn (): array => DestinoDeDocumentos::query()->orderBy('destino')->pluck('destino', 'id')->all())
+                ->searchable()
+                ->preload(),
+            Select::make('procedencia')
+                ->options(fn (): array => DestinoDeDocumentos::query()->orderBy('destino')->pluck('destino', 'id')->all())
+                ->searchable()
+                ->preload(),
             ]);
     }
 
@@ -86,8 +93,10 @@ class DocumentosRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('expediente_id')
             ->columns([
-                TextColumn::make('cod_plan')
-                ->searchable(),
+                TextColumn::make('Codigo_Plan')
+                ->label('Plan')
+                ->state(fn ($record) => $record->Codigo_Plan ?: $record->cod_plan)
+                ->searchable(['Codigo_Plan', 'cod_plan']),
             TextColumn::make('referencia')
                 ->numeric()
                 ->sortable(),

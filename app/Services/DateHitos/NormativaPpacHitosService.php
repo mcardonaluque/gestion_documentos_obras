@@ -4,17 +4,40 @@ declare(strict_types=1);
 
 namespace App\Services\DateHitos;
 
+use App\Models\DateValidationRule;
 use App\Models\Expediente;
 use App\Models\NormativaPpac;
 use App\Models\PlazoObraActivo;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
- * Calcula los hitos de fechas que la normativa PPAC fija para un expediente.
+ * Resuelve las fechas limite de la normativa PPAC para un expediente y las
+ * reglas de date_validation_rules que las comparan (tabla2 = NormativaPPAC).
  */
 final class NormativaPpacHitosService
 {
+    public const TABLA = 'NormativaPPAC';
+
+    /** Fase de PlazosObraActivos cuya fecha (con prorrogas) sustituye a la de la normativa. */
+    private const PLAZO_FASE_POR_CAMPO = [
+        'fecha_limite_presentacion_proyectod' => 'proyecto_memoria',
+        'fecha_limite_presentacion_proyectoa' => 'proyecto_memoria',
+        'fecha_limite_presentacion_documentaciond' => 'documentacion',
+        'fecha_limite_presentacion_documentaciona' => 'documentacion',
+        'fecha_limite_terminacion_plan' => 'ejecucion',
+        'fecha_limite_justificacion' => 'justificacion',
+    ];
+
+    /** @var Collection<int, DateValidationRule>|null */
+    private ?Collection $reglas = null;
+
+    public static function esNormativa(?string $tabla): bool
+    {
+        return $tabla !== null && strcasecmp(trim($tabla), self::TABLA) === 0;
+    }
+
     /**
      * Normativa aplicable al expediente (la de su plan o la general del año).
      */
@@ -24,48 +47,82 @@ final class NormativaPpacHitosService
     }
 
     /**
-     * @return Collection<int, array{codigo_hito: string, descripcion: string, fase: string, campo: string, fecha: Carbon, cumplido_con: list<string>}>
+     * Fecha limite del campo indicado para el expediente. Los campos que
+     * terminan en D/A (Diputacion/Ayuntamiento) se eligen segun quien redacta
+     * el proyecto, y una prorroga posterior sustituye a la fecha de normativa.
      */
-    public function hitosDe(Expediente $expediente, ?NormativaPpac $normativa = null): Collection
+    public function fechaLimite(Expediente $expediente, string $campo, ?NormativaPpac $normativa = null): ?Carbon
     {
         $normativa ??= $this->normativaDe($expediente);
+
+        if ($normativa === null) {
+            return null;
+        }
+
+        $campo = $this->campoSegunRedaccion($normativa, $expediente, $campo);
+        $valor = $normativa->getAttribute($campo);
+
+        if ($valor === null || $valor === '') {
+            return null;
+        }
+
+        $fecha = Carbon::parse($valor)->startOfDay();
+        $fase = self::PLAZO_FASE_POR_CAMPO[strtolower($campo)] ?? null;
+
+        if ($fase !== null) {
+            $plazo = PlazoObraActivo::query()
+                ->where('expediente_id', $expediente->expediente_id)
+                ->where('fase', $fase)
+                ->where('activo', true)
+                ->orderByDesc('fecha_fin')
+                ->value('fecha_fin');
+
+            if ($plazo !== null && Carbon::parse($plazo)->startOfDay()->greaterThan($fecha)) {
+                $fecha = Carbon::parse($plazo)->startOfDay();
+            }
+        }
+
+        return $fecha;
+    }
+
+    /**
+     * Reglas activas que comparan una fecha del expediente con la normativa.
+     *
+     * @return Collection<int, DateValidationRule>
+     */
+    public function reglas(): Collection
+    {
+        return $this->reglas ??= DateValidationRule::query()
+            ->active()
+            ->where('tabla2', self::TABLA)
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, array{regla: DateValidationRule, fecha_limite: Carbon, resuelto: bool}>
+     */
+    public function hitosDe(Expediente $expediente): Collection
+    {
+        $normativa = $this->normativaDe($expediente);
 
         if ($normativa === null) {
             return collect();
         }
 
-        $redactaDiputacion = (bool) ($expediente->proyecto?->SubvencionEconRedaccion ?? false);
-        $plazos = $this->plazosVigentes($expediente);
         $hitos = collect();
 
-        foreach ((array) config('date_rules.normativa_hitos', []) as $definicion) {
-            $campo = $this->campoPara($definicion['campo'] ?? null, $redactaDiputacion);
-            $fecha = $campo !== null ? $normativa->getAttribute($campo) : null;
+        foreach ($this->reglas() as $regla) {
+            $limite = $this->fechaLimite($expediente, (string) $regla->campo2, $normativa);
 
-            if ($fecha === null || $fecha === '') {
+            if ($limite === null) {
                 continue;
             }
 
-            $fecha = Carbon::parse($fecha);
-            $plazoFase = $definicion['plazo_fase'] ?? null;
+            $real = $this->fechaReal($expediente, $regla);
 
-            // Una prórroga aprobada desplaza el hito más allá de la fecha de la normativa.
-            if ($plazoFase !== null && isset($plazos[$plazoFase])) {
-                $fechaPlazo = Carbon::parse($plazos[$plazoFase]);
-
-                if ($fechaPlazo->greaterThan($fecha)) {
-                    $fecha = $fechaPlazo;
-                }
-            }
-
-            $hitos->push([
-                'codigo_hito' => (string) $definicion['codigo_hito'],
-                'descripcion' => (string) $definicion['descripcion'],
-                'fase' => (string) ($definicion['fase'] ?? ''),
-                'campo' => $campo,
-                'fecha' => $fecha->copy()->startOfDay(),
-                'cumplido_con' => array_values((array) ($definicion['cumplido_con'] ?? [])),
-            ]);
+            // Con fecha real ya hay cumplimiento (o incumplimiento ya validado al guardar): no se avisa.
+            $hitos->push(['regla' => $regla, 'fecha_limite' => $limite, 'resuelto' => $real !== null]);
         }
 
         return $hitos;
@@ -85,28 +142,26 @@ final class NormativaPpacHitosService
         return $dias <= $avisoDias ? 'preaviso' : null;
     }
 
-    /**
-     * @param  string|array<string, string>|null  $campo
-     */
-    private function campoPara(string|array|null $campo, bool $redactaDiputacion): ?string
+    private function fechaReal(Expediente $expediente, DateValidationRule $regla): ?Carbon
     {
-        if (is_array($campo)) {
-            return $campo[$redactaDiputacion ? 'diputacion' : 'ayuntamiento'] ?? null;
-        }
+        $valor = DB::connection($regla->connection_name ?: 'Obras')
+            ->table($regla->tabla1)
+            ->where('expediente_id', $expediente->expediente_id)
+            ->whereNotNull($regla->campo1)
+            ->value($regla->campo1);
 
-        return $campo;
+        return $valor === null || $valor === '' ? null : Carbon::parse($valor);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function plazosVigentes(Expediente $expediente): array
+    private function campoSegunRedaccion(NormativaPpac $normativa, Expediente $expediente, string $campo): string
     {
-        return PlazoObraActivo::query()
-            ->where('expediente_id', $expediente->expediente_id)
-            ->where('activo', true)
-            ->orderBy('id')
-            ->pluck('fecha_fin', 'fase')
-            ->all();
+        if (! preg_match('/^(.*)[DA]$/', $campo, $coincidencia)) {
+            return $campo;
+        }
+
+        $redactaDiputacion = (bool) ($expediente->proyecto?->SubvencionEconRedaccion ?? false);
+        $candidato = $coincidencia[1] . ($redactaDiputacion ? 'D' : 'A');
+
+        return array_key_exists($candidato, $normativa->getAttributes()) ? $candidato : $campo;
     }
 }

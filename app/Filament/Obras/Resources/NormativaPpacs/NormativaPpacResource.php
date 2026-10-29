@@ -137,6 +137,9 @@ class NormativaPpacResource extends Resource
                             $set('fecha_proyectoA_siguiente', $projectDate);
                         })
                         ->default(fn () => now()->startOfDay()),
+                    DateTimePicker::make('fecha_convenio')
+                        ->label('Fecha de convenio')
+                        ->nullable(),
                     DateTimePicker::make('fecha_limite_terminacion_plan')
                         ->label('Fecha límite de ejecución de obras')
                         ->required()
@@ -218,6 +221,7 @@ class NormativaPpacResource extends Resource
                 TextColumn::make('ao_fin_plan')->label('Año fin')->sortable(),
                 TextColumn::make('fecha_aprobacion_plan')->label('Aprobación')->date()->sortable(),
                 TextColumn::make('fecha_publicacion_definitiva')->label('Publicación')->date()->sortable(),
+                TextColumn::make('fecha_convenio')->label('Convenio')->date()->sortable(),
                 TextColumn::make('fecha_limite_terminacion_plan')->label('Límite Ejecución')->date()->sortable(),
                 TextColumn::make('fecha_limite_justificacion')->label('Límite justificación')->date()->sortable(),
                 TextColumn::make('fecha_limite_cesion_obra')->label('Límite cesión obra')->date(),

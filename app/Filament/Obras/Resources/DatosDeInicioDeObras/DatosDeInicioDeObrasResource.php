@@ -120,6 +120,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
             //     ->setImportesDeObra($record?->importes ?? $record?->importesPorOrganismo?->first()),
             Livewire::make(DocumentosTable::class, [
                 'expedienteSeleccionado' => (string) ($record?->expediente_id ?? ''),
+                'fases' => ['proyecto', 'aprobacion'],
             ])
                 ->columnSpan(2),
             PlazosObraInfo::make('plazos_obra_info')
@@ -231,7 +232,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
                         'NO' => 'NO',
                     ]),
 
-                Radio::make('CompApAyto')
+               /* Radio::make('CompApAyto')
                         ->label('Forma de Aportación')
                         ->reactive()
                         ->visible(fn ($get) => $get('Aportacion')==='SI')
@@ -253,10 +254,10 @@ class DatosDeInicioDeObrasResource extends BaseResource
                             'IN' => 'Ingreso del Ayto.',
                             'EF' => 'Entidad financiera',
 
-                    ]),
+                    ]),*/
 
 
-                    Fieldset::make('Patronato')
+                   /* Fieldset::make('Patronato')
                         ->label('Patronato')
                         ->columns(3 )
                         ->columnSpan(3)
@@ -275,9 +276,7 @@ class DatosDeInicioDeObrasResource extends BaseResource
                                     ->label('Fecha Ingreso Ayto.')
                                     ->nullable(),
 
-                            ]),
-
-
+                            ]),*/
 
                 ]),
                 Section::make('Fechas')
@@ -360,17 +359,26 @@ class DatosDeInicioDeObrasResource extends BaseResource
                     ->nullable()
                     ->label('Petición de ayuda técnica')),
                 DateFieldRules::apply(DatePicker::make('fecha_envio_fiscalizacion')
+                    ->hidden()
                     ->nullable()
                     ->label('Envio a Fiscalizar')),
                 DateFieldRules::apply(DatePicker::make('fecha_fiscalizacion')
+                    ->hidden()
                     ->nullable()
                     ->label('Fecha Fiscalización')),
                 DateFieldRules::apply(DatePicker::make('fecha_prev_comienzo_obra')
+                    ->hidden()
                     ->nullable()
                     ->label('Prevista Comienzo')),
-                DateFieldRules::apply(DatePicker::make('fecha_prev_term_obra')
+                DateFieldRules::apply(DatePicker::make('fecha_aprobacion_plan')
                     ->nullable()
-                    ->label('Prevista Terminación')),
+                    ->label('Aprobación Plan')),
+                DateFieldRules::apply(DatePicker::make('fecha_final_aprobacion_plan')
+                    ->nullable()
+                    ->label('Final Aprobación Plan')),
+                DateFieldRules::apply(DatePicker::make('fecha_convenio')
+                    ->nullable()
+                    ->label('Fecha Convenio')),
                 DateFieldRules::apply(DatePicker::make('FechaMediosMatAyto')
                     ->nullable()
                     ->label('Medios Materiales Ayto.')),

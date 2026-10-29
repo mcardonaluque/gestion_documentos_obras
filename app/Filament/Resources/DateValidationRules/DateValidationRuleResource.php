@@ -68,7 +68,7 @@ class DateValidationRuleResource extends Resource
                 TextInput::make('campo2')
                     ->label('Campo fecha comparacion')
                     ->placeholder('Ejemplo: fecha_recepcion_proyecto o today/now')
-                    ->helperText('Puede usar today, @today, current_date, now, @now o current_timestamp como valor de sistema.')
+                    ->helperText('Puede usar today, @today, current_date, now, @now o current_timestamp como valor de sistema. Con tabla NormativaPPAC use un campo fecha_limite_* (los acabados en D/A se eligen segun quien redacta el proyecto).')
                     ->maxLength(120),
                 Select::make('condicion')
                     ->options(DateRuleCondition::options())

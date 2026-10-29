@@ -427,7 +427,7 @@ class ImportesManagement extends Fieldset
             'ejecucion' => ['label' => 'Ejecución', 'value' => (float) ($totals['executed_percent_total'] ?? 0.0)],
         ];
 
-        $html = '<div class="grid gap-2 md:grid-cols-2 xl:grid-cols-4">';
+        $html = '<div class="gap-2" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));">';
 
         foreach ($items as $key => $item) {
             $hasError = array_key_exists($key, $errors);

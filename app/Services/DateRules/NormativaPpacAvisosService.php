@@ -6,7 +6,6 @@ namespace App\Services\DateRules;
 
 use App\Models\Aviso;
 use App\Models\Expediente;
-use App\Models\ExpedienteFechaHito;
 use App\Models\TiposAviso;
 use App\Services\DateHitos\NormativaPpacHitosService;
 use App\Services\NotificationService;
@@ -44,11 +43,9 @@ final class NormativaPpacAvisosService
             ->when($expedienteId !== null, fn ($query) => $query->where('expediente_id', $expedienteId))
             ->orderBy('id')
             ->chunk(200, function (Collection $expedientes) use ($simular, $hoy, &$stats): void {
-                $cumplidos = $this->hitosCumplidos($expedientes);
-
                 foreach ($expedientes as $expediente) {
                     $stats['expedientes']++;
-                    $this->procesar($expediente, $cumplidos[$expediente->expediente_id] ?? [], $hoy, $simular, $stats);
+                    $this->procesar($expediente, $hoy, $simular, $stats);
                 }
             });
 
@@ -56,22 +53,32 @@ final class NormativaPpacAvisosService
     }
 
     /**
-     * @param  list<string>  $cumplidos
      * @param  array{expedientes: int, avisos: int, notificaciones: int, cerrados: int}  $stats
      */
-    private function procesar(Expediente $expediente, array $cumplidos, Carbon $hoy, bool $simular, array &$stats): void
+    private function procesar(Expediente $expediente, Carbon $hoy, bool $simular, array &$stats): void
     {
-        $avisoDias = (int) config('date_rules.normativa_avisos.aviso_dias', 30);
-        $maxVencido = (int) config('date_rules.normativa_avisos.max_dias_vencido', 30);
+        foreach ($this->hitos->hitosDe($expediente) as $item) {
+            $regla = $item['regla'];
+            $limite = $item['fecha_limite'];
 
-        foreach ($this->hitos->hitosDe($expediente) as $hito) {
-            if (array_intersect($hito['cumplido_con'], $cumplidos) !== []) {
+            $hito = [
+                'codigo_hito' => (string) $regla->nombre,
+                'descripcion' => (string) ($regla->descripcion ?? $regla->nombre),
+                'fecha' => $limite,
+            ];
+
+            if ($item['resuelto']) {
                 $stats['cerrados'] += $this->cerrarAvisos($expediente, $hito['codigo_hito'], $simular);
 
                 continue;
             }
 
-            $etapa = NormativaPpacHitosService::etapa($hito['fecha'], $hoy, $avisoDias, $maxVencido);
+            $etapa = NormativaPpacHitosService::etapa(
+                $limite,
+                $hoy,
+                (int) ($regla->aviso_dias ?? config('date_rules.normativa_avisos.aviso_dias', 30)),
+                (int) config('date_rules.normativa_avisos.max_dias_vencido', 30),
+            );
 
             if ($etapa === null) {
                 continue;
@@ -185,28 +192,6 @@ final class NormativaPpacAvisosService
         }
 
         return $abiertos->update(['FecSolucion' => now()->format('Ymd H:i:s')]);
-    }
-
-    /**
-     * @param  Collection<int, Expediente>  $expedientes
-     * @return array<string, list<string>>
-     */
-    private function hitosCumplidos(Collection $expedientes): array
-    {
-        $codigos = collect((array) config('date_rules.normativa_hitos', []))
-            ->pluck('cumplido_con')
-            ->flatten()
-            ->unique()
-            ->values()
-            ->all();
-
-        return ExpedienteFechaHito::query()
-            ->whereIn('expediente_id', $expedientes->pluck('expediente_id')->all())
-            ->whereIn('codigo_hito', $codigos)
-            ->get(['expediente_id', 'codigo_hito'])
-            ->groupBy('expediente_id')
-            ->map(fn (Collection $filas): array => $filas->pluck('codigo_hito')->unique()->values()->all())
-            ->all();
     }
 
     private function asegurarTiposAviso(): void

@@ -8,6 +8,8 @@ use App\DTOs\DateRuleEvaluationResult;
 use App\Enums\DateRuleCondition;
 use App\Enums\DateRuleOperation;
 use App\Models\DateValidationRule;
+use App\Models\Expediente;
+use App\Services\DateHitos\NormativaPpacHitosService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -300,7 +302,28 @@ final class DateRuleEvaluator
             return $systemDate;
         }
 
+        if (NormativaPpacHitosService::esNormativa($tableName) && $fieldName !== null && $fieldName !== '') {
+            return $this->resolveNormativaValue($model, $fieldName);
+        }
+
         return $this->resolveFieldValue($model, $tableName, $fieldName);
+    }
+
+    private function resolveNormativaValue(Model $model, string $fieldName): ?string
+    {
+        $expedienteId = $this->resolveExpedienteId($model);
+
+        if ($expedienteId === null) {
+            return null;
+        }
+
+        $expediente = Expediente::query()->where('expediente_id', $expedienteId)->first();
+
+        if ($expediente === null) {
+            return null;
+        }
+
+        return $this->stringOrNull(app(NormativaPpacHitosService::class)->fechaLimite($expediente, $fieldName));
     }
 
     private function resolveSystemDateValue(?string $tableName, ?string $fieldName): ?string

@@ -76,39 +76,39 @@ class ObraGeneralInfo extends Fieldset
     {
         return [
         Section::make('Información de la obra de la Obra')
-            ->columns(3)
+            ->columns(12)
             ->columnSpan(3)
             ->schema([
                 TextInput::make('Codigo_Plan')
                     ->label('Codigo del Plan')
                     ->formatStateUsing(fn ($state) => $state ?? $this->resolveObra()?->Codigo_Plan)
-                    ->columnSpan(1)
+                    ->columnSpan(2)
                     ->disabled(),
                 Placeholder::make('Plan')
+                    ->columnSpan(4)
                     ->label('Plan')
                     ->content(function ($record) {
                         // dd($record->planes);
                         return $record->planes->denominacion_plan;
                     })
-
-                    ->columnSpan(2)
                     ->disabled(),
                 TextInput::make('numero_obra')
                     ->label('Número de Obra')
                     ->formatStateUsing(fn ($state) => $state ?? $this->resolveObra()?->numero_obra)
-                    ->columnSpan(1)
+
                     ->disabled(),
                 TextInput::make('subreferencia')
                     ->label('Subreferencia')
                     ->formatStateUsing(fn ($state) => $state ?? $this->resolveObra()?->subreferencia)
-                    ->columnSpan(1)
+
                     ->disabled(),
                 TextInput::make('ao_ejecucion')
                     ->label('Año de Ejecución')
                     ->formatStateUsing(fn ($state) => $state ?? $this->resolveObra()?->ao_ejecucion)
-                    ->columnSpan(1)
+
                     ->disabled(),
                 Placeholder::make('Ubicacion')
+
                     ->id('Ubicacion')
                     ->label('Ubicación')
                     ->extraAttributes(['class' => 'custom-textinput-class'])
@@ -123,6 +123,7 @@ class ObraGeneralInfo extends Fieldset
                     ->dehydrated(false), // Evita que el campo se guarde en la base de datos
                     //->visible(fn ($get) => $get('municipio') || $get('carretera')),
                 Placeholder::make('zona')
+                    ->columnSpan(2)
                     ->id('zona')
                     ->label('Zona')
                     ->content(function ($get, $record) {
@@ -136,8 +137,8 @@ class ObraGeneralInfo extends Fieldset
                     ->dehydrated(false)
                     ->disabled(),
                 Placeholder::make('nombre_obra1')
+                    ->columnSpan(4)
                     ->label('Nombre de la Obra')
-                    ->columnSpan(2)
                     ->content(function ($record) {
                                     return $this->resolveObra()?->nombre_obra1 ?? 'Sin nombre disponible';
                     })
@@ -145,19 +146,18 @@ class ObraGeneralInfo extends Fieldset
                 TextInput::make('expediente_id')
                     ->label('Expediente')
                     ->columnSpan(2)
-                    ->extraAttributes(['class' => 'compact-input w-40'])
                     ->formatStateUsing(fn ($state) => $state ?? $this->resolveObra()?->expediente_id)
                     ->disabled(),
                 Placeholder::make('forma_ejecucion')
+
                     ->label('Forma de Ejecución')
-                    ->columnSpan(1)
                     ->content(function ($record) {
                                     return $this->resolveObra()?->forma_ejecucion ?? 'Sin nombre disponible';
                     })
                     ->disabled(),
                 Placeholder::make('ejecucion')
-                    ->id('ejecucion')
                     ->columnSpan(2)
+                    ->id('ejecucion')
                     ->extraAttributes([
                         'class' => 'border border-gray-300 rounded-lg p-2 bg-gray-50 shadow-sm'])
                     ->label('Forma de Ejecución')
@@ -172,8 +172,8 @@ class ObraGeneralInfo extends Fieldset
                     ->dehydrated(false)
                     ->disabled(),
                 Placeholder::make('codigo_estado_obra')
+
                     ->label('Estado de la Obra')
-                    ->columnSpan(1)
                     ->content(function ($get, $record) {
                         return ucwords($this->resolveObra()?->codigo_estado_obra);
                     })
@@ -181,6 +181,7 @@ class ObraGeneralInfo extends Fieldset
 
 
                 Placeholder::make('Estado')
+                    ->columnSpan(2)
                     ->label('Estado')
                     ->content(function ($get, $record) {
 

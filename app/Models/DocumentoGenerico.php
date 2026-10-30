@@ -12,6 +12,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 /**
+ * Catálogo de tipos de documentos genéricos (plantillas documentales).
+ *
+ * Define cada tipo de documento tramitable, su fase documental, plantilla
+ * Word asociada y configuración de origen/destino. Tabla
+ * 'documento_genericos' en la conexión 'Obras' (SQL Server), sin timestamps.
+ * Se relaciona con FaseDocumento, TipoDocumento, DestinoDeDocumentos,
+ * TablaDeEstados, DocumentoExpediente y DocumentoGenericoVariable.
+ *
  * @property int|string $id
  * @property string $nombre
  * @property bool $con_plantilla
@@ -65,6 +73,7 @@ class DocumentoGenerico extends Model
         'con_plantilla' => 'boolean',
     ];
 
+    /** Normaliza el nombre de una fase a su identificador canónico en minúsculas. */
     public static function normalizePhase(?string $phase): ?string
     {
         $normalized = strtolower(trim((string) ($phase ?? '')));
@@ -100,6 +109,7 @@ class DocumentoGenerico extends Model
         return $normalized;
     }
 
+    /** Devuelve la etiqueta legible en español de una fase documental. */
     public static function phaseLabel(?string $phase): string
     {
         return match (self::normalizePhase($phase)) {
@@ -156,6 +166,8 @@ class DocumentoGenerico extends Model
     }
 
     /**
+     * Opciones id => nombre de documentos aplicables a las fases indicadas.
+     *
      * @param array<int, string|null> $phases
      */
     public static function getOptionsForPhases(array $phases): array
@@ -168,6 +180,8 @@ class DocumentoGenerico extends Model
     }
 
     /**
+     * Indica si este tipo documental pertenece a alguna de las fases indicadas.
+     *
      * @param array<int, string|null> $phases
      */
     public function belongsToPhases(array $phases): bool
@@ -178,6 +192,7 @@ class DocumentoGenerico extends Model
             ->exists();
     }
 
+    /** Indica si este tipo documental pertenece a la fase indicada. */
     public function belongsToPhase(?string $phase): bool
     {
         return static::query()
@@ -186,6 +201,7 @@ class DocumentoGenerico extends Model
             ->exists();
     }
 
+    /** Indica si el documento corresponde a la fase de justificación. */
     public function isJustification(): bool
     {
         $phase = strtolower(trim((string) ($this->fase_doc ?? '')));
@@ -193,6 +209,7 @@ class DocumentoGenerico extends Model
         return $phase === 'jst' || str_contains($phase, 'justific');
     }
 
+    /** Opciones id => nombre de documentos aplicables a la fase indicada. */
     public static function getOptionsForPhase(?string $phase): array
     {
         return static::query()
@@ -202,36 +219,43 @@ class DocumentoGenerico extends Model
             ->toArray();
     }
 
+    /** Fase documental actual del tipo de documento. */
     public function fasedoc(): BelongsTo
     {
         return $this->belongsTo(FaseDocumento::class, 'fase_doc', 'cod_fase');
     }
 
+    /** Fase documental siguiente a la que transiciona el documento. */
     public function fasedocsig(): BelongsTo
     {
         return $this->belongsTo(FaseDocumento::class, 'fase_siguiente', 'cod_fase');
     }
 
+    /** Destino por defecto del documento genérico. */
     public function destino(): BelongsTo
     {
         return $this->belongsTo(DestinoDeDocumentos::class);
     }
 
+    /** Tipo de documento del catálogo general. */
     public function tipodoc(): BelongsTo
     {
         return $this->belongsTo(TipoDocumento::class, 'cod_tipo_doc', 'id');
     }
 
+    /** Documentos de expediente generados a partir de este tipo. */
     public function documtoexpediente(): HasMany
     {
         return $this->hasMany(DocumentoExpediente::class, 'cod_documento', 'id');
     }
 
+    /** Estado de tramitación asociado al tipo de documento. */
     public function estados(): BelongsTo
     {
         return $this->belongsTo(TablaDeEstados::class, 'cod_estado', 'cod_estado');
     }
 
+    /** Variables WD_* configuradas en la plantilla del documento. */
     public function variables(): HasMany
     {
         return $this->hasMany(DocumentoGenericoVariable::class, 'documento_generico_id', 'id');

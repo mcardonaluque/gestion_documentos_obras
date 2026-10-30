@@ -9,10 +9,21 @@ use Symfony\Component\HttpFoundation\Response;
 
 use function Laravel\Prompts\clear;
 
+/**
+ * Middleware que normaliza URLs con espacios codificados duplicados.
+ *
+ * Colapsa secuencias repetidas de `%20` en la URI y redirige a la URL
+ * limpia cuando difiere de la original. Se registra en el middleware del
+ * panel Obras (`ObrasPanelProvider`) y como tenantMiddleware del panel
+ * Ayuntamientos (`AyuntamientosPanelProvider`), donde los slugs de
+ * los equipos (ayuntamientos) pueden generar URLs con espacios.
+ */
 class CleanTenantUrl
 {
     /**
      * Handle an incoming request.
+     *
+     * Limpia la URI de espacios codificados repetidos y redirige si cambia.
      *
      * @param Closure(Request):Response $next
      */

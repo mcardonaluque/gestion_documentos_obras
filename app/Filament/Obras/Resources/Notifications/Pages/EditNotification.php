@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\Notifications\NotificationResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
+/** Página estándar de edición de notificaciones (sin lógica propia). */
 class EditNotification extends EditRecord
 {
     protected static string $resource = NotificationResource::class;

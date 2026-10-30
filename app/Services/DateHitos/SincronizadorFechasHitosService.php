@@ -10,8 +10,21 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Sincroniza el catálogo de hitos de fecha y la tabla materializada expediente_fecha_hitos.
+ *
+ * Lee la definición de hitos de config/date_rules.php (clave hitos_catalogo),
+ * actualiza FechaHitoCatalogo y vuelca las fechas reales de cada tabla origen en
+ * ExpedienteFechaHito. Invocado por el comando Artisan SincronizarFechasHitosCommand.
+ */
 final class SincronizadorFechasHitosService
 {
+    /**
+     * Sincroniza el catálogo FechaHitoCatalogo desde config/date_rules.php,
+     * desactivando los hitos que ya no figuren en la configuración.
+     *
+     * @return int Número de registros creados o modificados.
+     */
     public function sincronizarCatalogoDesdeConfig(): int
     {
         /** @var array<int, array<string, mixed>> $catalogo */
@@ -58,6 +71,11 @@ final class SincronizadorFechasHitosService
         return $afectados;
     }
 
+    /**
+     * Sincroniza los hitos de todos los expedientes (opcionalmente limpiando antes).
+     *
+     * @return int Número de hitos sincronizados.
+     */
     public function sincronizarTodo(bool $limpiarAntes = false): int
     {
         if ($limpiarAntes) {
@@ -67,6 +85,11 @@ final class SincronizadorFechasHitosService
         return $this->sincronizarPorMapa();
     }
 
+    /**
+     * Sincroniza los hitos de un único expediente (opcionalmente limpiando antes).
+     *
+     * @return int Número de hitos sincronizados.
+     */
     public function sincronizarExpediente(string $expedienteId, bool $limpiarAntes = false): int
     {
         if ($limpiarAntes) {

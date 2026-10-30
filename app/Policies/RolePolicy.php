@@ -8,12 +8,21 @@ use Filament\Facades\Filament;
 use Spatie\Permission\Models\Role;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
+/**
+ * Policy que protege el modelo `Role` de Spatie Permission.
+ *
+ * Restringe la gestión de roles al panel `admin` de Filament mediante
+ * `before()` y delega el resto de habilidades en los permisos `*_role`
+ * de Filament Shield. La usa `RoleResource` (Shield) registrado en
+ * `AdminPanelProvider`.
+ */
 class RolePolicy
 {
     use HandlesAuthorization;
 
     /**
-     * Determine whether the user can view any models.
+     * Deniega cualquier habilidad fuera del panel `admin`; dentro de él
+     * devuelve null para continuar con las comprobaciones de permisos.
      */
     public function before(User $user, $ability)
     {

@@ -6,6 +6,14 @@ use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Comando Artisan app:migrar-usuarios-a-users.
+ *
+ * Migra los usuarios heredados de la tabla Usuarios (conexión Obras) al modelo
+ * User de Laravel, conservando la clave (re-hasheada por el cast del modelo),
+ * generando el email corporativo y asociándolos al team 0. Ejecución manual
+ * puntual de migración de datos.
+ */
 class UpdatePasswordsToBcrypt extends Command
 {
     /**
@@ -24,6 +32,9 @@ class UpdatePasswordsToBcrypt extends Command
 
     /**
      * Execute the console command.
+     *
+     * Recorre los usuarios heredados dentro de una transacción y crea o
+     * actualiza su registro en users, devolviendo FAILURE si algo falla.
      */
     public function handle(): int
     {

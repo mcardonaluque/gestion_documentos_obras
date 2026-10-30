@@ -6,9 +6,20 @@ namespace App\Services\Importes;
 
 use App\Enums\ImportesStage;
 
+/**
+ * Calculadora de distribución de importes por organismo y fase.
+ *
+ * Reparte importes y porcentajes (aprobado, a contratar, adjudicado, ejecutado,
+ * baja) entre organismos según la fase ImportesStage, manteniendo la coherencia
+ * importe/porcentaje. Usada por el componente de formulario ImportesManagement
+ * y por el widget Livewire ManageImportesWidget.
+ */
 final class ImportesDistributionCalculator
 {
     /**
+     * Normaliza y redondea los porcentajes iniciales de cada fase, heredando
+     * de la fase anterior cuando el porcentaje de una fase está vacío.
+     *
      * @param array<int, array<string, float|string>> $rows
      * @return array<int, array<string, float|string>>
      */
@@ -39,6 +50,8 @@ final class ImportesDistributionCalculator
     }
 
     /**
+     * Recalcula los importes de cada fila a partir del total y sus porcentajes.
+     *
      * @param array<int, array<string, float|string>> $rows
      * @return array<int, array<string, float|string>>
      */
@@ -57,6 +70,8 @@ final class ImportesDistributionCalculator
     }
 
     /**
+     * Ajusta el importe de una fila y recalcula los porcentajes del resto.
+     *
      * @param array<int, array<string, float|string>> $rows
      * @return array<int, array<string, float|string>>
      */
@@ -87,6 +102,8 @@ final class ImportesDistributionCalculator
     }
 
     /**
+     * Ajusta el porcentaje de una fila y recalcula su importe en función del total.
+     *
      * @param array<int, array<string, float|string>> $rows
      * @return array<int, array<string, float|string>>
      */
@@ -106,6 +123,8 @@ final class ImportesDistributionCalculator
     }
 
     /**
+     * Suma los importes de todas las filas por fase.
+     *
      * @param array<int, array<string, float|string>> $rows
      * @return array{approved_total: float, contract_total: float, awarded_total: float, drop_total: float, executed_total: float}
      */
@@ -135,6 +154,8 @@ final class ImportesDistributionCalculator
     }
 
     /**
+     * Suma los porcentajes de todas las filas por fase.
+     *
      * @param array<int, array<string, float|string>> $rows
      * @return array{approved_percent_total: float, contract_percent_total: float, awarded_percent_total: float, executed_percent_total: float}
      */

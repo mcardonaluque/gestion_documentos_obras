@@ -25,6 +25,15 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Recurso Filament para la contratación de obras (contratadas y pendientes).
+ *
+ * Gestiona el modelo {@see \App\Models\PendienteContratacionObra}: datos de
+ * contratación del expediente (clase, procedimiento, forma de contratación,
+ * adjudicación, contrato e importes) y el contratista adjudicatario. Usa el
+ * servicio {@see PendienteContratacionObraQueryService} para los filtros de
+ * búsqueda y el filtro por estado ({@see EstadoContratacionObra}).
+ */
 final class PendienteContratacionObraResource extends Resource
 {
     protected static ?string $model = PendienteContratacionObra::class;
@@ -39,11 +48,18 @@ final class PendienteContratacionObraResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'expediente_id';
 
+    /**
+     * Consulta base con la relación 'contratista' precargada.
+     */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with('contratista');
     }
 
+    /**
+     * Rellena en el formulario los datos informativos (nombre, domicilio,
+     * municipio...) del contratista seleccionado.
+     */
     public static function syncContratistaDetails(mixed $code, callable $set): void
     {
         $contratista = filled($code)
@@ -59,6 +75,10 @@ final class PendienteContratacionObraResource extends Resource
         $set('contratista_telefono', $contratista?->Telefono);
     }
 
+    /**
+     * Define el formulario de contratación con catálogos de la conexión
+     * 'Obras' y sincronización de los datos del contratista.
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -143,6 +163,10 @@ final class PendienteContratacionObraResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla con cabecera dinámica según el estado de contratación
+     * filtrado y filtros de texto reutilizables.
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -194,6 +218,10 @@ final class PendienteContratacionObraResource extends Resource
             ->defaultSort('AoObra', 'desc');
     }
 
+    /**
+     * Crea un filtro de texto (opcionalmente numérico) delegando la
+     * consulta en PendienteContratacionObraQueryService.
+     */
     private static function textFilter(string $name, string $label, bool $numeric = false): Tables\Filters\Filter
     {
         $input = TextInput::make($name)->label($label);

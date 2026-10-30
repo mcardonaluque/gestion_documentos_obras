@@ -13,6 +13,11 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+/**
+ * Relation manager del acta de recepción ('actaRecepcion') de los datos de
+ * ejecución: fechas de recepción, publicaciones BOE, paralizaciones e
+ * intervinientes. Usado por DatosEjecucionObrasResource.
+ */
 class ActaRecepcionRelationManager extends RelationManager
 {
     protected static string $relationship = 'actaRecepcion';

@@ -8,10 +8,12 @@ use App\Filament\Resources\TramitadorApiOperaciones\TramitadorApiOperacionResour
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
+/** Página de edición de registros de TramitadorApiOperacionResource (panel de administración). */
 class EditTramitadorApiOperacion extends EditRecord
 {
     protected static string $resource = TramitadorApiOperacionResource::class;
 
+    /** Acciones de cabecera de la página. */
     protected function getHeaderActions(): array
     {
         return [

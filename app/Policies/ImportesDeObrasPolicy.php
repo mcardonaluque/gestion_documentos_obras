@@ -6,6 +6,13 @@ use App\Models\User;
 use App\Models\ImportesDeObras;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
+/**
+ * Policy que protege el modelo `ImportesDeObras` (importes económicos de la obra).
+ *
+ * Generada por Filament Shield: cada habilidad delega en los permisos
+ * `*_importes::deobras` de Spatie Permission. La resuelve automáticamente
+ * Laravel para `ImportesDeObrasResource` en los paneles Obras y Planes.
+ */
 class ImportesDeObrasPolicy
 {
     use HandlesAuthorization;

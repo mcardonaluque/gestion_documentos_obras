@@ -13,6 +13,11 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+/**
+ * Relation manager del acta de replanteo ('actaReplanteo') de los datos de
+ * ejecución de la obra: fechas de inicio/final/prórroga e indicadores de
+ * impresión y recepción. Usado por DatosEjecucionObrasResource.
+ */
 class ActaReplanteoRelationManager extends RelationManager
 {
     protected static string $relationship = 'actaReplanteo';

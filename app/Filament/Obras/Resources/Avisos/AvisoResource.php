@@ -24,6 +24,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Recurso Filament para gestionar los avisos generados sobre expedientes.
+ *
+ * Gestiona el modelo {@see \App\Models\Aviso}: avisos asociados a una
+ * referencia/expediente con tipo, plan, obra, usuario y fecha de solución.
+ * Es multi-tenant mediante la relación 'team'.
+ */
 class AvisoResource extends Resource
 {
     protected static ?string $model = Aviso::class;
@@ -31,6 +38,9 @@ class AvisoResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $tenantOwnershipRelationshipName = 'team';
 
+    /**
+     * Define el formulario de creación/edición de un aviso.
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -61,6 +71,9 @@ class AvisoResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla del listado de avisos.
+     */
     public static function table(Table $table): Table
     {
         return $table

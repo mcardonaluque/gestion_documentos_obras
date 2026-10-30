@@ -47,6 +47,9 @@ class TramitadorReglasCatalogo
     ];
 
     /**
+     * Convierte la definición de reglas del catálogo (texto Laravel o JSON declarativo)
+     * en una lista de reglas de validación de Laravel.
+     *
      * @param  array<string, mixed>  $valores  Todos los valores de la petición (las reglas condicionales los consultan).
      * @return list<mixed>
      */

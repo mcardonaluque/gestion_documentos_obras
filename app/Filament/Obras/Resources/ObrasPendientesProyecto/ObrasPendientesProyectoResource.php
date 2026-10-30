@@ -21,8 +21,16 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-
-
+/**
+ * Recurso Filament de solo consulta sobre las obras pendientes de proyecto.
+ *
+ * Gestiona el modelo {@see \App\Models\ObrasPendienteProyecto} (vista SQL
+ * V_ObrasPendientesProyecto) con slug 'obras-pendientes-proyecto'. Lista
+ * las obras aprobadas que aún no tienen proyecto redactado, con filtros
+ * por expediente, municipio, organismo y servicio, y ofrece la acción
+ * "Añadir Proyecto" que enlaza con la creación en {@see ProyectoResource}
+ * precargando los datos de la obra.
+ */
 class ObrasPendientesProyectoResource extends Resource
 {
     protected static ?string $model = ObrasPendienteProyecto::class;
@@ -35,6 +43,10 @@ class ObrasPendientesProyectoResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'expediente_id';
 
+    /**
+     * Consulta base: obras con plan informado y año de ejecución dentro de
+     * los últimos 10 años, con municipio y servicio director precargados.
+     */
       public static function getEloquentQuery(): Builder
     {
         $añoActual = now()->year;
@@ -52,6 +64,9 @@ class ObrasPendientesProyectoResource extends Resource
 
     }
 
+    /**
+     * Define la vista de detalle (infolist) mínima del registro.
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -60,6 +75,10 @@ class ObrasPendientesProyectoResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla de obras pendientes con filtros y la acción
+     * "Añadir Proyecto" hacia ProyectoResource.
+     */
      public static function table(Table $table): Table
     {
         return $table
@@ -151,6 +170,9 @@ class ObrasPendientesProyectoResource extends Resource
         ];
     }
 
+    /**
+     * Resolución de registros por ruta ignorando el soft delete.
+     */
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()

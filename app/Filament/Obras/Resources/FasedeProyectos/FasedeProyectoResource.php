@@ -21,6 +21,14 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Recurso Filament para gestionar las fases de proyectos.
+ *
+ * Gestiona el modelo {@see \App\Models\FasedeProyecto}: fases documentales
+ * de cada proyecto (documento, CSV, registro, estado, procedencia/destino).
+ * La consulta base se limita a fases con expediente y de los dos últimos
+ * años de ejecución. Multi-tenant mediante la relación 'team'.
+ */
 class FasedeProyectoResource extends Resource
 {
     protected static ?string $model = FasedeProyecto::class;
@@ -33,6 +41,10 @@ class FasedeProyectoResource extends Resource
     protected static \UnitEnum|string|null $navigationGroup="Proyectos";
     protected static ?string $navigationLabel ='Fases de Proyectos';**/
 
+    /**
+     * Consulta base: fases con expediente informado y año de ejecución
+     * entre el año actual y los dos anteriores.
+     */
     public static function getEloquentQuery(): Builder
     {
         $añoActual = now()->year;
@@ -49,6 +61,9 @@ class FasedeProyectoResource extends Resource
             //->where('codigo_municipio','=', )
 
     }
+    /**
+     * Define el formulario de la fase de proyecto.
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -97,6 +112,9 @@ class FasedeProyectoResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla del listado de fases de proyectos.
+     */
     public static function table(Table $table): Table
     {
         return $table

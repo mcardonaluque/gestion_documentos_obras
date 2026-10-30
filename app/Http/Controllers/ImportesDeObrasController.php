@@ -6,6 +6,14 @@ use App\Models\ImportesDeObras;
 use App\Http\Requests\StoreImportesDeObrasRequest;
 use App\Http\Requests\UpdateImportesDeObrasRequest;
 
+/**
+ * Controlador de recurso generado por scaffolding para el modelo
+ * `ImportesDeObras`, junto a sus form requests Store/Update.
+ *
+ * Todos sus métodos están vacíos y no tiene rutas registradas en
+ * routes\web.php ni routes\api.php: los importes de obras se gestionan
+ * desde `ImportesDeObrasResource` en los paneles Obras y Planes de Filament.
+ */
 class ImportesDeObrasController extends Controller
 {
     /**

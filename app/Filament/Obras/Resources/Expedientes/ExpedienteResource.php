@@ -8,6 +8,13 @@ use App\Filament\Obras\Resources\Expedientes\Pages\ViewExpediente;
 // use App\Filament\Obras\Resources\Expedientes\Pages\EditExpediente;
 use App\Filament\Shared\Resources\Expedientes\ExpedienteResourceBase;
 
+/**
+ * Recurso del panel Obras para los expedientes.
+ *
+ * Extiende {@see ExpedienteResourceBase} (recurso compartido que gestiona el
+ * modelo Expediente) registrando las páginas de listado, creación y vista
+ * del panel Obras (la edición está deshabilitada).
+ */
 class ExpedienteResource extends ExpedienteResourceBase
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';

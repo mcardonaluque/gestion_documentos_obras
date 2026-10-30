@@ -15,6 +15,13 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+/**
+ * Recurso Filament para los porcentajes de financiación por plan y organismo.
+ *
+ * Gestiona el modelo App\Models\PorcentajesDeFinanciacion en el panel de
+ * administración, grupo «Parametros», sin aislamiento por tenant. Mantiene
+ * las fórmulas y porcentajes de financiación por año de ejecución.
+ */
 class PorcentajesDeFinanciacionResource extends Resource
 {
     protected static ?string $model = PorcentajesDeFinanciacion::class;
@@ -26,6 +33,7 @@ class PorcentajesDeFinanciacionResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-table-cells';
     protected static string | \UnitEnum | null $navigationGroup = 'Parametros';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -43,6 +51,7 @@ class PorcentajesDeFinanciacionResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -69,11 +78,13 @@ class PorcentajesDeFinanciacionResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

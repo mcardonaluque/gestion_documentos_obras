@@ -16,6 +16,8 @@ use RuntimeException;
 final class TramitadorMockFixtures
 {
     /**
+     * Devuelve el contenido JSON simulado para una operación e id concretos.
+     *
      * @return array<string, mixed>
      */
     public static function respuesta(string $operacion, int|string $id): array

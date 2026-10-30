@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\Documentoexpedientes\DocumentoexpedienteResourc
 use App\Models\DocumentoExpediente;
 use Filament\Resources\Pages\CreateRecord;
 
+/** Página estándar de creación de documentos de expediente (sin lógica propia). */
 class CreateDocumentoexpediente extends CreateRecord
 {
     use NotifiesAndValidatesDates;

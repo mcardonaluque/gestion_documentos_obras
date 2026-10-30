@@ -17,6 +17,8 @@ final class ListadoExpedientesMock
     private const LIMITE = 100;
 
     /**
+     * Filtra, ordena y limita el listado simulado según los parámetros de la consulta.
+     *
      * @param  array<string, mixed>  $cuerpo  Contenido del JSON base.
      * @param  array<string, mixed>  $query  Parámetros de la petición.
      * @return array<string, mixed>

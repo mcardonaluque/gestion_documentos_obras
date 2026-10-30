@@ -23,12 +23,20 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Recurso Filament para el catálogo de departamentos provinciales.
+ *
+ * Gestiona el modelo App\Models\TablaDeDepartamento en el panel de
+ * administración. Mantiene denominaciones, jefaturas y datos usados en la
+ * generación de documentos.
+ */
 class TablaDeDepartamentoResource extends Resource
 {
     protected static ?string $model = TablaDeDepartamento::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -88,6 +96,7 @@ class TablaDeDepartamentoResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -166,6 +175,7 @@ class TablaDeDepartamentoResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -173,6 +183,7 @@ class TablaDeDepartamentoResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

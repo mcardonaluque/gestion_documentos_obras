@@ -20,6 +20,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Facades\Filament;
 
+/**
+ * Recurso Filament para gestionar los importes de las obras.
+ *
+ * Gestiona el modelo {@see \App\Models\ImportesDeObras}: importes aprobados
+ * y a contratar (con sus porcentajes) por expediente. Filtra la consulta
+ * base por el tenant (team) activo del panel.
+ */
 class ImportesDeObrasResource extends Resource
 {
     protected static ?string $model = ImportesDeObras::class;
@@ -28,10 +35,17 @@ class ImportesDeObrasResource extends Resource
     protected static bool $shouldRegisterNavigation = true;
     protected static \UnitEnum|string|null $navigationGroup="Gestión de Importes";
     protected static ?string $navigationLabel = 'Importes de Obras';**/
+    /**
+     * Etiqueta del recurso mostrada en la interfaz.
+     */
     public static function getLabel(): string
     {
         return 'Importes de Obras';
     }
+
+    /**
+     * Consulta base restringida al tenant (team) activo.
+     */
     public static function getEloquentQuery(): Builder
     {
         $tenantId = Filament::getTenant()?->id;
@@ -44,6 +58,9 @@ class ImportesDeObrasResource extends Resource
 
         return $query;
     }
+    /**
+     * Define el formulario de importes de la obra.
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -66,6 +83,9 @@ class ImportesDeObrasResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla del listado de importes de obras.
+     */
     public static function table(Table $table): Table
     {
         return $table

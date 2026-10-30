@@ -6,6 +6,13 @@ namespace App\DTOs\Informes;
 
 use DateTimeImmutable;
 
+/**
+ * DTO inmutable con el resultado completo del informe agrupado de expedientes.
+ *
+ * Reúne los filtros aplicados, los grupos generados, los totales globales y la
+ * fecha de generación. Producido por InformeExpedientesService y consumido por
+ * la página Filament InformeExpedientesAgrupado y la vista de impresión.
+ */
 final class InformeExpedientesResultadoData
 {
     /**

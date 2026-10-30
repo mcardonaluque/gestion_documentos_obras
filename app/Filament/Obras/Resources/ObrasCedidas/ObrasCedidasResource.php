@@ -19,6 +19,12 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Recurso Filament esqueleto sobre el modelo {@see \App\Models\ObraCedida}.
+ *
+ * Formulario y tabla están vacíos (sin desarrollar); la gestión real de
+ * obras cedidas se realiza en {@see \App\Filament\Obras\Resources\ObraCedidas\ObraCedidaResource}.
+ */
 class ObrasCedidasResource extends Resource
 {
     protected static ?string $model = ObraCedida::class;

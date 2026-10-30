@@ -11,6 +11,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Página de consulta de hitos de fechas materializados de los expedientes.
+ *
+ * Accesible solo para usuarios con rol 'super_admin'. Permite filtrar por
+ * expediente, código de hito, tabla de origen y rango de fechas, delegando
+ * la búsqueda en {@see ConsultaExpedienteFechaHitosService}.
+ */
 final class HitosFechasMaterializados extends Page
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-calendar-days';
@@ -41,6 +48,9 @@ final class HitosFechasMaterializados extends Page
         'tiene_resultados' => false,
     ];
 
+    /**
+     * Inicializa los filtros por defecto y lanza la primera búsqueda.
+     */
     public function mount(ConsultaExpedienteFechaHitosService $service): void
     {
         $this->filtros = [
@@ -60,6 +70,9 @@ final class HitosFechasMaterializados extends Page
         return 'Hitos de fechas materializados';
     }
 
+    /**
+     * Solo pueden acceder los usuarios con rol 'super_admin'.
+     */
     public static function canAccess(): bool
     {
         $user = Auth::user();
@@ -72,6 +85,8 @@ final class HitosFechasMaterializados extends Page
     }
 
     /**
+     * Valida los filtros introducidos y ejecuta la búsqueda de hitos.
+     *
      * @throws ValidationException
      */
     public function aplicarFiltros(ConsultaExpedienteFechaHitosService $service): void
@@ -94,6 +109,8 @@ final class HitosFechasMaterializados extends Page
     }
 
     /**
+     * Opciones de códigos de hito para el selector del filtro.
+     *
      * @return array<string, string>
      */
     public function getOpcionesHitos(): array
@@ -102,6 +119,8 @@ final class HitosFechasMaterializados extends Page
     }
 
     /**
+     * Opciones de tablas de origen para el selector del filtro.
+     *
      * @return array<string, string>
      */
     public function getOpcionesTablas(): array

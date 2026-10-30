@@ -5,6 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Acta de recepción de una obra (provisional o definitiva).
+ *
+ * Representa el hito administrativo de recepción, con sus fechas de
+ * comunicación, publicación en BOE, paralizaciones y firmantes.
+ * Tabla 'ActasRecepcionObra' en la conexión 'Obras' (SQL Server),
+ * con clave primaria string 'expediente_id' no autoincremental.
+ * Se vincula a DatosEjecucionObras por el expediente.
+ */
 class actaderecepcion extends Model
 {
     protected $connection = 'Obras';
@@ -71,6 +80,7 @@ class actaderecepcion extends Model
         'Fecha_Medicion' => 'datetime',
     ];
 
+    /** Datos de ejecución de la obra a la que pertenece este acta de recepción. */
     public function ejecucion(): BelongsTo
     {
         return $this->belongsTo(DatosEjecucionObras::class, 'expediente_id', 'expediente_id');

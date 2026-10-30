@@ -54,6 +54,7 @@ class PorcentajesProyectos extends Model
         ];
     }
 
+    /** Convierte un valor con coma decimal a float redondeado a 2 decimales. */
     private static function toFloat(mixed $value): ?float
     {
         if ($value === null || $value === '') {

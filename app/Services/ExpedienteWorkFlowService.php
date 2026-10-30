@@ -10,17 +10,32 @@ use App\Services\Tramitador\TramitadorApiClient;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Servicio de flujo de trabajo (workflow) de documentos de expediente.
+ *
+ * Centraliza el avance de estado del expediente al guardar un documento:
+ * actualiza el estado del modelo Expediente según la definición del DocumentoGenerico,
+ * sube/descarga el fichero al Tramitador mediante TramitadorApiClient y emite el
+ * evento SystemEventOccurred para notificar el cambio. Sin consumidores directos
+ * registrados actualmente en app/ (uso previsto desde recursos Filament o la API).
+ */
 class ExpedienteWorkFlowService
 {
     /* =========================
      * DOCUMENTO LOCAL
      * ========================= */
 
+    /**
+     * Recupera el documento de expediente local por su identificador.
+     */
     public static function getDocumentoActual(?int $documento_id): ?DocumentoExpediente
     {
         return DocumentoExpediente::find($documento_id);
     }
 
+    /**
+     * Obtiene la definición genérica (catálogo) asociada al documento.
+     */
     protected static function getDocumentoDefinicion(?int $documento_id): ?DocumentoGenerico
     {
         $doc = self::getDocumentoActual($documento_id);
@@ -34,6 +49,12 @@ class ExpedienteWorkFlowService
      * WORKFLOW
      * ========================= */
 
+    /**
+     * Guarda el documento avanzando el workflow: actualiza el estado del expediente,
+     * lo sube al Tramitador (si procede) y emite el evento SystemEventOccurred.
+     *
+     * @param bool $fromApi true si el documento procede del Tramitador (no se re-sube)
+     */
     public static function saveDocumento(?int $documento_id, bool $fromApi = false): void
     {
         DB::transaction(function () use ($documento_id, $fromApi) {
@@ -69,6 +90,9 @@ class ExpedienteWorkFlowService
         });
     }
 
+    /**
+     * Actualiza el estado del expediente según la definición del documento guardado.
+     */
     public static function saveEstadoActual(?int $documento_id): void
     {
         $doc = self::getDocumentoActual($documento_id);
@@ -89,7 +113,8 @@ class ExpedienteWorkFlowService
      * ========================= */
 
     /**
-     * 🔼 Subir documento al tramitador
+     * 🔼 Sube el fichero CSV del documento al Tramitador vía TramitadorApiClient
+     * y persiste el número de registro/secuencia devuelto.
      */
     public static function saveDocumentoHelp(?int $documento_id): void
     {
@@ -116,7 +141,9 @@ class ExpedienteWorkFlowService
     }
 
     /**
-     * 🔽 Descargar documento desde el tramitador
+     * 🔽 Descarga un documento desde el Tramitador y lo almacena en disco local.
+     *
+     * @return string|null Ruta relativa del fichero guardado o null si falla la petición.
      */
     public static function getDocumentoHelp(
         string $dir3_emisor,

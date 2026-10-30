@@ -8,10 +8,12 @@ use App\Filament\Resources\TramitadorApiOperaciones\TramitadorApiOperacionResour
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
+/** Página de listado de registros de TramitadorApiOperacionResource (panel de administración). */
 class ListTramitadorApiOperaciones extends ListRecords
 {
     protected static string $resource = TramitadorApiOperacionResource::class;
 
+    /** Acciones de cabecera de la página. */
     protected function getHeaderActions(): array
     {
         return [

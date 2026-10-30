@@ -21,12 +21,19 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Recurso Filament para el catálogo de destinos/procedencias de documentos.
+ *
+ * Gestiona el modelo App\Models\DestinoDeDocumentos en el panel de
+ * administración, grupo de navegación «Documentación».
+ */
 class DestinoDeDocumentosResource extends Resource
 {
     protected static ?string $model = DestinoDeDocumentos::class;
     protected static string | \UnitEnum | null $navigationGroup = 'Documentación';
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-inbox-arrow-down';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -36,6 +43,7 @@ class DestinoDeDocumentosResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -62,6 +70,7 @@ class DestinoDeDocumentosResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -69,6 +78,7 @@ class DestinoDeDocumentosResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

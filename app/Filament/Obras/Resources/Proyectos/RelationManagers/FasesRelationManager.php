@@ -17,6 +17,10 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Relation manager de las fases ('fases') de un proyecto. Actualmente está
+ * deshabilitado en ProyectoResource::getRelations() (comentado).
+ */
 class FasesRelationManager extends RelationManager
 {
     protected static string $relationship = 'fases';

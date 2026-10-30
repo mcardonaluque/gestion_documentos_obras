@@ -22,6 +22,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Relation manager de los parámetros de una función API del tramitador.
+ *
+ * Gestiona la relación «parametros» desde TramitadorApiOperacionResource.
+ * Al crear, calcula el orden automáticamente (las entradas se priorizan por
+ * ubicación: path, query, header, body) y valida la unicidad del parámetro.
+ */
 class ParametrosRelationManager extends RelationManager
 {
     protected static string $relationship = 'parametros';
@@ -35,6 +42,7 @@ class ParametrosRelationManager extends RelationManager
         'body' => 4,
     ];
 
+    /** Define el formulario de la relación. */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -114,6 +122,7 @@ class ParametrosRelationManager extends RelationManager
             ->columns(3);
     }
 
+    /** Configura la tabla de registros relacionados. */
     public function table(Table $table): Table
     {
         return $table

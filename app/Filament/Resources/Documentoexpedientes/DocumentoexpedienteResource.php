@@ -23,6 +23,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Recurso Filament para la gestión directa de documentos de expediente.
+ *
+ * Gestiona el modelo App\Models\Documentoexpediente en el panel de
+ * administración, grupo «Documentación». Ofrece el CRUD completo del
+ * documento (plan, referencia, fechas, CSV, estado...) y precarga la
+ * relación de estados en el listado.
+ */
 class DocumentoexpedienteResource extends Resource
 {
     protected static ?string $model = Documentoexpediente::class;
@@ -32,6 +40,7 @@ class DocumentoexpedienteResource extends Resource
     protected static ?string $pluralModelLabel = 'Documentos de Expedientes';
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -75,6 +84,7 @@ class DocumentoexpedienteResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -130,11 +140,13 @@ class DocumentoexpedienteResource extends Resource
             ]);
     }
 
+    /** Precarga la relación de estados para optimizar el listado. */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with('estados');
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -142,6 +154,7 @@ class DocumentoexpedienteResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

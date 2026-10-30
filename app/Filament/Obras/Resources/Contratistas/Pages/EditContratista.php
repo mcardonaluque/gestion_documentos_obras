@@ -6,10 +6,17 @@ use App\Filament\Obras\Resources\Contratistas\ContratistaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
+/**
+ * Página de edición de contratistas, con accesos rápidos de navegación y
+ * actualización del último código del tipo tras guardar.
+ */
 class EditContratista extends EditRecord
 {
     protected static string $resource = ContratistaResource::class;
 
+    /**
+     * Acciones de cabecera: volver al listado, crear otro, ver y eliminar.
+     */
     protected function getHeaderActions(): array
     {
         return [
@@ -24,6 +31,9 @@ class EditContratista extends EditRecord
         ];
     }
 
+    /**
+     * Actualiza el último código usado del tipo tras guardar los cambios.
+     */
     protected function afterSave(): void
     {
         ContratistaResource::actualizarUltimoCodigoTipo(

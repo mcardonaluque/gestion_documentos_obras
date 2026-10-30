@@ -22,6 +22,14 @@ use Filament\Tables\Table;
 use Filament\Schemas\Components\Section;
 use Illuminate\Validation\Rule;
 
+/**
+ * Recurso Filament para la normativa PPAC de planes de obras.
+ *
+ * Gestiona el modelo App\Models\NormativaPpac en el panel de administración,
+ * grupo «Administracion de prorrogas», sin aislamiento por tenant. Mantiene
+ * por año (y opcionalmente por plan) las fechas límite de adjudicación,
+ * justificación y prórrogas, con reglas de unicidad año/plan.
+ */
 class NormativaPpacResource extends Resource
 {
     protected static ?string $model = NormativaPpac::class;
@@ -40,16 +48,19 @@ class NormativaPpacResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Normativas PPAC';
 
+    /** Reglas de validación comunes para campos de año (2000-2100). */
     public static function yearValidationRules(): array
     {
         return ['required', 'integer', 'min:2000', 'max:2100'];
     }
 
+    /** Reglas de unicidad del año de plan (por plan), delegadas en el modelo NormativaPpac. */
     public static function aoPlanValidationRules(?int $ignoreId = null, ?string $codigoPlan = null): array
     {
         return NormativaPpac::aoPlanValidationRules($ignoreId, $codigoPlan);
     }
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -202,6 +213,7 @@ class NormativaPpacResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -271,6 +283,7 @@ class NormativaPpacResource extends Resource
             ]);
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

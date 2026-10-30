@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\FasedeProyectos\FasedeProyectoResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
+/** Página estándar de edición de fases de proyecto (sin lógica propia). */
 class EditFasedeProyecto extends EditRecord
 {
     protected static string $resource = FasedeProyectoResource::class;

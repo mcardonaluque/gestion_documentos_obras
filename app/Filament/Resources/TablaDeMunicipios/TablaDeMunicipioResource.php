@@ -21,12 +21,20 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Recurso Filament para el catálogo de municipios de la provincia.
+ *
+ * Gestiona el modelo App\Models\TablaDeMunicipio en el panel de
+ * administración. Mantiene códigos MAP, comarca, zona, población y datos
+ * de contacto municipales.
+ */
 class TablaDeMunicipioResource extends Resource
 {
     protected static ?string $model = TablaDeMunicipio::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -81,6 +89,7 @@ class TablaDeMunicipioResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -156,6 +165,7 @@ class TablaDeMunicipioResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -163,6 +173,7 @@ class TablaDeMunicipioResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

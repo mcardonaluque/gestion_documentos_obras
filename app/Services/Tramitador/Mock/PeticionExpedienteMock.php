@@ -22,6 +22,8 @@ final class PeticionExpedienteMock
     ];
 
     /**
+     * Simula la creación de una petición sobre el expediente: id_peticion o 409/404.
+     *
      * @return array<string, mixed>
      */
     public static function responder(string $codigo, string $idExp): array

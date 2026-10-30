@@ -6,9 +6,19 @@ use App\Filament\Obras\Resources\ObrasPendientesProyecto\ObrasPendientesProyecto
 use App\Models\DatosDeInicioDeObras;
 use Filament\Resources\Pages\CreateRecord;
 
+/**
+ * Página de creación desde el listado de obras pendientes de proyecto.
+ *
+ * Si llega 'expediente_id' por la URL, precarga el formulario con los
+ * datos de la obra (plan, número, importe aprobado, municipio...).
+ */
 class CreateObrasPendientesProyecto extends CreateRecord
 {
     protected static string $resource = ObrasPendientesProyectoResource::class;
+
+    /**
+     * Precarga los datos de la obra indicada en la query string.
+     */
     public function mount(): void
 {
     parent::mount();

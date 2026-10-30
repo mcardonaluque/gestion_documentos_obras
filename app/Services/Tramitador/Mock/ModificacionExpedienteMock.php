@@ -28,6 +28,8 @@ final class ModificacionExpedienteMock
     private const DURACION_CON_MESES = ['SP', 'NR'];
 
     /**
+     * Simula la modificación del expediente aplicando los campos admitidos del body.
+     *
      * @param  array<string, mixed>  $body
      * @return array<string, mixed>
      */

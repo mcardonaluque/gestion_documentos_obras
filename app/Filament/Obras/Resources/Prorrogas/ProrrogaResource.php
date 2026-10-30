@@ -18,6 +18,15 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Recurso Filament para gestionar las prórrogas de ejecución de obras.
+ *
+ * Trabaja sobre el modelo {@see \App\Models\DatosEjecucionObras} con slug
+ * 'prorrogas-ejecucion' en el grupo "Ejecucion": lista los expedientes en
+ * ejecución y las prórrogas se gestionan desde el relation manager
+ * {@see ProrrogasRelationManager}. Usa los traits {@see CommonFilters},
+ * {@see MunicipiosFilter} y {@see HasAssignedExpedienteVisibility}.
+ */
 class ProrrogaResource extends Resource
 {
     use CommonFilters;

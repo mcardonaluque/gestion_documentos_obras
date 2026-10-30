@@ -402,7 +402,7 @@
                 <a href="/obras/certificaciones" class="custom-submenu-item">
                     📝 Certificación Final
                 </a>
-                <a href="/obras/actadereplanteos" class="custom-submenu-item">
+                <a href="/obras/actasdereplanteo " class="custom-submenu-item">
                     👷‍♀️ Acta de replanteo
                 </a>
                 <a href="/obras/plan-sses" class="custom-submenu-item">

@@ -5,6 +5,13 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Form request de scaffolding para la creación de `ImportesDeObras`.
+ *
+ * Solo lo referencia `ImportesDeObrasController::store()`, que no tiene
+ * rutas registradas; por ello `authorize()` devuelve false y `rules()`
+ * está vacío. El alta real de importes se hace desde Filament.
+ */
 class StoreImportesDeObrasRequest extends FormRequest
 {
     /**

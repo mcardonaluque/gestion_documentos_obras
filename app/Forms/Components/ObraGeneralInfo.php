@@ -6,6 +6,16 @@ use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Placeholder;
 use App\Models\DatosDeInicioDeObras;
+
+/**
+ * Fieldset de Filament que muestra, en solo lectura, la información
+ * general de la obra asociada a un expediente (plan, número de obra,
+ * ubicación, zona, estado, forma de ejecución...).
+ *
+ * Resuelve la obra consultando `DatosDeInicioDeObras` por expediente_id.
+ * Se usa en `DatosDeInicioDeObrasResource`, `DatosEjecucionObrasResource`,
+ * `CertificacionesResource` y `CertificacionesRelationManager`.
+ */
 class ObraGeneralInfo extends Fieldset
 {
     private $obra = null;
@@ -37,6 +47,10 @@ class ObraGeneralInfo extends Fieldset
         $this->schema(fn (): array => $this->getSchemaComponents());
     }
 
+    /**
+     * Carga la obra del expediente indicado y fija sus datos generales
+     * como valores por defecto de los campos del fieldset.
+     */
     public function setObraData($reg): static
     {
        if (blank($reg)) {
@@ -200,6 +214,10 @@ class ObraGeneralInfo extends Fieldset
 
  ];
 }
+/**
+ * Devuelve los campos deshabilitados con los datos identificativos
+ * de la obra, para reutilizarlos en otros formularios.
+ */
 Public function getObraFields(): array
 {
     return [
@@ -250,6 +268,10 @@ Public function getObraFields(): array
     ];
    }
 
+ /**
+  * Variante alternativa del esquema con la sección de identificación
+  * de la obra y campos fijos/ocultos (actualmente sin uso externo).
+  */
  public function getFixComponents(): array{
  return[
 

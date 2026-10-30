@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\ObrasCedidas\ObrasCedidasResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
+/** Página estándar de edición del recurso esqueleto de obras cedidas (sin lógica propia). */
 class EditObrasCedidas extends EditRecord
 {
     protected static string $resource = ObrasCedidasResource::class;

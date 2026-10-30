@@ -37,6 +37,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Base compartida de los recursos Filament de expedientes.
+ *
+ * Clase abstracta sobre el modelo App\Models\Expediente de la que heredan
+ * los recursos de expedientes de los distintos paneles. Usa los traits
+ * HasAssignedExpedienteVisibility y CommonFilters, limita la consulta al
+ * tenant «team» (municipio) y aporta las acciones de tabla para subir
+ * documentos (validando plazos de justificación con ProrrogaRulesService y
+ * emitiendo el evento SystemEventOccurred) y consultar la documentación.
+ */
 abstract class ExpedienteResourceBase extends Resource
 {
     use HasAssignedExpedienteVisibility;
@@ -46,6 +56,7 @@ abstract class ExpedienteResourceBase extends Resource
 
     protected static ?string $tenantOwnershipRelationshipName = 'team';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -101,6 +112,7 @@ abstract class ExpedienteResourceBase extends Resource
             ]);
     }
 
+    /** Tabla de expedientes con acciones de subida de documentos (con validación de plazos) y consulta de documentación. */
     public static function table(Table $table): Table
     {
         return $table
@@ -429,11 +441,13 @@ abstract class ExpedienteResourceBase extends Resource
             ]);
     }
 
+    /** Indica si el tipo de documento corresponde a justificación. */
     private static function isJustificationDocumentStatic(DocumentoGenerico $documentType): bool
     {
         return $documentType->isJustification();
     }
 
+    /** Relation managers comunes; en el panel de ayuntamientos añade importes por organismo. */
     public static function getRelations(): array
     {
         $relations = [
@@ -448,6 +462,7 @@ abstract class ExpedienteResourceBase extends Resource
         return $relations;
     }
 
+    /** Precarga documentos y restringe la consulta al tenant (municipio) activo. */
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()->with('documentos');
@@ -460,6 +475,7 @@ abstract class ExpedienteResourceBase extends Resource
         return $query;
     }
 
+    /** Limita la consulta al equipo (ayuntamiento) recibido como tenant. */
     public static function scopeEloquentQueryToTenant(Builder $query, ?Model $tenant): Builder
     {
         if ($tenant instanceof Model && filled($tenant->getKey())) {

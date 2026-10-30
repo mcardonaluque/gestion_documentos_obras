@@ -57,11 +57,13 @@ class DocumentoGenericoVariable extends Model
         'last_detected_at' => 'datetime',
     ];
 
+    /** Tipo de documento genérico (plantilla) al que pertenece la variable. */
     public function documentoGenerico(): BelongsTo
     {
         return $this->belongsTo(DocumentoGenerico::class, 'documento_generico_id', 'id');
     }
 
+    /** Devuelve el tipo de origen de datos de la variable como enum. */
     public function sourceType(): TemplateVariableSourceType
     {
         return TemplateVariableSourceType::from($this->source_type);

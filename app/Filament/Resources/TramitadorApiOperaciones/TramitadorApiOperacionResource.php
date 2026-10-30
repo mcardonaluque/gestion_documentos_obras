@@ -22,6 +22,14 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+/**
+ * Recurso Filament para las funciones (operaciones) del API del tramitador.
+ *
+ * Gestiona el modelo App\Models\TramitadorApiOperacion en el panel de
+ * administración, grupo «Tramitador» y slug «tramitador-api-operaciones».
+ * Define código, método HTTP y ruta de cada operación, y gestiona sus
+ * parámetros de entrada/salida mediante ParametrosRelationManager.
+ */
 class TramitadorApiOperacionResource extends Resource
 {
     protected static ?string $model = TramitadorApiOperacion::class;
@@ -38,6 +46,7 @@ class TramitadorApiOperacionResource extends Resource
 
     protected static ?string $slug = 'tramitador-api-operaciones';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -93,6 +102,7 @@ class TramitadorApiOperacionResource extends Resource
             ->columns(3);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -134,6 +144,7 @@ class TramitadorApiOperacionResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -141,6 +152,7 @@ class TramitadorApiOperacionResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

@@ -11,6 +11,15 @@ use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
+/**
+ * Componente Livewire para gestionar la distribución de importes de un
+ * expediente entre organismos, por fase económica (`ImportesStage`).
+ *
+ * Renderiza la vista `livewire.importes.manage-importes-widget`, carga y
+ * guarda el estado con `ImportesManagementRepository` y recalcula
+ * importes/porcentajes en vivo con `ImportesDistributionCalculator`.
+ * Es la versión widget independiente del fieldset `ImportesManagement`.
+ */
 final class ManageImportesWidget extends Component
 {
     private const PERCENTAGE_TOLERANCE = 0.01;
@@ -53,12 +62,19 @@ final class ManageImportesWidget extends Component
 
     private ImportesManagementRepository $repository;
 
+    /**
+     * Inyecta los servicios de cálculo y persistencia de importes.
+     */
     public function boot(ImportesDistributionCalculator $calculator, ImportesManagementRepository $repository): void
     {
         $this->calculator = $calculator;
         $this->repository = $repository;
     }
 
+    /**
+     * Inicializa el widget: carga el estado del expediente desde el
+     * repositorio, resuelve la fase inicial y recalcula los importes.
+     */
     public function mount(?string $expedienteId = null, ?string $formaEjecucion = null, ?string $stage = null): void
     {
         $this->expedienteId = $expedienteId;
@@ -83,6 +99,10 @@ final class ManageImportesWidget extends Component
         $this->refreshComputedData();
     }
 
+    /**
+     * Hook de Livewire: reacciona a cambios de fase, de totales maestros
+     * o de filas, recalculando la distribución correspondiente.
+     */
     public function updated(string $name): void
     {
         if (! $this->loaded) {
@@ -106,6 +126,10 @@ final class ManageImportesWidget extends Component
         }
     }
 
+    /**
+     * Valida que los porcentajes por fase sumen 100 % y persiste la
+     * distribución; notifica el resultado con Filament Notifications.
+     */
     public function save(): void
     {
         if (! $this->loaded || $this->expedienteId === null || trim($this->expedienteId) === '') {
@@ -131,6 +155,10 @@ final class ManageImportesWidget extends Component
             ->send();
     }
 
+    /**
+     * Renderiza la vista del widget con las opciones de fase, los flags
+     * de edición por columna y los totales/errores de porcentajes.
+     */
     public function render(): View
     {
         return view('livewire.importes.manage-importes-widget', [

@@ -6,6 +6,14 @@ use App\Models\TablaDeCarretera;
 use App\Http\Requests\StoreTablaDeCarreteraRequest;
 use App\Http\Requests\UpdateTablaDeCarreteraRequest;
 
+/**
+ * Controlador de recurso generado por scaffolding para el modelo
+ * `TablaDeCarretera`, junto a sus form requests Store/Update.
+ *
+ * Todos sus métodos están vacíos y no tiene rutas registradas en
+ * routes\web.php ni routes\api.php: las carreteras se usan como catálogo
+ * de apoyo en los formularios de obras de Filament.
+ */
 class TablaDeCarreteraController extends Controller
 {
     /**

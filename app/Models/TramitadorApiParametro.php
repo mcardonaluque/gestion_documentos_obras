@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Parámetro de una operación de la API del tramitador electrónico.
+ *
+ * Describe cada parámetro de entrada o salida (ubicación, tipo de dato,
+ * obligatoriedad, formato y validación) de una operación. Tabla
+ * 'tramitador_api_parametros' en la conexión 'Obras' (SQL Server).
+ * Pertenece a TramitadorApiOperacion.
+ */
 class TramitadorApiParametro extends Model
 {
     use HasFactory;
@@ -45,6 +53,7 @@ class TramitadorApiParametro extends Model
         ];
     }
 
+    /** Operación de la API a la que pertenece el parámetro. */
     public function operacion(): BelongsTo
     {
         return $this->belongsTo(TramitadorApiOperacion::class, 'operacion_id');

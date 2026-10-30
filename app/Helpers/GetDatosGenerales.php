@@ -5,12 +5,22 @@ namespace App\Helpers;
 use App\Models\DatosDeInicioDeObras;
 use App\Models\Expediente;
 
+/**
+ * Helper de datos generales de obras y expedientes con caché en memoria.
+ *
+ * Resuelve en una sola llamada los datos descriptivos (plan, municipio, estado,
+ * forma de ejecución) de DatosDeInicioDeObras y Expediente, cacheando por
+ * expediente_id durante la petición. Usado por el widget Filament DocumentosTable.
+ */
 class GetDatosGenerales
 {
     protected static array $obraCache = [];
 
     protected static array $expedienteCache = [];
 
+    /**
+     * Punto de entrada genérico: enruta la consulta según el nombre de tabla lógico.
+     */
     public static function getData(string $table, string $data): mixed
     {
         return match (strtolower(trim($table))) {
@@ -22,6 +32,8 @@ class GetDatosGenerales
     }
 
     /**
+     * Datos descriptivos de la obra (DatosDeInicioDeObras) cacheados por expediente.
+     *
      * @return array<string, mixed>
      */
     public static function getDatosObra(?string $expedienteId): array
@@ -70,6 +82,8 @@ class GetDatosGenerales
     }
 
     /**
+     * Datos descriptivos del expediente cacheados por expediente_id.
+     *
      * @return array<string, mixed>
      */
     public static function getDatosExpediente(?string $expedienteId): array
@@ -113,6 +127,8 @@ class GetDatosGenerales
     }
 
     /**
+     * Combina los datos de expediente y obra en un único array.
+     *
      * @return array<string, mixed>
      */
     public static function getDatosGenerales(?string $expedienteId): array

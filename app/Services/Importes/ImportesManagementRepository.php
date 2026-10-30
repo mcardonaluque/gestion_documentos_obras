@@ -11,9 +11,20 @@ use App\Models\ImportesPorOrganismo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
+/**
+ * Repositorio de carga y guardado de importes de obra por organismo.
+ *
+ * Lee y persiste ImportesDeObras (totales) e ImportesPorOrganismo (reparto DIP/AYT)
+ * usando el DTO ImportesOrganismoRowData. Lo consumen el componente de formulario
+ * ImportesManagement, el widget Livewire ManageImportesWidget y el recurso Filament
+ * DatosDeInicioDeObrasResource.
+ */
 class ImportesManagementRepository
 {
     /**
+     * Carga los totales maestros y las filas por organismo del expediente;
+     * si no existen filas devuelve un reparto por defecto DIP/AYT al 50%.
+     *
      * @return array{master: array<string, float>, rows: array<int, array<string, float|string>>, stage_hint: string}
      */
     public function load(string $expedienteId): array
@@ -53,6 +64,8 @@ class ImportesManagementRepository
     }
 
     /**
+     * Persiste los totales maestros y las filas por organismo del expediente.
+     *
      * @param array<string, float|int|string|null> $master
      * @param array<int, array<string, float|string>> $rows
      */

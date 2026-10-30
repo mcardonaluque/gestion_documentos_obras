@@ -21,6 +21,12 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Recurso Filament para el catálogo de tipos de documentos.
+ *
+ * Gestiona el modelo App\Models\TipoDocumento en el panel de
+ * administración, grupo «Documentación», sin aislamiento por tenant.
+ */
 class TipoDocumentoResource extends Resource
 {
     protected static ?string $model = TipoDocumento::class;
@@ -28,6 +34,7 @@ class TipoDocumentoResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static string | \UnitEnum | null $navigationGroup = 'Documentación';
     protected static ?string $navigationLabel = 'Tipos de documentos';
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -48,6 +55,7 @@ class TipoDocumentoResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -77,6 +85,7 @@ class TipoDocumentoResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -84,6 +93,7 @@ class TipoDocumentoResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

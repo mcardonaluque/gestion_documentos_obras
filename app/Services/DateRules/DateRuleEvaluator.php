@@ -17,6 +17,11 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Evalua reglas de fechas definidas en base de datos para una entidad Eloquent.
+ *
+ * Carga las reglas activas de DateValidationRule, compara las fechas del modelo
+ * (incluidas las de NormativaPPAC vía NormativaPpacHitosService) y produce DTOs
+ * DateRuleEvaluationResult. Lo invocan DateRuleObserver y el trait Filament
+ * NotifiesAndValidatesDates al crear/actualizar registros.
  */
 final class DateRuleEvaluator
 {
@@ -35,6 +40,8 @@ final class DateRuleEvaluator
     ];
 
     /**
+     * Evalúa todas las reglas activas aplicables al modelo y a los campos modificados.
+     *
      * @param array<int, string> $changedFields
      * @return Collection<int, DateRuleEvaluationResult>
      */
@@ -102,6 +109,8 @@ final class DateRuleEvaluator
     }
 
     /**
+     * Agrupa por campo los mensajes de error bloqueantes de los resultados disparados.
+     *
      * @param Collection<int, DateRuleEvaluationResult> $results
      * @return array<string, array<int, string>>
      */

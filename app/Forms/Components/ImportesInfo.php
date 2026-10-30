@@ -4,6 +4,14 @@ namespace App\Forms\Components;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Forms\Components\TextInput;
 
+/**
+ * Fieldset de Filament que muestra, en solo lectura, los importes
+ * económicos de una obra (aprobado, a contratar, adjudicación, etc.).
+ *
+ * Carga los datos desde la relación `importes()` del registro o mediante
+ * los setters `setImportesDataOrganismo()` / `setImportesDeObra()`.
+ * Se usa en `DatosDeInicioDeObrasResource` (paneles Obras y Planes).
+ */
 class ImportesInfo extends Fieldset
 {
     protected array $importesData = [];
@@ -57,6 +65,10 @@ class ImportesInfo extends Fieldset
         $this->schema(fn (): array => $this->getSchemaComponents());
     }
 
+    /**
+     * Rellena los importes a partir de una colección de importes por
+     * organismo (usa el primer elemento) y los fija como valores por defecto.
+     */
     public function setImportesDataOrganismo($Importes): static
     {
         if (blank($Importes)) {
@@ -82,6 +94,10 @@ class ImportesInfo extends Fieldset
 
         return $this->default($this->importesData);
     }
+    /**
+     * Rellena los importes a partir de un registro `ImportesDeObras`
+     * y los fija como valores por defecto del fieldset.
+     */
     public function setImportesDeObra($Importes): static
     {
         if (blank($Importes)) {

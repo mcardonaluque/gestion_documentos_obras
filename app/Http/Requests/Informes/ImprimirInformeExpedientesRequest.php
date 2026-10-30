@@ -9,14 +9,28 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
+/**
+ * Valida los filtros del informe imprimible de expedientes agrupados.
+ *
+ * La usa `ImprimirInformeExpedientesController` (ruta GET
+ * /informes/expedientes/imprimir, routes\web.php). Comprueba rango de
+ * años, estado, equipo y el modo de agrupación contra las opciones del
+ * enum `InformeExpedientesAgrupacion`.
+ */
 final class ImprimirInformeExpedientesRequest extends FormRequest
 {
+    /**
+     * Autoriza la petición a cualquier usuario autenticado; la
+     * autorización fina la aplica después `InformeExpedientesPolicy`.
+     */
     public function authorize(): bool
     {
         return $this->user() !== null;
     }
 
     /**
+     * Reglas de validación de los filtros del informe.
+     *
      * @return array<string, array<int, mixed>>
      */
     public function rules(): array
@@ -34,6 +48,9 @@ final class ImprimirInformeExpedientesRequest extends FormRequest
         ];
     }
 
+    /**
+     * Validación adicional: el año "hasta" no puede ser anterior al año "desde".
+     */
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator): void {

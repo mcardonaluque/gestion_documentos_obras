@@ -7,9 +7,19 @@ namespace App\Services\DateHitos;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Servicio de consulta de la tabla materializada expediente_fecha_hitos (conexión Obras).
+ *
+ * Construye el listado filtrable de hitos de fechas por expediente, uniendo el
+ * catálogo de hitos y los equipos. Lo utiliza la página Filament
+ * HitosFechasMaterializados (panel Obras) para mostrar y filtrar los resultados.
+ */
 final class ConsultaExpedienteFechaHitosService
 {
     /**
+     * Ejecuta la búsqueda de hitos aplicando los filtros y devuelve filas formateadas,
+     * total de coincidencias y metadatos para la vista.
+     *
      * @param array<string, mixed> $filtros
     * @return array<string, mixed>
      */
@@ -68,6 +78,8 @@ final class ConsultaExpedienteFechaHitosService
     }
 
     /**
+     * Opciones de selector código de hito => descripción del catálogo.
+     *
      * @return array<string, string>
      */
     public function opcionesHitos(): array
@@ -86,6 +98,8 @@ final class ConsultaExpedienteFechaHitosService
     }
 
     /**
+     * Opciones de selector con las tablas de origen distintas registradas.
+     *
      * @return array<string, string>
      */
     public function opcionesTablas(): array

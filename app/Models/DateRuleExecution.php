@@ -9,6 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * Registro de ejecución de una regla de validación de fechas.
+ *
+ * Guarda el resultado de cada evaluación (valor evaluado, comparado,
+ * superada o disparada) con huella para evitar duplicados.
+ * Tabla 'date_rule_executions' en la conexión 'Obras' (SQL Server).
+ * Pertenece a una DateValidationRule.
+ *
  * @property int $id
  * @property int $date_validation_rule_id
  * @property string $model_type
@@ -66,6 +73,7 @@ class DateRuleExecution extends Model
         ];
     }
 
+    /** Regla de validación de fechas que originó esta ejecución. */
     public function rule(): BelongsTo
     {
         return $this->belongsTo(DateValidationRule::class, 'date_validation_rule_id');

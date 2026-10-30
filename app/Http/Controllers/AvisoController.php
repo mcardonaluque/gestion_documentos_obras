@@ -5,6 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Aviso;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador de recurso generado por scaffolding para el modelo `Aviso`.
+ *
+ * Todos sus métodos están vacíos y no tiene rutas registradas en
+ * routes\web.php ni routes\api.php: los avisos se gestionan desde los
+ * paneles de Filament. Se conserva como punto de extensión para un
+ * futuro CRUD HTTP tradicional.
+ */
 class AvisoController extends Controller
 {
     /**

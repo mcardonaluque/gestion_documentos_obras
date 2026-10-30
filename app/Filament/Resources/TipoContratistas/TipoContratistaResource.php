@@ -12,6 +12,12 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
 
+/**
+ * Recurso Filament para el catálogo de tipos de contratista.
+ *
+ * Gestiona el modelo App\Models\TipoContratista en el panel de
+ * administración, sin grupo de navegación específico.
+ */
 class TipoContratistaResource extends Resource
 {
     protected static ?string $model = TipoContratista::class;
@@ -20,6 +26,7 @@ class TipoContratistaResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'Denominacion';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -35,6 +42,7 @@ class TipoContratistaResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -63,6 +71,7 @@ class TipoContratistaResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -70,6 +79,7 @@ class TipoContratistaResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

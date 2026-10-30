@@ -6,6 +6,13 @@ use App\Models\TablaDeCarretera;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
+/**
+ * Policy que protege el modelo `TablaDeCarretera` (catálogo de carreteras).
+ *
+ * Todas las habilidades devuelven false: el catálogo es de solo lectura
+ * interna (se consulta desde los formularios de obras) y no se expone
+ * ningún CRUD en los paneles de Filament ni en rutas HTTP.
+ */
 class TablaDeCarreteraPolicy
 {
     /**

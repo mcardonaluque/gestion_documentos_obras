@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\Certificaciones\CertificacionesResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
+/** Listado estándar de certificaciones (sin lógica propia). */
 class ListCertificaciones extends ListRecords
 {
     protected static string $resource = CertificacionesResource::class;

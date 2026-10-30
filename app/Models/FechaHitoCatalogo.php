@@ -7,6 +7,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Catálogo de hitos de fechas controlados por el sistema.
+ *
+ * Define cada hito temporal (código, descripción, tabla y campo de origen,
+ * fase, obligatoriedad y orden) que luego se materializa en
+ * ExpedienteFechaHito. Tabla 'fecha_hitos_catalogo' en la conexión
+ * 'Obras' (SQL Server).
+ */
 class FechaHitoCatalogo extends Model
 {
     use HasFactory;

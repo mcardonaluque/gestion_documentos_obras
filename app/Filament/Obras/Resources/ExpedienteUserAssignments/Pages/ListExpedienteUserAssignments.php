@@ -8,6 +8,7 @@ use App\Filament\Obras\Resources\ExpedienteUserAssignments\ExpedienteUserAssignm
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
+/** Listado de asignaciones de expedientes a usuarios con acción de crear. */
 class ListExpedienteUserAssignments extends ListRecords
 {
     protected static string $resource = ExpedienteUserAssignmentResource::class;

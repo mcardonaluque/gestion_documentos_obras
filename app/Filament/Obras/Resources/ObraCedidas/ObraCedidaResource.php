@@ -28,6 +28,16 @@ use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 
+/**
+ * Recurso Filament para gestionar las obras cedidas a los ayuntamientos.
+ *
+ * Gestiona el modelo {@see \App\Models\ObraCedida}: fechas de la fase de
+ * cesión (remisión al ayuntamiento, recepción de certificado, cesión,
+ * adjudicación y contrato) y datos del contratista adjudicatario. Usa los
+ * traits {@see CommonFilters}, {@see MunicipiosFilter}, {@see ZonasFilter}
+ * y {@see HasAssignedExpedienteVisibility}, y aplica
+ * {@see DateFieldRules} a los campos de fecha. Multi-tenant vía 'team'.
+ */
 class ObraCedidaResource extends Resource
 {
     use CommonFilters;
@@ -40,6 +50,11 @@ class ObraCedidaResource extends Resource
     protected static ?string $pluralModelLabel = 'Obras Cedidas';
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $tenantOwnershipRelationshipName = 'team';
+
+    /**
+     * Define el formulario de la obra cedida (fechas de cesión y datos del
+     * contratista), validando las fechas con DateFieldRules.
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -93,6 +108,10 @@ class ObraCedidaResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla de obras cedidas, ordenada por fecha de cesión
+     * descendente y con filtros comunes, de municipio y de zona.
+     */
     public static function table(Table $table): Table
     {
         return $table

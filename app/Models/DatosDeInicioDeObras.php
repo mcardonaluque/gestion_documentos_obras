@@ -73,6 +73,7 @@ class DatosDeInicioDeObras extends Model
     {
         return $this->HasOne(AyudaTecnica::class, 'expediente_id', 'expediente_id' );
     }
+    /** Carretera provincial asociada cuando la obra es viaria. */
     public function carrteras():BelongsTo
     {
         return $this->belongsTo(TablaDeCarretera::class, 'carretera', 'Cod_Car' );
@@ -86,23 +87,29 @@ class DatosDeInicioDeObras extends Model
     {
         return $this->hasMany(ImportesPorOrganismo::class, 'expediente_id','expediente_id' );
     }
+    /** Plan de seguridad y salud de la obra. */
     public function planeseguridadysalud():HasOne    {
         return $this->hasOne(Planseguridadysalud::class, 'expediente_id','expediente_id');
     }
+    /** Proyecto técnico de la obra. */
     public function proyectos():HasOne    {
         return $this->hasOne(Proyecto::class, 'expediente_id','expediente_id');
     }
+    /** Datos de ejecución de la obra. */
     public function datosjecucion():HasOne    {
         return $this->hasOne(DatosEjecucionObras::class, 'expediente_id','expediente_id');
     }
+     /** Estado de tramitación actual de la obra. */
      public function estados():BelongsTo
     {
         return $this->belongsTo(TablaDeEstados::class, 'codigo_estado_obra', 'cod_estado' );
     }
+    /** Plan provincial al que pertenece la obra. */
     public function planes():BelongsTo
     {
         return $this->belongsTo(Planes::class, 'Codigo_Plan', 'codigo_plan' );
     }
+    /** Forma de ejecución/contratación de la obra. */
     public function ejecucion():BelongsTo
     {
         return $this->belongsTo(FormaEjecucion::class, 'forma_ejecucion', 'COD_CONTRATA' );
@@ -112,18 +119,22 @@ class DatosDeInicioDeObras extends Model
     {
         return $this->hasMany(DocumentoExpediente::class, 'expediente_id', 'expediente_id' );
     }
+    /** Certificaciones económicas emitidas para la obra. */
     public function certificaciones():HasMany
     {
         return $this->hasMany(certificaciones::class, 'Expediente', 'Expediente' );
     }
+    /** Tipo de actuación de la obra dentro del plan. */
     public function tipoactuacion():BelongsTo
     {
         return $this->belongsTo(TipoActuacion::class, 'TipoActuacion', 'codigo' );
     }
 
+    /** Team (ayuntamiento/ámbito) propietario de la obra. */
     public function team():BelongsTo{
         return $this->belongsTo(Team::class);
     }
+    /** Tipo de actuación (variante con clave alternativa). */
     public function actuacion():BelongsTo
     {
         return $this->belongsTo(TipoActuacion::class, 'TipoActuacion', 'cod_estado' );
@@ -144,6 +155,7 @@ class DatosDeInicioDeObras extends Model
     {
         return $this->planes ? $this->planes->denominacion_plan : null;
     }
+    /** Accessor: compromiso de aportación del ayuntamiento, si existe. */
     public function getAportacionAttribute()
     {
         return $this->CompApAyto ? $this->CompApAyto : null;

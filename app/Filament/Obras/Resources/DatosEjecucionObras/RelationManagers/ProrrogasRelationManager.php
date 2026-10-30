@@ -21,6 +21,12 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+/**
+ * Relation manager de las prórrogas ('prorrogas') del expediente de
+ * ejecución: alta/edición con tipo, alcance, origen y fechas, delegando el
+ * registro en {@see RegistrarProrrogaAction}. Usado por
+ * DatosEjecucionObrasResource y ProrrogaResource.
+ */
 class ProrrogasRelationManager extends RelationManager
 {
     /** Relación de prórrogas ligada al expediente de la obra. */

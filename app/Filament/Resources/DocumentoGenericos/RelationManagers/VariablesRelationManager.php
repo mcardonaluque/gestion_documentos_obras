@@ -17,12 +17,19 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+/**
+ * Relation manager de las variables de plantilla de un documento genérico.
+ *
+ * Gestiona la relación «variables» desde DocumentoGenericoResource: origen
+ * del dato, ruta lógica, formato y marcas de obligatoria/activa.
+ */
 class VariablesRelationManager extends RelationManager
 {
     protected static string $relationship = 'variables';
 
     protected static ?string $title = 'Variables de plantilla';
 
+    /** Define el formulario de la relación. */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -54,6 +61,7 @@ class VariablesRelationManager extends RelationManager
             ->columns(2);
     }
 
+    /** Configura la tabla de registros relacionados. */
     public function table(Table $table): Table
     {
         return $table

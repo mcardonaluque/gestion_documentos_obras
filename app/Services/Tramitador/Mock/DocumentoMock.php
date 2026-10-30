@@ -19,6 +19,8 @@ final class DocumentoMock
     ];
 
     /**
+     * Filtra los bloques de la respuesta según los indicadores de la consulta.
+     *
      * @param  array<string, mixed>  $cuerpo  Contenido del JSON base.
      * @param  array<string, mixed>  $query  Parámetros de la petición.
      * @return array<string, mixed>

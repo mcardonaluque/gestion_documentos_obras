@@ -15,6 +15,8 @@ namespace App\Services\Tramitador\Mock;
 final class NotificacionExpedienteMock
 {
     /**
+     * Simula el alta de una notificación: devuelve id_peticion o 409/404 según el estado.
+     *
      * @return array<string, mixed>
      */
     public static function responder(string $idExp): array

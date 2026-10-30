@@ -26,6 +26,14 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 
+/**
+ * Recurso Filament para el mantenimiento de reglas de validación de fechas.
+ *
+ * Gestiona el modelo App\Models\DateValidationRule en el panel de
+ * administración, grupo «Validacion de fechas». Configura comparaciones
+ * entre campos fecha de distintas tablas (o fechas de sistema) usando los
+ * enums DateRuleCondition, DateRuleType, DateRuleAction y DateRuleOperation.
+ */
 class DateValidationRuleResource extends Resource
 {
     protected static ?string $model = DateValidationRule::class;
@@ -38,6 +46,7 @@ class DateValidationRuleResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -122,6 +131,7 @@ class DateValidationRuleResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -155,11 +165,13 @@ class DateValidationRuleResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

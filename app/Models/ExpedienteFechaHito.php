@@ -7,6 +7,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Fecha de hito registrada para un expediente.
+ *
+ * Materializa cada hito temporal (código del catálogo FechaHitoCatalogo)
+ * con su fecha y la tabla/campo de origen del dato. Tabla
+ * 'expediente_fecha_hitos' en la conexión 'Obras' (SQL Server).
+ */
 class ExpedienteFechaHito extends Model
 {
     use HasFactory;

@@ -16,6 +16,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * Regla configurable de validación entre fechas de distintas tablas.
+ *
+ * Define la condición, operación y plazos que se evalúan sobre campos de
+ * fecha del expediente, junto con los mensajes y la acción a disparar.
+ * Tabla 'date_validation_rules' en la conexión 'Obras' (SQL Server).
+ * Tiene muchas DateRuleExecution y referencia FaseDocumento y TablaDeEstados.
+ *
  * @property int $id
  * @property string $nombre
  * @property string|null $descripcion
@@ -92,21 +99,25 @@ class DateValidationRule extends Model
         ];
     }
 
+    /** Scope: filtra solo las reglas activas. */
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('activa', true);
     }
 
+    /** Fase documental a la que aplica la regla. */
     public function faseRelacionada(): BelongsTo
     {
         return $this->belongsTo(FaseDocumento::class, 'fase', 'cod_fase');
     }
 
+    /** Estado de tramitación al que aplica la regla. */
     public function estadoRelacionado(): BelongsTo
     {
         return $this->belongsTo(TablaDeEstados::class, 'estado', 'cod_estado');
     }
 
+    /** Ejecuciones registradas de esta regla. */
     public function executions(): HasMany
     {
         return $this->hasMany(DateRuleExecution::class, 'date_validation_rule_id');

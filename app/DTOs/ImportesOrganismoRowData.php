@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace App\DTOs;
 
+/**
+ * DTO inmutable de una fila de reparto de importes por organismo (DIP/AYT).
+ *
+ * Transporta porcentajes e importes de cada fase (aprobado, a contratar,
+ * adjudicado, baja y ejecutado). Lo construye y consume
+ * ImportesManagementRepository al cargar/guardar ImportesPorOrganismo.
+ */
 final class ImportesOrganismoRowData
 {
     public function __construct(
@@ -22,6 +29,8 @@ final class ImportesOrganismoRowData
     }
 
     /**
+     * Convierte la fila al formato de array usado por el formulario de importes.
+     *
      * @return array<string, float|string>
      */
     public function toArray(): array

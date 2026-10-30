@@ -7,6 +7,12 @@ namespace App\DTOs;
 use App\Enums\DateRuleType;
 use App\Models\DateValidationRule;
 
+/**
+ * DTO inmutable con el resultado de evaluar una regla de fechas sobre un campo.
+ *
+ * Lo produce DateRuleEvaluator y lo consumen DateRuleExecutionLogger (auditoría)
+ * y DateRuleNotifier (notificaciones) para decidir bloqueos y avisos.
+ */
 final class DateRuleEvaluationResult
 {
     public function __construct(

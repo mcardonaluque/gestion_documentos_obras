@@ -6,13 +6,27 @@ use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Pages\Dashboard as BaseDashboard;
 
+/**
+ * Panel de inicio (dashboard) del panel Obras.
+ *
+ * Personaliza el título ("Planes de Obras Provinciales") y añade un grupo
+ * de acciones de cabecera con accesos directos a los documentos de
+ * expediente filtrados por fase (proyecto, aprobación, cesión,
+ * contratación, ejecución y justificación).
+ */
 class Dashboard extends BaseDashboard
 {
+    /**
+     * Título mostrado en la cabecera del dashboard.
+     */
     public function getTitle(): string
     {
         return 'Planes de Obras Provinciales';
     }
 
+    /**
+     * Acciones de cabecera: accesos a documentos por fase del expediente.
+     */
     protected function getHeaderActions(): array
     {
         return [

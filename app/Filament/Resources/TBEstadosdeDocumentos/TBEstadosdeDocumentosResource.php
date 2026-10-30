@@ -15,6 +15,12 @@ use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 
+/**
+ * Recurso Filament para el catálogo de estados de documentos.
+ *
+ * Gestiona el modelo App\Models\TBestadosdeDocumentos en el panel de
+ * administración con la etiqueta de navegación «Estados de Documentos».
+ */
 class TBEstadosdeDocumentosResource extends Resource
 {
     protected static ?string $model = TBestadosdeDocumentos::class;
@@ -22,6 +28,7 @@ class TBEstadosdeDocumentosResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
      protected static ?string $navigationLabel = 'Estados de Documentos';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -36,6 +43,7 @@ class TBEstadosdeDocumentosResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -66,6 +74,7 @@ class TBEstadosdeDocumentosResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -73,6 +82,7 @@ class TBEstadosdeDocumentosResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

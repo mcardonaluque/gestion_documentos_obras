@@ -6,6 +6,14 @@ use App\Models\ImportesPorOrganismo;
 use App\Http\Requests\StoreImportesPorOrganismoRequest;
 use App\Http\Requests\UpdateImportesPorOrganismoRequest;
 
+/**
+ * Controlador de recurso generado por scaffolding para el modelo
+ * `ImportesPorOrganismo`, junto a sus form requests Store/Update.
+ *
+ * Todos sus métodos están vacíos y no tiene rutas registradas en
+ * routes\web.php ni routes\api.php: el reparto de importes por organismo
+ * se gestiona desde `ImportesPorOrganismoResource` en los paneles de Filament.
+ */
 class ImportesPorOrganismoController extends Controller
 {
     /**

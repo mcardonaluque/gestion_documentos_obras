@@ -9,9 +9,18 @@ use App\Models\DateRuleExecution;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
+/**
+ * Registra en auditoría las ejecuciones de reglas de fechas disparadas.
+ *
+ * Persiste cada resultado disparado como DateRuleExecution usando un fingerprint
+ * diario para evitar duplicados. Invocado por DateRuleObserver y por el trait
+ * Filament NotifiesAndValidatesDates tras evaluar con DateRuleEvaluator.
+ */
 final class DateRuleExecutionLogger
 {
     /**
+     * Guarda una entrada de ejecución por cada resultado disparado (sin duplicar en el día).
+     *
      * @param Collection<int, DateRuleEvaluationResult> $results
      */
     public function log(Model $model, Collection $results): void

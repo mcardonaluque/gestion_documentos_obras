@@ -8,6 +8,7 @@ use App\Filament\Obras\Resources\NormativaPpacs\NormativaPpacResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
+/** Listado estándar de normativas PPAC (sin lógica propia). */
 class ListNormativaPpacs extends ListRecords
 {
     protected static string $resource = NormativaPpacResource::class;

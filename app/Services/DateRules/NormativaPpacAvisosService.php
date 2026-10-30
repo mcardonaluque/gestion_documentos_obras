@@ -26,6 +26,9 @@ final class NormativaPpacAvisosService
     }
 
     /**
+     * Recorre los expedientes recientes, genera/cierra avisos de hitos PPAC y
+     * devuelve estadísticas del proceso. Con $simular no persiste cambios.
+     *
      * @return array{expedientes: int, avisos: int, notificaciones: int, cerrados: int}
      */
     public function ejecutar(bool $simular = false, ?string $expedienteId = null, ?Carbon $hoy = null): array

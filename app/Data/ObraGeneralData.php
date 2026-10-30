@@ -3,6 +3,13 @@ namespace App\Data;
 
 //use Spatie\LaravelData\Data;
 
+/**
+ * DTO simple con los datos generales de una obra.
+ *
+ * Mapea los campos básicos (código, nombre, fechas, presupuesto) desde un
+ * modelo de obra mediante fromObra(). Actualmente sin consumidores directos
+ * registrados en app/ (clase auxiliar/legado).
+ */
 class ObraGeneralData 
 {
     public function __construct(
@@ -16,6 +23,9 @@ class ObraGeneralData
         public ?float $presupuesto,
     ) {}
     
+    /**
+     * Crea el DTO a partir de un modelo de obra con los atributos esperados.
+     */
     public static function fromObra($obra): self
     {
         return new self(

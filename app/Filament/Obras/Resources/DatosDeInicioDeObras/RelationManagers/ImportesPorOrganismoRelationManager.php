@@ -17,6 +17,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Relation manager de los importes por organismo ('importesPorOrganismo')
+ * del expediente. Compatible con propietarios Expediente o datos de inicio
+ * de obra (resuelve la relación inversa según el tipo). Usado por
+ * DatosDeInicioDeObrasResource y DatosEjecucionObrasResource.
+ */
 class ImportesPorOrganismoRelationManager extends RelationManager
 {
     protected static string $relationship = 'importesPorOrganismo';
@@ -27,6 +33,9 @@ class ImportesPorOrganismoRelationManager extends RelationManager
         return true;
     }
 
+    /**
+     * Devuelve la relación inversa adecuada según el modelo propietario.
+     */
     protected function getInverseRelationship(): string
     {
         if ($this->getOwnerRecord() instanceof Expediente) {
@@ -36,6 +45,10 @@ class ImportesPorOrganismoRelationManager extends RelationManager
         return 'obra';
     }
 
+    /**
+     * Clave de fila compuesta 'expediente-organismo' (la tabla no tiene id
+     * único propio).
+     */
     public function getTableRecordKey(Model | array $record): string
     {
         if (is_array($record)) {

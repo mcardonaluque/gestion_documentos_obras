@@ -17,6 +17,8 @@ final class ModificacionEstadoExpedienteMock
     private const ESTADOS_PENDIENTES = ['PEN', 'PTE_FIRM', 'EN_PROCESO', 'PTE_VAL', 'VAL_SOP'];
 
     /**
+     * Simula el cambio de estado del expediente, con 409 si está cerrado o tiene trámites pendientes.
+     *
      * @return array<string, mixed>
      */
     public static function responder(string $idExp, string $estado): array

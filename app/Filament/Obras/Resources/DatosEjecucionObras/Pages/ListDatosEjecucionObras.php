@@ -8,9 +8,19 @@ use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Listado de datos de ejecución de obras con pestañas por año de ejecución
+ * generadas dinámicamente a partir de la consulta base del recurso.
+ */
 class ListDatosEjecucionObras extends ListRecords
 {
     protected static string $resource = DatosEjecucionObrasResource::class;
+
+    /**
+     * Genera las pestañas "Todos" y una por cada año con registros,
+     * usando la misma query base del recurso para que los contadores
+     * sean coherentes con el listado.
+     */
     public function getTabs(): array
     {
         // Usar la misma query base del Resource para que badges y listado sean coherentes.

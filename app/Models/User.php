@@ -23,6 +23,15 @@ use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 
 //use \BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 
+/**
+ * Usuario de la aplicación con autenticación, roles y multi-tenancy.
+ *
+ * Integra Filament (FilamentUser, HasTenants), Spatie Permission y las
+ * notificaciones personalizadas. Usa la conexión 'Obras' (SQL Server).
+ * Se relaciona con Team (belongsToMany vía team_user), Expediente
+ * (asignaciones vía expediente_user_assignments), TablaDeDepartamento
+ * y CustomNotification (morphMany).
+ */
 class User extends Authenticatable implements FilamentUser , HasTenants
 {
     use HasFactory, Notifiable, HasRoles, HasPanelShield, HasPermissions;
@@ -62,12 +71,14 @@ class User extends Authenticatable implements FilamentUser , HasTenants
             'password' => 'hashed',
         ];
     }
+    /** Mutator: guarda el nombre del usuario sin espacios sobrantes. */
     public function setNameAttribute($value)
     {
         $this->attributes['name'] = trim($value);
     }
 
 
+    /** Devuelve los tenants (teams) accesibles por el usuario en el panel. */
     public function getTenants(Panel $panel): array|Collection
     {
         if ($this->hasGlobalAyuntamientosAccess($panel)) {
@@ -76,10 +87,12 @@ class User extends Authenticatable implements FilamentUser , HasTenants
 
         return $this->team;
     }
+    /** Departamento de la diputación al que pertenece el usuario. */
     public function departamento():BelongsTo
     {
         return $this->belongsTo(TablaDeDepartamento::class);
     }
+    /** Indica si el usuario puede acceder al tenant (team) indicado. */
     public function canAccessTenant(Model $tenant): bool
     {
         if ($this->hasGlobalAyuntamientosAccess()) {
@@ -102,6 +115,7 @@ class User extends Authenticatable implements FilamentUser , HasTenants
 
         return (int) $this->id === 2 || $this->hasRole('super_admin');
     }
+    /** Determina a qué paneles de Filament puede acceder el usuario. */
     public function canAccessPanel(Panel $panel): bool
     {
         //dd($this->hasRole('panel_user'));
@@ -128,21 +142,26 @@ class User extends Authenticatable implements FilamentUser , HasTenants
             // ...
         });
     }
+    /** Teams (ayuntamientos/ámbitos) a los que pertenece el usuario. */
     public function teams(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'team_user', 'user_id', 'team_id');
     }
+    /** Alias de teams(). */
     public function team(): BelongsToMany
     {
         return $this->teams();
     }
 
+    /** Notificaciones del usuario, ordenadas de más reciente a más antigua. */
     public function notifications(): MorphMany
     {
         return $this->morphMany(CustomNotification::class, 'notifiable')->orderBy('created_at', 'desc');
     }
 
     /**
+     * Expedientes asignados expresamente al usuario para su tramitación.
+     *
      * @return BelongsToMany<Expediente, self>
      */
     public function assignedExpedientes(): BelongsToMany
@@ -152,6 +171,7 @@ class User extends Authenticatable implements FilamentUser , HasTenants
             ->withTimestamps();
     }
 
+    /** Notificaciones no leídas del usuario, de más reciente a más antigua. */
     public function unreadNotifications(): MorphMany
     {
         return $this->morphMany(CustomNotification::class, 'notifiable')

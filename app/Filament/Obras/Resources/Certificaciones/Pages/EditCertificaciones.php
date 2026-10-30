@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\Certificaciones\CertificacionesResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
+/** Página estándar de edición de certificaciones (sin lógica propia). */
 class EditCertificaciones extends EditRecord
 {
     protected static string $resource = CertificacionesResource::class;

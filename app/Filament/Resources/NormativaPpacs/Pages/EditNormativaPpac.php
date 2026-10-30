@@ -9,10 +9,12 @@ use App\Filament\Support\AsignarNormativaAPlanesAction;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
+/** Página de edición de registros de NormativaPpacResource (panel de administración). */
 class EditNormativaPpac extends EditRecord
 {
     protected static string $resource = NormativaPpacResource::class;
 
+    /** Acciones de cabecera de la página. */
     protected function getHeaderActions(): array
     {
         return [

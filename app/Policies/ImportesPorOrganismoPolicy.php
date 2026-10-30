@@ -6,6 +6,14 @@ use App\Models\User;
 use App\Models\ImportesPorOrganismo;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
+/**
+ * Policy que protege el modelo `ImportesPorOrganismo`
+ * (reparto de importes de una obra entre organismos financiadores).
+ *
+ * Generada por Filament Shield: cada habilidad delega en los permisos
+ * `*_importes::por::organismo` de Spatie Permission. La resuelve
+ * automáticamente Laravel para `ImportesPorOrganismoResource`.
+ */
 class ImportesPorOrganismoPolicy
 {
     use HandlesAuthorization;

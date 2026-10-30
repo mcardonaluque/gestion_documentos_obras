@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\Avisos\AvisoResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
+/** Listado estándar de avisos (sin lógica propia). */
 class ListAvisos extends ListRecords
 {
     protected static string $resource = AvisoResource::class;

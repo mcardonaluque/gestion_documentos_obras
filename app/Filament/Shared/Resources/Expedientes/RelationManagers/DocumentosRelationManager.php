@@ -18,15 +18,24 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+/**
+ * Relation manager de los documentos asociados a un expediente.
+ *
+ * Gestiona la relación «documentos» y es compartido por los paneles que
+ * usan ExpedienteResourceBase. Permite crear y editar documentos con los
+ * datos del expediente propietario precargados.
+ */
 class DocumentosRelationManager extends RelationManager
 {
     protected static string $relationship = 'documentos';
 
+    /** Permite crear y editar documentos desde la relación (no es de solo lectura). */
     public function isReadOnly(): bool
     {
         return false;
     }
 
+    /** Define el formulario de la relación. */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -103,6 +112,7 @@ class DocumentosRelationManager extends RelationManager
             ]);
     }
 
+    /** Configura la tabla de registros relacionados. */
     public function table(Table $table): Table
     {
         return $table

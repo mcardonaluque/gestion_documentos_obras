@@ -8,24 +8,36 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Departamento o servicio de la diputación.
+ *
+ * Catálogo de servicios técnicos y administrativos que actúan como
+ * redactores, directores o gestores de proyectos. Tabla
+ * 'TablaDeDepartamentos' en la conexión 'Obras' (SQL Server), clave
+ * primaria 'CODIGO_DPTO'. Tiene muchos Proyecto y Usuario.
+ */
 class TablaDeDepartamento extends Model
 {
     use HasFactory;
     protected $connection='Obras';
     protected $table='TablaDeDepartamentos';
     protected $primaryKey='CODIGO_DPTO';
+    /** Proyectos en los que el departamento actúa como redactor. */
     public function proyecto_redactor():HasMany
     {
         return $this->hasMany(Proyecto::class, 'Servicio_redactor', 'CODIGO_DPTO' );
     }
+    /** Proyectos en los que el departamento dirige la obra. */
     public function proyecto_director():HasMany
     {
         return $this->hasMany(Proyecto::class, 'servicio_direccion', 'CODIGO_DPTO' );
     }
+    /** Proyectos gestionados por el departamento. */
     public function proyecto_gestor():HasMany
     {
         return $this->hasMany(Proyecto::class, 'Servicio_Gestor', 'CODIGO_DPTO' );
     }
+    /** Usuarios internos adscritos al departamento. */
     public function usuarios():HasMany{
         return $this->hasMany(Usuario::class);
     }

@@ -5,6 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Zona;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador de recurso generado por scaffolding para el modelo `Zona`.
+ *
+ * Todos sus métodos están vacíos y no tiene rutas registradas en
+ * routes\web.php ni routes\api.php: las zonas se consultan como catálogo
+ * (relación municipios->zonas) en los componentes y recursos de Filament.
+ */
 class ZonaController extends Controller
 {
     /**

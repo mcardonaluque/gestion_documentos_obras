@@ -8,6 +8,14 @@ use App\Services\Importes\ImportesManagementRepository;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
+/**
+ * Página de edición de datos de inicio de obra.
+ *
+ * Usa el concern {@see NotifiesAndValidatesDates}. Precarga ubicación,
+ * ayuda técnica y el estado de gestión de importes (vía
+ * {@see ImportesManagementRepository}) y, al guardar, valida la petición de
+ * acta de replanteo y persiste el estado de importes del expediente.
+ */
 class EditDatosDeInicioDeObra extends EditRecord
 {
     use NotifiesAndValidatesDates;
@@ -20,6 +28,10 @@ class EditDatosDeInicioDeObra extends EditRecord
            // Actions\DeleteAction::make(),
         ];
     }
+    /**
+     * Precarga ubicación, ayuda técnica y el estado de gestión de importes
+     * del expediente en el formulario.
+     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         // Obtener el modelo actual
@@ -73,6 +85,10 @@ class EditDatosDeInicioDeObra extends EditRecord
         return $data;
     }
 
+    /**
+     * Valida la petición de acta de replanteo y persiste el estado de
+     * gestión de importes antes de guardar.
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         DatosDeInicioDeObrasResource::validateActaReplanteoPetition($data, $this->getRecord());

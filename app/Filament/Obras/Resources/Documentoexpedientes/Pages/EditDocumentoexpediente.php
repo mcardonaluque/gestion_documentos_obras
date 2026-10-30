@@ -8,6 +8,10 @@ use App\Filament\Obras\Resources\Documentoexpedientes\DocumentoexpedienteResourc
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
+/**
+ * Página de edición del documento de expediente; usa el concern
+ * {@see NotifiesAndValidatesDates} para validar y notificar fechas.
+ */
 class EditDocumentoexpediente extends EditRecord
 {
     use NotifiesAndValidatesDates;

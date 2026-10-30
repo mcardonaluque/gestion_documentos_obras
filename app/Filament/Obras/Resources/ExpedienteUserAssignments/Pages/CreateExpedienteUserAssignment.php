@@ -13,6 +13,14 @@ use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Página de asignación de expedientes a usuarios (creación múltiple).
+ *
+ * Permite seleccionar varios expedientes para un usuario: valida que no
+ * existan asignaciones duplicadas y crea un registro de
+ * {@see ExpedienteUserAssignment} por expediente, resolviendo el team de
+ * cada uno y registrando quién lo asignó.
+ */
 class CreateExpedienteUserAssignment extends CreateRecord
 {
     protected static string $resource = ExpedienteUserAssignmentResource::class;
@@ -39,6 +47,9 @@ class CreateExpedienteUserAssignment extends CreateRecord
     }
 
     /**
+     * Valida que se haya seleccionado algún expediente y que ninguno esté
+     * ya asignado al usuario; añade el usuario asignador.
+     *
      * @param array<string, mixed> $data
      * @return array<string, mixed>
      */
@@ -76,6 +87,10 @@ class CreateExpedienteUserAssignment extends CreateRecord
         return $data;
     }
 
+    /**
+     * Crea una asignación por cada expediente seleccionado, resolviendo el
+     * team del expediente, y devuelve la primera creada.
+     */
     protected function handleRecordCreation(array $data): \App\Models\ExpedienteUserAssignment
     {
         $selectedExpedienteIds = collect((array) ($data['expediente_id'] ?? []))

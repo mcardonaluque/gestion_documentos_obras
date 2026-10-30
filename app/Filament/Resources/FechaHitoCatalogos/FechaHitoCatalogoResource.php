@@ -21,6 +21,14 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
+/**
+ * Recurso Filament para el catálogo de hitos de fecha.
+ *
+ * Gestiona el modelo App\Models\FechaHitoCatalogo en el panel de
+ * administración, grupo «Validacion de fechas». Define los hitos (tabla y
+ * campo de origen, fase, obligatoriedad...) que luego se materializan por
+ * expediente.
+ */
 class FechaHitoCatalogoResource extends Resource
 {
     protected static ?string $model = FechaHitoCatalogo::class;
@@ -33,6 +41,7 @@ class FechaHitoCatalogoResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -71,6 +80,7 @@ class FechaHitoCatalogoResource extends Resource
         ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -112,11 +122,13 @@ class FechaHitoCatalogoResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

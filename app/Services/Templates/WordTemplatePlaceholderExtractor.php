@@ -15,6 +15,8 @@ use PhpOffice\PhpWord\TemplateProcessor;
 final class WordTemplatePlaceholderExtractor
 {
     /**
+     * Devuelve los placeholders ${...} de la plantilla, normalizados y ordenados.
+     *
      * @return list<string>
      */
     public function extract(string $templatePath): array

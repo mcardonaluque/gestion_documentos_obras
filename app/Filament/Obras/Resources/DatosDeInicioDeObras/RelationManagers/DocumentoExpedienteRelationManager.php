@@ -18,6 +18,12 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 
+/**
+ * Relation manager de documentos ('documentos') del expediente seleccionado
+ * en el listado de expedientes. Sobrescribe el registro propietario para
+ * usar el expediente elegido en la página Livewire (ListExpedientes).
+ * Usado por DatosDeInicioDeObrasResource.
+ */
 class DocumentoExpedienteRelationManager extends RelationManager
 {
     protected static string $relationship = 'documentos';
@@ -27,7 +33,10 @@ class DocumentoExpedienteRelationManager extends RelationManager
 
     protected static ?string $pluralLabel = 'Documentos';
 
-    // Sobrescribir para usar el expediente seleccionado
+    /**
+     * Usa como propietario el expediente seleccionado en la página (o un
+     * Expediente vacío para evitar errores si no hay selección).
+     */
     public function getOwnerRecord(): Expediente
     {
         $ownerRecord = $this->getLivewire()->getSelectedRecord();

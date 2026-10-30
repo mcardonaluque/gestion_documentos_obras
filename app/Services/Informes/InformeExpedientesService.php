@@ -16,8 +16,20 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use stdClass;
 
+/**
+ * Servicio generador del informe agrupado de expedientes.
+ *
+ * Consulta la conexión Obras (Expedientes, TablaDeEstados, teams, ImportesDeObras),
+ * mapea cada fila al DTO InformeExpedientesFilaData y agrupa/totaliza según
+ * InformeExpedientesAgrupacion devolviendo InformeExpedientesResultadoData.
+ * Usado por la página Filament InformeExpedientesAgrupado y por
+ * ImprimirInformeExpedientesController (impresión del informe).
+ */
 final class InformeExpedientesService
 {
+    /**
+     * Genera el informe completo (filas, grupos y totales) a partir de los filtros.
+     */
     public function generar(InformeExpedientesFiltrosData $filtros): InformeExpedientesResultadoData
     {
         $query = $this->buildQuery($filtros);

@@ -6,6 +6,7 @@ use App\Filament\Resources\TiposAvisos\TiposAvisoResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
+/** Página de creación de registros de TiposAvisoResource (panel de administración). */
 class CreateTiposAviso extends CreateRecord
 {
     protected static string $resource = TiposAvisoResource::class;

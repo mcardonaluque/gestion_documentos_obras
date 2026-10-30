@@ -6,6 +6,7 @@ use App\Filament\Obras\Resources\ImportesPorOrganismos\ImportesPorOrganismoResou
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
+/** Página estándar de creación de importes por organismo (sin lógica propia). */
 class CreateImportesPorOrganismo extends CreateRecord
 {
     protected static string $resource = ImportesPorOrganismoResource::class;

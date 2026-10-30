@@ -24,6 +24,16 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use App\Forms\Components\ObraGeneralInfo;
 
+/**
+ * Recurso Filament para gestionar las certificaciones de obra.
+ *
+ * Gestiona el modelo {@see \App\Models\Certificaciones}: certificaciones
+ * mensuales/finales de cada expediente con sus importes (con/sin IVA,
+ * penalidades), fechas de tramitación (envío, aprobación, decreto...) y
+ * tipo de justificante. Usa el componente de formulario personalizado
+ * {@see \App\Forms\Components\ObraGeneralInfo} para mostrar la cabecera
+ * informativa de la obra. Multi-tenant mediante la relación 'team'.
+ */
 class CertificacionesResource extends Resource
 {
     protected static ?string $model = Certificaciones::class;
@@ -36,6 +46,10 @@ class CertificacionesResource extends Resource
    // protected static ?string $navigationGroup="Ejecución";
     protected static ?string $navigationLabel ='Certificaciones de Obras';**/
 
+    /**
+     * Define el formulario de la certificación, encabezado por la
+     * información general de la obra del expediente en edición.
+     */
     public static function form(Schema $schema): Schema
     {
        // $obra =GetObraData(request()->route('record'));
@@ -120,6 +134,9 @@ class CertificacionesResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla del listado de certificaciones.
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -286,6 +303,9 @@ class CertificacionesResource extends Resource
             'edit' => EditCertificaciones::route('/{record}/edit'),
         ];
     }
+    /**
+     * Obtiene los datos de inicio de obra asociados a la certificación.
+     */
     protected static function GetObraData(Certificaciones $obra)
     {
 

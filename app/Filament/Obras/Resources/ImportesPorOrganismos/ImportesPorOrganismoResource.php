@@ -18,6 +18,14 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Recurso Filament para gestionar los importes por organismo financiador.
+ *
+ * Gestiona el modelo {@see \App\Models\ImportesPorOrganismo}: desglose por
+ * organismo de los importes aprobados, a contratar, adjudicados y bajas de
+ * cada expediente. La consulta base descarta registros vacíos o a cero y
+ * se limita a los dos últimos años de ejecución. Multi-tenant vía 'team'.
+ */
 class ImportesPorOrganismoResource extends Resource
 {
     protected static ?string $model = ImportesPorOrganismo::class;
@@ -26,6 +34,10 @@ class ImportesPorOrganismoResource extends Resource
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static bool $shouldRegisterNavigation = true;
     protected static ?string $navigationLabel = 'Importes por organismo';**/
+    /**
+     * Consulta base: excluye filas con expediente o importes vacíos/cero y
+     * limita el año de ejecución al rango [año actual - 2, año actual].
+     */
     public static function getEloquentQuery(): Builder
     {
         $añoActual = now()->year;
@@ -42,6 +54,9 @@ class ImportesPorOrganismoResource extends Resource
             ->where('ImportesPorOrganismo.ao_ejecucion', '>=', $añoAnterior2)
             ->where('ImportesPorOrganismo.ao_ejecucion', '<=', $añoActual);
     }
+    /**
+     * Define el formulario de importes por organismo.
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -79,6 +94,9 @@ class ImportesPorOrganismoResource extends Resource
         ]);
     }
 
+    /**
+     * Define la tabla del listado de importes por organismo.
+     */
     public static function table(Table $table): Table
     {
         return $table

@@ -11,10 +11,18 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Validation\ValidationException;
 
 
+/**
+ * Página de creación/envío de notificaciones internas mediante
+ * {@see NotificationService}.
+ */
 class CreateNotification extends CreateRecord
 {
     protected static string $resource =NotificationResource::class;
 
+    /**
+     * Normaliza los destinatarios (todos/equipo/usuarios), valida que haya
+     * al menos uno y delega el envío en NotificationService.
+     */
     protected function handleRecordCreation(array $data): Model
     {
         $toAllUsers = (bool) ($data['to_all'] ?? false);

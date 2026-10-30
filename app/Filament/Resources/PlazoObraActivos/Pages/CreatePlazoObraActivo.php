@@ -7,6 +7,7 @@ namespace App\Filament\Resources\PlazoObraActivos\Pages;
 use App\Filament\Resources\PlazoObraActivos\PlazoObraActivoResource;
 use Filament\Resources\Pages\CreateRecord;
 
+/** Página de creación de registros de PlazoObraActivoResource (panel de administración). */
 class CreatePlazoObraActivo extends CreateRecord
 {
     protected static string $resource = PlazoObraActivoResource::class;

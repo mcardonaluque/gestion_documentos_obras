@@ -21,6 +21,11 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Relation manager de los documentos ('documentos') asociados a los datos
+ * de inicio de obra: fases documentales con tipo de documento, CSV,
+ * registro, estado y destino. Usado por DatosDeInicioDeObrasResource.
+ */
 class DocumentosRelationManager extends RelationManager
 {
     protected static string $relationship = 'documentos';

@@ -26,8 +26,20 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
+/**
+ * Configura el panel de ayuntamientos de Filament (id `ayuntamientos`,
+ * ruta /ayuntamientos), orientado a los usuarios municipales.
+ *
+ * Es multi-tenant por `Team` (ayuntamiento): registra los recursos de
+ * expedientes y documentos del espacio Ayuntamientos, una navegación
+ * superior por fases documentales y el middleware `CleanTenantUrl` para
+ * sanear las URLs de tenant. Se registra en bootstrap\providers.php.
+ */
 class AyuntamientosPanelProvider extends PanelProvider
 {
+    /**
+     * Define identidad, tenancy, recursos, navegación y middleware del panel.
+     */
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -85,6 +97,10 @@ class AyuntamientosPanelProvider extends PanelProvider
             ]);
     }
 
+    /**
+     * Construye la navegación superior del panel, agrupada en
+     * Expedientes y Documentación (enlaces filtrados por fase documental).
+     */
     protected function getTopNavigation(NavigationBuilder $builder): NavigationBuilder
     {
         return $builder->groups([

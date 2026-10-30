@@ -6,11 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Helper de validación de fechas basado en la tabla reglas_validacion_fechas.
+ *
+ * Carga las reglas activas aplicables a la tabla del modelo indicado y lanza
+ * ValidationException si una fecha incumple su relación (after/before/
+ * after_or_equal) con el campo relacionado. Sin consumidores directos
+ * registrados actualmente en app/ (reemplazado por los servicios DateRules).
+ */
 class ControlDeFechasHelper
 {
     /**
+     * Valida los campos de fecha de $data contra las reglas activas de la tabla del modelo.
+     *
      * @param  class-string<Model>  $modelClass
      * @param  array<string, mixed>  $data
+     * @throws ValidationException Si alguna regla de fechas no se cumple.
      */
     public function validateDateRules(string $modelClass, array $data, ?int $recordId = null): void
     {
@@ -29,6 +40,9 @@ class ControlDeFechasHelper
         }
     }
 
+    /**
+     * Aplica una regla concreta al dato recibido según su validation_type.
+     */
     protected function applyRule($rule, $data, $recordId = null)
     {
         // Extraer el nombre del campo sin el nombre de la tabla
@@ -75,6 +89,9 @@ class ControlDeFechasHelper
         }
     }
 
+    /**
+     * Obtiene el valor del campo relacionado contra el que se compara la fecha.
+     */
     protected function getRelatedValue($rule, $data, $recordId = null)
     {
         // Si la relación está en el mismo modelo

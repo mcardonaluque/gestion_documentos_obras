@@ -24,6 +24,16 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+/**
+ * Recurso Filament para gestionar la normativa PPAC (Plan Provincial de
+ * Asistencia y Cooperación).
+ *
+ * Gestiona el modelo {@see \App\Models\NormativaPpac}: fechas límite por
+ * año/plan (aprobación, publicación, contratación, cesión, justificación,
+ * presentación de documentación y proyectos). Pertenece al grupo
+ * "Aprobacion de Obras" y ofrece la acción de tabla
+ * {@see AsignarNormativaAPlanesAction} para propagar fechas a los planes.
+ */
 class NormativaPpacResource extends Resource
 {
     protected static ?string $model = NormativaPpac::class;
@@ -34,11 +44,18 @@ class NormativaPpacResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Normativas PPAC';
 
+    /**
+     * Reglas de validación comunes para los campos de año (2000-2100).
+     */
     public static function yearValidationRules(): array
     {
         return ['required', 'integer', 'min:2000', 'max:2100'];
     }
 
+    /**
+     * Reglas de validación del año del plan, con unicidad por año y plan
+     * (delegadas en el modelo NormativaPpac).
+     */
     public static function aoPlanValidationRules(?int $ignoreId = null, ?string $codigoPlan = null): array
     {
         $rules = NormativaPpac::aoPlanValidationRules($ignoreId, $codigoPlan);
@@ -50,6 +67,10 @@ class NormativaPpacResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = 'Aprobacion de Obras';
 
+    /**
+     * Define el formulario de la normativa: al cambiar el año o la fecha de
+     * publicación se recalculan automáticamente las fechas derivadas.
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -211,6 +232,10 @@ class NormativaPpacResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla de normativas (ordenada por año descendente) con la
+     * acción de asignación de normativa a planes.
+     */
     public static function table(Table $table): Table
     {
         return $table

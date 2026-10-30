@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\ImportesPorOrganismos\ImportesPorOrganismoResou
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
+/** Página estándar de edición de importes por organismo (sin lógica propia). */
 class EditImportesPorOrganismo extends EditRecord
 {
     protected static string $resource = ImportesPorOrganismoResource::class;

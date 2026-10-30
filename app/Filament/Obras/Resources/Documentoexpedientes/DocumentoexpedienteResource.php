@@ -8,6 +8,13 @@ use App\Filament\Obras\Resources\Documentoexpedientes\Pages\EditDocumentoexpedie
 use App\Filament\Obras\Resources\Documentoexpedientes\Pages\ViewDocumentoexpediente;
 use App\Filament\Shared\Resources\Documentoexpedientes\DocumentoexpedienteResourceBase;
 
+/**
+ * Recurso del panel Obras para los documentos de expediente.
+ *
+ * Extiende {@see DocumentoexpedienteResourceBase} (recurso compartido que
+ * gestiona el modelo Documentoexpediente) y solo personaliza etiquetas,
+ * icono de navegación y las páginas propias del panel Obras.
+ */
 class DocumentoexpedienteResource extends DocumentoexpedienteResourceBase
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';

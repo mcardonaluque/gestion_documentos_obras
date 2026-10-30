@@ -5,6 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\alerta;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador de recurso generado por scaffolding para el modelo `alerta`.
+ *
+ * Actualmente todos sus métodos están vacíos y no tiene rutas registradas
+ * en routes\web.php ni routes\api.php: la gestión de alertas se realiza
+ * desde los recursos de Filament. Se mantiene como punto de extensión
+ * para una futura API/CRUD HTTP tradicional.
+ */
 class AlertaController extends Controller
 {
     /**

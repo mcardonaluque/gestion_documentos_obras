@@ -17,6 +17,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use App\Models\AyudaTecnica;
 
+/**
+ * Relation manager de la ayuda técnica ('ayudaTecnica') asociada a los
+ * datos de inicio de obra. Permite registrar los departamentos redactor y
+ * director y los indicadores de ayuda/subvención. Usado por
+ * DatosDeInicioDeObrasResource.
+ */
 class AyudaRelationManager extends RelationManager
 {
     protected static string $relationship = 'ayudaTecnica';

@@ -33,6 +33,18 @@ use App\Filament\Traits\CommonFilters;
 use App\Filament\Traits\MunicipiosFilter;
 use App\Filament\Widgets\DocumentosTable;
 use Filament\Schemas\Components\Livewire;
+
+/**
+ * Recurso Filament para gestionar los datos de ejecución de las obras.
+ *
+ * Gestiona el modelo {@see \App\Models\DatosEjecucionObras} (fase de
+ * ejecución del expediente). Usa los traits {@see MunicipiosFilter},
+ * {@see CommonFilters} y {@see HasAssignedExpedienteVisibility} (visibilidad
+ * limitada a expedientes asignados al usuario). Incluye los relation
+ * managers de certificaciones, importes por organismo, actas de replanteo y
+ * recepción y prórrogas, además del widget {@see DocumentosTable} embebido
+ * para los documentos del expediente.
+ */
 class DatosEjecucionObrasResource extends Resource
 {
     use MunicipiosFilter;
@@ -46,6 +58,10 @@ class DatosEjecucionObrasResource extends Resource
     protected static \UnitEnum|string|null $navigationGroup="Ejecución";
     protected static ?string $navigationLabel ='Ejecución de Obras';
    **/
+    /**
+     * Consulta base: solo registros con expediente_id no vacío, ya que
+     * Filament necesita una clave no nula por fila.
+     */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -58,6 +74,10 @@ class DatosEjecucionObrasResource extends Resource
             //->where('codigo_municipio','=', )
 
     }
+    /**
+     * Define el formulario de ejecución con la cabecera informativa de la
+     * obra y la tabla embebida de documentos del expediente.
+     */
     public static function form(Schema $schema): Schema
     {
         $record=$schema->getRecord();
@@ -95,6 +115,11 @@ class DatosEjecucionObrasResource extends Resource
             ]);
     }
     use CommonFilters;
+
+    /**
+     * Define la tabla del listado de ejecución, con columnas de las actas
+     * relacionadas y filtros comunes (programa, año, municipio...).
+     */
     public static function table(Table $table): Table
     {
 
@@ -173,6 +198,10 @@ class DatosEjecucionObrasResource extends Resource
             ]);
     }
 
+    /**
+     * Relation managers mostrados en la página de edición: certificaciones,
+     * importes por organismo, actas de replanteo/recepción y prórrogas.
+     */
     public static function getRelations(): array
     {
         return [

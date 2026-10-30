@@ -23,6 +23,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * Recurso Filament para la gestión de usuarios de la aplicación.
+ *
+ * Gestiona el modelo App\Models\User en el panel de administración, grupo
+ * «Usuarios». Permite asignar roles (spatie/permission), hashea la
+ * contraseña al guardar e integra Filament Shield mediante
+ * getPermissionPrefixes().
+ */
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
@@ -30,6 +38,7 @@ class UserResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user';
     protected static string | \UnitEnum | null $navigationGroup = 'Usuarios';
     protected static ?string $navigationLabel = 'Usuarios';
+    /** Prefijos de permisos gestionados por Filament Shield para este recurso. */
     public static function getPermissionPrefixes(): array
     {
         return [
@@ -41,6 +50,7 @@ class UserResource extends Resource
             'delete_any',
         ];
     }
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -68,6 +78,7 @@ class UserResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -95,6 +106,7 @@ class UserResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -102,6 +114,7 @@ class UserResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

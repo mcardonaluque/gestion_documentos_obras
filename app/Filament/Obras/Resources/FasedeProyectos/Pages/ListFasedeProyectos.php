@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\FasedeProyectos\FasedeProyectoResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
+/** Listado estándar de fases de proyecto (sin lógica propia). */
 class ListFasedeProyectos extends ListRecords
 {
     protected static string $resource = FasedeProyectoResource::class;

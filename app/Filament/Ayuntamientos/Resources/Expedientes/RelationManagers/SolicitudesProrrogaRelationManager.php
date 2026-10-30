@@ -23,12 +23,21 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+/**
+ * Relation manager de las solicitudes de prórroga de un expediente.
+ *
+ * Gestiona la relación «solicitudesProrroga» desde los recursos de
+ * expedientes (se registra en ExpedienteResourceBase). Valida la ventana de
+ * solicitud con ProrrogaRulesService, registra la prórroga mediante
+ * SolicitudProrrogaService y adjunta el documento de solicitud al expediente.
+ */
 class SolicitudesProrrogaRelationManager extends RelationManager
 {
     protected static string $relationship = 'solicitudesProrroga';
 
     protected static ?string $title = 'Solicitudes de prórroga';
 
+    /** Define el formulario de la relación. */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -36,6 +45,7 @@ class SolicitudesProrrogaRelationManager extends RelationManager
             ->components(static::getFormComponents());
     }
 
+    /** Componentes del formulario de solicitud de prórroga, reutilizables desde otras pantallas. */
     public static function getFormComponents(): array
     {
         return [
@@ -78,6 +88,13 @@ class SolicitudesProrrogaRelationManager extends RelationManager
         ];
     }
 
+    /**
+     * Crea una solicitud de prórroga para el expediente indicado.
+     *
+     * Valida la ventana y el tipo de solicitud con ProrrogaRulesService y
+     * SolicitudProrrogaService, registra la prórroga sobre la obra en ejecución
+     * y adjunta el documento de solicitud como documento del expediente.
+     */
     public static function createForExpediente(Expediente $owner, array $data): void
     {
         $plazo = $owner->obraEjecucion?->plazosActivos()->where('activo', true)->orderByDesc('id')->first();
@@ -167,6 +184,7 @@ class SolicitudesProrrogaRelationManager extends RelationManager
         Notification::make()->title('Solicitud de prórroga creada')->success()->send();
     }
 
+    /** Configura la tabla de registros relacionados. */
     public function table(Table $table): Table
     {
         return $table

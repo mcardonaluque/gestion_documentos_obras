@@ -7,6 +7,7 @@ use App\Filament\Support\Concerns\NotifiesAndValidatesDates;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
+/** Página de creación de obras cedidas; valida fechas con NotifiesAndValidatesDates. */
 class CreateObraCedida extends CreateRecord
 {
     use NotifiesAndValidatesDates;

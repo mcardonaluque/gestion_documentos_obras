@@ -6,12 +6,24 @@ use App\Filament\Obras\Resources\DatosDeInicioDeObras\DatosDeInicioDeObrasResour
 use App\Filament\Support\Concerns\NotifiesAndValidatesDates;
 use Filament\Resources\Pages\CreateRecord;
 
+/**
+ * Página de creación de datos de inicio de obra.
+ *
+ * Usa el concern {@see NotifiesAndValidatesDates} para validar y notificar
+ * fechas. Precarga ubicación, aportación municipal y ayuda técnica en el
+ * formulario, valida la petición de acta de replanteo antes de crear y
+ * persiste los datos de ayuda técnica en su relación.
+ */
 class CreateDatosDeInicioDeObra extends CreateRecord
 {
     use NotifiesAndValidatesDates;
 
     protected static string $resource = DatosDeInicioDeObrasResource::class;
 
+/**
+ * Precarga la ubicación, la aportación del ayuntamiento y los datos de
+ * ayuda técnica en el formulario.
+ */
 protected function mutateFormDataBeforeFill(array $data): array
 {
     // Obtener el modelo actual
@@ -45,12 +57,19 @@ protected function mutateFormDataBeforeFill(array $data): array
     }
     return $data;
 }
+/**
+ * Valida la petición de acta de replanteo antes de crear el registro.
+ */
 protected function mutateFormDataBeforeCreate(array $data): array
 {
     DatosDeInicioDeObrasResource::validateActaReplanteoPetition($data);
 
     return $data;
 }
+/**
+ * Extrae los datos de ayuda técnica, los guarda en su relación y calcula
+ * el indicador de petición de ayuda técnica.
+ */
 protected function mutateFormDataBeforeSave(array $data): array
 {
     // Si necesitas manipular los datos antes de guardarlos, hazlo aquí
@@ -67,6 +86,9 @@ protected function mutateFormDataBeforeSave(array $data): array
     return $data;
 
 }
+/**
+ * Crea o actualiza la relación de ayuda técnica del registro.
+ */
 private function guardarAyudaTecnica(array $ayudaData): void
 {
     // Obtén el registro actual

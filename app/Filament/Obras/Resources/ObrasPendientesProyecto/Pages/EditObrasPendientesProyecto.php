@@ -6,6 +6,7 @@ use App\Filament\Obras\Resources\ObrasPendientesProyecto\ObrasPendientesProyecto
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
+/** Página estándar de edición de obras pendientes de proyecto (sin lógica propia). */
 class EditObrasPendientesProyecto extends EditRecord
 {
     protected static string $resource = ObrasPendientesProyectoResource::class;

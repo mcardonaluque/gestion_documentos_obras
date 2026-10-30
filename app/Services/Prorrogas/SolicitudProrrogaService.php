@@ -8,6 +8,13 @@ use App\Models\NormativaPpac;
 use App\Models\PlazoObraActivo;
 use Carbon\Carbon;
 
+/**
+ * Servicio de preparación y validación de solicitudes de prórroga (ayuntamientos).
+ *
+ * Normaliza fechas/días solicitados contra el plazo activo (PlazoObraActivo) y el
+ * máximo permitido por NormativaPpac, y valida restricciones de fase. Lo utiliza
+ * el relation manager Filament SolicitudesProrrogaRelationManager (panel Ayuntamientos).
+ */
 final class SolicitudProrrogaService
 {
     /**
@@ -76,7 +83,9 @@ final class SolicitudProrrogaService
     }
 
     /**
-     * @return array<string, mixed>
+     * Comprueba que el tipo de prórroga solicitado es compatible con la fase del plazo activo.
+     *
+     * @return array<string, mixed> Claves valid y message.
      */
     public function validatePhaseRestriction(PlazoObraActivo $plazo, string $requestedType): array
     {

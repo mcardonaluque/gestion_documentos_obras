@@ -13,6 +13,12 @@ use Filament\Support\Enums\Width;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Página de edición de una asignación de expediente a usuario.
+ *
+ * Al guardar valida que el usuario no tenga ya asignado ese expediente en
+ * otro registro y sincroniza el team con el del expediente.
+ */
 class EditExpedienteUserAssignment extends EditRecord
 {
     protected static string $resource = ExpedienteUserAssignmentResource::class;
@@ -34,6 +40,9 @@ class EditExpedienteUserAssignment extends EditRecord
     }
 
     /**
+     * Evita asignaciones duplicadas usuario-expediente y actualiza el team
+     * según el expediente seleccionado.
+     *
      * @param array<string, mixed> $data
      * @return array<string, mixed>
      */

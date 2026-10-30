@@ -32,6 +32,18 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Closure;
 use Illuminate\Validation\ValidationException;
+
+/**
+ * Recurso Filament para gestionar los proyectos de obras.
+ *
+ * Gestiona el modelo {@see \App\Models\Proyecto} con clave compuesta
+ * (municipio, año, número de proyecto). Usa el trait
+ * {@see HasAssignedExpedienteVisibility} y concentra la lógica financiera
+ * del proyecto: cálculo/validación de importes (gastos generales, beneficio
+ * industrial, control de calidad, IVA, subcontrata, PEM) según la forma de
+ * ejecución del expediente y los porcentajes por defecto del año
+ * ({@see PorcentajesProyectos}).
+ */
 class ProyectoResource extends Resource
 {
     use HasAssignedExpedienteVisibility;
@@ -48,6 +60,10 @@ class ProyectoResource extends Resource
     protected static \UnitEnum|string|null $navigationGroup="Proyectos";
     protected static ?string $navigationLabel ='Proyectos';**/
 
+    /**
+     * Consulta base: proyectos de los últimos 10 años, ordenados por año
+     * de proyecto descendente.
+     */
     public static function getEloquentQuery(): Builder
     {
         $añoActual = now()->year;
@@ -64,6 +80,9 @@ class ProyectoResource extends Resource
             //->where('codigo_municipio','=', )
 
     }
+    /**
+     * Define el formulario del proyecto con recálculo reactivo de importes.
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -341,6 +360,9 @@ class ProyectoResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla del listado de proyectos con sus filtros.
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -677,6 +699,9 @@ class ProyectoResource extends Resource
             ]);
     }
 
+    /**
+     * Construye la clave de ruta compuesta 'municipio|año|número'.
+     */
     private static function buildRouteRecordKey(Proyecto $record): string
     {
         $municipio = trim((string) ($record->CODIGO_MUNICIPIO ?? ''));
@@ -686,6 +711,10 @@ class ProyectoResource extends Resource
         return implode('|', [$municipio, $aoProyecto, $numeroProyecto]);
     }
 
+    /**
+     * Descompone la clave de ruta compuesta en sus tres componentes, o
+     * devuelve null si no es válida.
+     */
     private static function parseRouteRecordKey(string $key): ?array
     {
         $parts = explode('|', $key);
@@ -707,6 +736,10 @@ class ProyectoResource extends Resource
         ];
     }
 
+    /**
+     * Resuelve el registro desde la URL usando la clave compuesta
+     * (municipio, año, número de proyecto).
+     */
     public static function resolveRecordRouteBinding(int | string $key, ?Closure $modifyQuery = null): ?Model
     {
         $parsedKey = static::parseRouteRecordKey((string) $key);
@@ -744,6 +777,11 @@ class ProyectoResource extends Resource
         ];
     }
 
+    /**
+     * Normaliza y completa los datos financieros antes de guardar:
+     * aplica porcentajes por defecto del año, recalcula importes (salvo
+     * ajuste manual) y valida la coherencia del desglose.
+     */
     public static function prepareFinancialDataBeforeSave(array $data): array
     {
         $expedienteId = self::normalizeExpedienteId($data['expediente_id'] ?? null);
@@ -770,6 +808,10 @@ class ProyectoResource extends Resource
         return $data;
     }
 
+    /**
+     * Recalcula en vivo los importes del formulario a partir del estado
+     * actual (porcentajes, honorarios y forma de ejecución).
+     */
     public static function recalculateFromFormState(callable $get, callable $set): void
     {
         // Get and normalize expediente_id early - if invalid, we can't proceed
@@ -829,6 +871,13 @@ class ProyectoResource extends Resource
         }
     }
 
+    /**
+     * Valida los datos financieros: en modo automático la suma de
+     * porcentajes no puede superar 100 y debe existir forma de ejecución;
+     * en ajuste manual la suma de importes debe igualar el importe total.
+     *
+     * @throws ValidationException
+     */
     public static function validateFinancialData(array $data, ?string $formaEjecucion): void
     {
         if (! self::toBool($data['ajuste_importes'] ?? false)) {
@@ -871,6 +920,10 @@ class ProyectoResource extends Resource
         }
     }
 
+    /**
+     * Calcula el desglose de importes (GG, BI, CC, IVA, subcontrata y PEM)
+     * según la forma de ejecución (DIP/AYC, AYA u otras).
+     */
     private static function calculateImportes(array $data, ?string $formaEjecucion): array
     {
         $importe = self::toFloat($data['importe_proyecto'] ?? 0);
@@ -969,6 +1022,10 @@ class ProyectoResource extends Resource
         ];
     }
 
+    /**
+     * Obtiene (con caché estática) la forma de ejecución del expediente,
+     * buscando primero en DatosDeInicioDeObras y después en Expediente.
+     */
     private static function resolveFormaEjecucion(?string $expedienteId): ?string
     {
         $expedienteId = self::normalizeExpedienteId($expedienteId);
@@ -996,6 +1053,9 @@ class ProyectoResource extends Resource
         return $forma;
     }
 
+    /**
+     * Convierte un valor a float aceptando coma decimal.
+     */
     private static function toFloat(mixed $value): float
     {
         if ($value === null || $value === '') {
@@ -1009,11 +1069,17 @@ class ProyectoResource extends Resource
         return (float) $value;
     }
 
+    /**
+     * Redondea a dos decimales.
+     */
     private static function round2(float $value): float
     {
         return round($value, 2);
     }
 
+    /**
+     * Interpreta un valor arbitrario como booleano.
+     */
     private static function toBool(mixed $value): bool
     {
         if (is_bool($value)) {
@@ -1023,6 +1089,10 @@ class ProyectoResource extends Resource
         return in_array($value, [1, '1', 'true', 'on', 'yes'], true);
     }
 
+    /**
+     * Aplica los porcentajes auxiliares (honorarios de dirección y
+     * redacción) sobre el importe del proyecto cuando faltan importes.
+     */
     private static function applyAuxiliaryPercentages(array $data, array $defaults): array
     {
         $importeProyecto = self::toFloat($data['importe_proyecto'] ?? 0);
@@ -1046,11 +1116,18 @@ class ProyectoResource extends Resource
         return $data;
     }
 
+    /**
+     * Indica si un valor está ausente (null o cadena vacía).
+     */
     private static function isMissing(mixed $value): bool
     {
         return $value === null || $value === '';
     }
 
+    /**
+     * Normaliza el identificador de expediente (recorta y devuelve null si
+     * queda vacío).
+     */
     private static function normalizeExpedienteId(mixed $value): ?string
     {
         if ($value === null) {

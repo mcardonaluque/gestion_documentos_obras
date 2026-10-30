@@ -9,10 +9,22 @@ use App\Models\Proyecto;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Página de creación de proyectos.
+ *
+ * Si llega 'expediente_id' por la URL (desde Obras pendientes de
+ * proyecto), precarga el formulario con los datos de la obra, calcula el
+ * siguiente número de proyecto del municipio/año y aplica los porcentajes
+ * por defecto y el cálculo financiero del recurso.
+ */
 class CreateProyecto extends CreateRecord
 {
     protected static string $resource = ProyectoResource::class;
 
+    /**
+     * Precarga los datos de la obra y los importes calculados al crear
+     * desde un expediente concreto.
+     */
     public function mount(): void
 {
     parent::mount();
@@ -68,6 +80,9 @@ class CreateProyecto extends CreateRecord
     }
 }
 
+    /**
+     * Normaliza y valida los datos financieros antes de crear el proyecto.
+     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         return ProyectoResource::prepareFinancialDataBeforeSave($data);

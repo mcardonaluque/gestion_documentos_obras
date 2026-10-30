@@ -20,6 +20,9 @@ use Carbon\CarbonInterface;
 final class ProrrogaRulesService
 {
     /**
+     * Calcula la ventana de solicitud de prórroga (fase, tipo, fecha límite
+     * y fecha máxima de solicitud) según la normativa PPAC aplicable al plazo.
+     *
      * @return array{fase: string, tipo: string, fecha_limite: ?Carbon, fecha_maxima_solicitud: ?Carbon, normativa: ?NormativaPpac}
      */
     public function getRequestWindow(Expediente $expediente, PlazoObraActivo $plazo): array
@@ -105,11 +108,18 @@ final class ProrrogaRulesService
         return new ProrrogaValidationResult(true, null, $maxAllowedDays);
     }
 
+    /**
+     * Calcula la fecha límite de justificación: tres meses tras el nuevo límite de ejecución.
+     */
     public function calculateJustificationDeadline(CarbonInterface $newExecutionLimit): Carbon
     {
         return Carbon::parse($newExecutionLimit)->copy()->addMonthsNoOverflow(3)->endOfDay();
     }
 
+    /**
+     * Indica si se permite subir justificación: solo bloquea cuando el plazo activo
+     * de fase justificación está vencido en la fecha de subida.
+     */
     public function allowJustificationUpload(PlazoObraActivo $plazo, CarbonInterface $uploadDate): bool
     {
         if (($plazo->fase ?? '') !== 'justificacion' || ! (bool) ($plazo->activo ?? false)) {

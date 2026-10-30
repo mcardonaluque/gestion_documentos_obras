@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Departamentos;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Ayuda técnica prestada a una obra (redacción y dirección).
+ *
+ * Registra los departamentos redactores y directores, así como las
+ * subvenciones económicas asociadas. Tabla 'Ayuda_Tecnica' en la conexión
+ * 'Obras' (SQL Server) con clave primaria string 'expediente_id'.
+ * Se relaciona con Departamentos, DatosDeInicioDeObras y TablaDeMunicipio.
+ */
 class AyudaTecnica extends Model
 {
     //
@@ -25,6 +33,7 @@ class AyudaTecnica extends Model
         'SubvencionEconomicaD',
         'codigo_municipio',
     ];
+    /** Al crear, copia plan, número de obra, subreferencia y año desde la obra asociada. */
     protected static function booted()
     {
         static::creating(function ($ayuda) {
@@ -36,18 +45,22 @@ class AyudaTecnica extends Model
             }
         });
     }
+    /** Departamento redactor que presta la ayuda técnica. */
     public function ayudaR():BelongsTo
     {
         return $this->belongsTo(Departamentos::class, 'dpto_redactor', 'CODIGO_DPTO' );
     }
+    /** Departamento de dirección que presta la ayuda técnica. */
     public function ayudaD():BelongsTo
     {
         return $this->belongsTo(Departamentos::class, 'departamento_direccion', 'CODIGO_DPTO' );
     }
+    /** Ficha de inicio de obra a la que pertenece esta ayuda técnica. */
     public function Obra():BelongsTo
     {
         return $this->belongsTo(DatosDeInicioDeObras::class, 'expediente_id', 'expediente_id' );
     }
+    /** Municipio asociado a la ayuda técnica. */
     public function municipio():BelongsTo
     {
         return $this->belongsTo(TablaDeMunicipio::class, 'codigo_municipio', 'codigo_municipio' );

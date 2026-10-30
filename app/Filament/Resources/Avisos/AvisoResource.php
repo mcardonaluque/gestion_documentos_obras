@@ -23,6 +23,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Recurso Filament para la gestión de avisos generados por el sistema.
+ *
+ * Gestiona el modelo App\Models\Aviso en el panel de administración,
+ * grupo de navegación «Notificaciones», con pertenencia al tenant a través
+ * de la relación «team». Relaciona cada aviso con su tipo (TiposAviso).
+ */
 class AvisoResource extends Resource
 {
     protected static ?string $model = Aviso::class;
@@ -31,6 +38,7 @@ class AvisoResource extends Resource
     protected static string | \UnitEnum | null $navigationGroup="Notificaciones";
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bell';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -59,6 +67,7 @@ class AvisoResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -79,6 +88,7 @@ class AvisoResource extends Resource
             ]);
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

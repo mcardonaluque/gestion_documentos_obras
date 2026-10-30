@@ -31,8 +31,20 @@ use Filament\Support\Enums\Width;
 use App\Filament\Pages\Dashboard as AdminDashboard;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 
+/**
+ * Configura el panel de administración de Filament (id `admin`, ruta /admin).
+ *
+ * Panel por defecto de la aplicación, reservado a super administradores:
+ * registra `UserResource` y el `RoleResource` de Filament Shield, el
+ * dashboard de administración, las notificaciones persistentes en base de
+ * datos y el middleware `EnsureSuperAdminForAdminPanel`. Se registra en
+ * bootstrap\providers.php.
+ */
 class AdminPanelProvider extends PanelProvider
 {
+    /**
+     * Define identidad, recursos, páginas, widgets y middleware del panel admin.
+     */
     public function panel(Panel $panel): Panel
     {
         return $panel

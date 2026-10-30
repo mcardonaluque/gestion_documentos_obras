@@ -28,6 +28,15 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Recurso Filament para gestionar las notificaciones internas del usuario.
+ *
+ * Gestiona el modelo {@see \App\Models\CustomNotification} en el grupo
+ * "Sistema". Permite enviar notificaciones a todos los usuarios, a un
+ * equipo o a usuarios concretos, y marcarlas como leídas/no leídas de
+ * forma individual o masiva. La consulta base muestra solo las
+ * notificaciones del usuario autenticado.
+ */
 class NotificationResource extends Resource
 {
     protected static ?string $model = CustomNotification::class;
@@ -38,6 +47,10 @@ class NotificationResource extends Resource
     protected static ?string $modelLabel = 'Notificación';
     protected static ?string $pluralModelLabel = 'Notificaciones';
 
+    /**
+     * Define el formulario de envío de notificaciones (destinatarios
+     * excluyentes: todos, un equipo o usuarios concretos).
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -101,6 +114,9 @@ class NotificationResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla de notificaciones con acciones de leído/no leído.
+     */
     public static function table(Table $table): Table
     {
         return $table
@@ -194,7 +210,10 @@ class NotificationResource extends Resource
         ];
     }
 
-    // Solo mostrar Notificationes del usuario actual
+    /**
+     * Consulta base: solo notificaciones del usuario autenticado,
+     * ordenadas de más reciente a más antigua.
+     */
     public static function getEloquentQuery(): Builder
     {
         $user = Filament::auth()->user();

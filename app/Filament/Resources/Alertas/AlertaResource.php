@@ -21,11 +21,20 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Recurso Filament para la gestión de alertas configurables.
+ *
+ * Gestiona el modelo App\Models\Alerta en el panel de administración,
+ * grupo de navegación «Notificaciones». Define reglas (tablas, campos,
+ * condición y acción) que disparan avisos al operar sobre expedientes,
+ * e integra Filament Shield mediante getPermissionPrefixes().
+ */
 class AlertaResource extends Resource
 {
     protected static ?string $model = Alerta::class;
     protected static string | \UnitEnum | null $navigationGroup="Notificaciones";
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bell';
+    /** Prefijos de permisos gestionados por Filament Shield para este recurso. */
     public static function getPermissionPrefixes(): array
     {
         return [
@@ -37,6 +46,7 @@ class AlertaResource extends Resource
             'delete_any',
         ];
     }
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -96,6 +106,7 @@ class AlertaResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -123,6 +134,7 @@ class AlertaResource extends Resource
             ]);
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

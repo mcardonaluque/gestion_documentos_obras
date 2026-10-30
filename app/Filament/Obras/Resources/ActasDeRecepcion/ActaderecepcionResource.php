@@ -16,6 +16,14 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+/**
+ * Recurso Filament para gestionar las actas de recepción de obras.
+ *
+ * Gestiona el modelo {@see \App\Models\actaderecepcion} dentro del grupo de
+ * navegación "Ejecucion" del panel Obras. Permite registrar fechas de
+ * recepción provisional/definitiva, publicaciones en BOE, paralizaciones
+ * temporales y los intervinientes en el acta.
+ */
 class ActaderecepcionResource extends Resource
 {
     protected static ?string $model = \App\Models\actaderecepcion::class;
@@ -28,6 +36,9 @@ class ActaderecepcionResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = 'Ejecucion';
 
+    /**
+     * Define el formulario de creación/edición del acta de recepción.
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -85,6 +96,9 @@ class ActaderecepcionResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla del listado de actas de recepción.
+     */
     public static function table(Table $table): Table
     {
         return $table

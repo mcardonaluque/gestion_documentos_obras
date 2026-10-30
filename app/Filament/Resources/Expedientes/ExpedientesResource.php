@@ -20,6 +20,13 @@ use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 
+/**
+ * Recurso Filament para la administración de expedientes de obras.
+ *
+ * Gestiona el modelo App\Models\Expediente en el panel de administración,
+ * grupo «Documentación», con pertenencia al tenant mediante la relación
+ * «team». Usa el trait CommonFilters para los filtros compartidos de la tabla.
+ */
 class ExpedientesResource extends Resource
 {
     use CommonFilters;
@@ -31,6 +38,7 @@ class ExpedientesResource extends Resource
     protected static ?string $tenantOwnershipRelationshipName = 'team';
 
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -67,6 +75,7 @@ class ExpedientesResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -118,6 +127,7 @@ class ExpedientesResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -125,6 +135,7 @@ class ExpedientesResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

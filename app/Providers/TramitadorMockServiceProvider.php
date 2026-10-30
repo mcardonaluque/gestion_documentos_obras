@@ -12,6 +12,10 @@ use Illuminate\Support\ServiceProvider;
  */
 class TramitadorMockServiceProvider extends ServiceProvider
 {
+    /**
+     * Registra las rutas/respuestas simuladas del tramitador si la opción
+     * `tramitador.mock.enabled` (variable TRAMITADOR_MOCK) está activa.
+     */
     public function boot(): void
     {
         if (config('tramitador.mock.enabled') === true) {

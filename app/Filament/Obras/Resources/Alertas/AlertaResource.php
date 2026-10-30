@@ -24,6 +24,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Recurso Filament para administrar las definiciones de alertas del sistema.
+ *
+ * Gestiona el modelo {@see \App\Models\Alerta}, que define reglas
+ * configurables (tablas, campos, condición, plazo y mensaje) usadas para
+ * generar avisos automáticos sobre los expedientes. Es multi-tenant a
+ * través de la relación 'team'.
+ */
 class AlertaResource extends Resource
 {
     protected static ?string $model = Alerta::class;
@@ -31,6 +39,10 @@ class AlertaResource extends Resource
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $tenantOwnershipRelationshipName = 'team';
+
+    /**
+     * Define el formulario de configuración de una alerta.
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -86,6 +98,9 @@ class AlertaResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla del listado de alertas configuradas.
+     */
     public static function table(Table $table): Table
     {
         return $table

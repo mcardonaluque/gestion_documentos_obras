@@ -20,6 +20,14 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Página de informe de expedientes agrupados (grupo de navegación "Informes").
+ *
+ * Permite filtrar expedientes por rango de años, estado y municipio (team)
+ * y agruparlos según {@see InformeExpedientesAgrupacion}. Delega la
+ * generación en {@see InformeExpedientesService}, controla el acceso con
+ * {@see InformeExpedientesPolicy} y ofrece una URL de impresión del informe.
+ */
 final class InformeExpedientesAgrupado extends Page
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-chart-bar';
@@ -67,6 +75,10 @@ final class InformeExpedientesAgrupado extends Page
         'tiene_resultados' => false,
     ];
 
+    /**
+     * Inicializa los filtros por defecto (dos últimos años, agrupado por
+     * estado) y genera el informe inicial.
+     */
     public function mount(InformeExpedientesService $service): void
     {
         $anioActual = (int) now()->format('Y');
@@ -87,6 +99,9 @@ final class InformeExpedientesAgrupado extends Page
         return 'Informe agrupado de expedientes';
     }
 
+    /**
+     * El acceso lo decide InformeExpedientesPolicy::viewAny().
+     */
     public static function canAccess(): bool
     {
         $user = Auth::user();
@@ -99,6 +114,8 @@ final class InformeExpedientesAgrupado extends Page
     }
 
     /**
+     * Valida los filtros introducidos y regenera el informe.
+     *
      * @throws ValidationException
      */
     public function aplicarFiltros(InformeExpedientesService $service): void
@@ -113,6 +130,8 @@ final class InformeExpedientesAgrupado extends Page
     }
 
     /**
+     * Opciones del selector de estado del expediente.
+     *
      * @return array<string, string>
      */
     public function getOpcionesEstado(): array
@@ -127,6 +146,8 @@ final class InformeExpedientesAgrupado extends Page
     }
 
     /**
+     * Opciones del selector de municipio (equipos/teams).
+     *
      * @return array<int|string, string>
      */
     public function getOpcionesMunicipio(): array
@@ -140,6 +161,9 @@ final class InformeExpedientesAgrupado extends Page
         return $options;
     }
 
+    /**
+     * URL de la versión imprimible del informe con los filtros actuales.
+     */
     public function getUrlImpresion(): string
     {
         return route('informes.expedientes.imprimir', $this->getFiltrosData()->toQueryParams());

@@ -23,12 +23,20 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Recurso Filament para el registro de técnicos de obra.
+ *
+ * Gestiona el modelo App\Models\TecnicoObra en el panel de administración.
+ * Mantiene datos personales, titulación y adscripción de los técnicos
+ * redactores y directores de obra.
+ */
 class TecnicoObraResource extends Resource
 {
     protected static ?string $model = TecnicoObra::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -91,6 +99,7 @@ class TecnicoObraResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -172,6 +181,7 @@ class TecnicoObraResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -179,6 +189,7 @@ class TecnicoObraResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

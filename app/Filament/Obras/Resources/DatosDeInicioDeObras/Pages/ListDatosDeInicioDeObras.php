@@ -7,8 +7,15 @@ use App\Models\DatosDeInicioDeObras;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Listado de datos de inicio de obras con pestañas por año de ejecución
+ * (últimos 5 años) y una pestaña "Todos" con contadores.
+ */
 class ListDatosDeInicioDeObras extends ListRecords
 {
+    /**
+     * Genera las pestañas: "Todos" y una por cada año de ejecución.
+     */
     public function getTabs(): array
 {
     $añoActual=now()->year;

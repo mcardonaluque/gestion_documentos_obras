@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\Documentoexpedientes\DocumentoexpedienteResourc
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
+/** Listado estándar de documentos de expediente (sin lógica propia). */
 class ListDocumentoexpedientes extends ListRecords
 {
     protected static string $resource = DocumentoexpedienteResource::class;

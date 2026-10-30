@@ -6,6 +6,14 @@ use App\Models\User;
 use App\Models\DatosDeInicioDeObras;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
+/**
+ * Policy que protege el modelo `DatosDeInicioDeObras` (datos de inicio de obra).
+ *
+ * Generada por Filament Shield: cada habilidad delega en los permisos
+ * `*_datos::de::inicio::de::obras` de Spatie Permission. La resuelve
+ * automáticamente Laravel para `DatosDeInicioDeObrasResource` en los
+ * paneles Obras y Planes de Filament.
+ */
 class DatosDeInicioDeObrasPolicy
 {
     use HandlesAuthorization;

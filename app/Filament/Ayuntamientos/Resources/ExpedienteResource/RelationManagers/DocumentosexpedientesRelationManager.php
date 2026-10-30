@@ -15,10 +15,18 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+/**
+ * Relation manager de los documentos de un expediente (versión básica).
+ *
+ * Gestiona la relación «documentosexpedientes» para el recurso de
+ * expedientes del panel de ayuntamientos (namespace legado
+ * ExpedienteResource\RelationManagers).
+ */
 class DocumentosexpedientesRelationManager extends RelationManager
 {
     protected static string $relationship = 'documentosexpedientes';
 
+    /** Define el formulario de la relación. */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -29,6 +37,7 @@ class DocumentosexpedientesRelationManager extends RelationManager
             ]);
     }
 
+    /** Configura la tabla de registros relacionados. */
     public function table(Table $table): Table
     {
         return $table

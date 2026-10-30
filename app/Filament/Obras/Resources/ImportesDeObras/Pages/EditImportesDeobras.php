@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\ImportesDeObras\ImportesDeObrasResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
+/** Página estándar de edición de importes de obras (sin lógica propia). */
 class EditImportesDeobras extends EditRecord
 {
     protected static string $resource = ImportesDeObrasResource::class;

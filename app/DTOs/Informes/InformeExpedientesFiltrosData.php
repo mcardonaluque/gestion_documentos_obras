@@ -6,6 +6,13 @@ namespace App\DTOs\Informes;
 
 use App\Enums\InformeExpedientesAgrupacion;
 
+/**
+ * DTO inmutable con los filtros del informe agrupado de expedientes.
+ *
+ * Normaliza años, estado, equipo y criterio de agrupación. Se construye desde
+ * la página Filament InformeExpedientesAgrupado y desde
+ * ImprimirInformeExpedientesController, y lo consume InformeExpedientesService.
+ */
 final class InformeExpedientesFiltrosData
 {
     public function __construct(
@@ -18,6 +25,8 @@ final class InformeExpedientesFiltrosData
     }
 
     /**
+     * Crea el DTO desde datos de formulario/petición, saneando tipos y valores vacíos.
+     *
      * @param array<string, mixed> $input
      */
     public static function fromArray(array $input): self
@@ -41,6 +50,8 @@ final class InformeExpedientesFiltrosData
     }
 
     /**
+     * Convierte los filtros a parámetros de query string (p. ej. para la URL de impresión).
+     *
      * @return array<string, int|string|null>
      */
     public function toQueryParams(): array

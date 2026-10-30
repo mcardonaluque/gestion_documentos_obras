@@ -15,6 +15,8 @@ namespace App\Services\Tramitador\Mock;
 final class CreacionExpedienteMock
 {
     /**
+     * Devuelve el expediente base reflejando el ref_emisor recibido en el body.
+     *
      * @param  array<string, mixed>  $body
      * @return array<string, mixed>
      */

@@ -20,6 +20,12 @@ use InvalidArgumentException;
  */
 class TramitadorApiResponseReader
 {
+    /**
+     * Lee la respuesta HTTP de una operación y devuelve status, message y los
+     * parámetros de salida activos extraídos de data según su ruta_json.
+     *
+     * @return array{status: mixed, message: mixed, data: array<string, mixed>}
+     */
     public function leer(string $codigoOperacion, Response $response): array
     {
         $operacion = TramitadorApiOperacion::query()

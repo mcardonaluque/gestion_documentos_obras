@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+/**
+ * Condición temporal que evalúa una regla de validación de fechas
+ * (comparaciones entre fechas, respecto a hoy o sobre plazos en días).
+ *
+ * Lo usan el modelo `DateValidationRule`, el recurso de Filament
+ * `DateValidationRuleResource` y `DateRuleEvaluator`, que interpreta
+ * cada caso al validar los campos de fecha de los modelos observados.
+ */
 enum DateRuleCondition: string
 {
     case IS_DATE = 'is_date';
@@ -21,6 +29,8 @@ enum DateRuleCondition: string
     case DAYS_TO_DEADLINE_LTE = 'days_to_deadline_lte';
 
     /**
+     * Opciones legibles (valor => etiqueta) para selects de Filament.
+     *
      * @return array<string, string>
      */
     public static function options(): array
@@ -42,6 +52,9 @@ enum DateRuleCondition: string
         ];
     }
 
+    /**
+     * Indica si la condición necesita una segunda fecha de comparación.
+     */
     public function requiresSecondDate(): bool
     {
         return match ($this) {
@@ -56,6 +69,9 @@ enum DateRuleCondition: string
         };
     }
 
+    /**
+     * Indica si la condición necesita un valor numérico de días.
+     */
     public function requiresDaysValue(): bool
     {
         return match ($this) {

@@ -41,13 +41,29 @@ use App\Filament\Obras\Resources\Documentoexpedientes\DocumentoexpedienteResourc
 
 
 
+/**
+ * Configura el panel principal de obras de Filament (id `obras`, ruta /obras).
+ *
+ * Panel de trabajo de los técnicos de la diputación: registra los recursos
+ * de expedientes, documentos, importes y datos de inicio/ejecución de
+ * obras, las páginas de informes e hitos, notificaciones en base de datos
+ * con sondeo y el middleware `CleanTenantUrl`. Se registra en
+ * bootstrap\providers.php.
+ */
 class ObrasPanelProvider extends PanelProvider
 {
+    /**
+     * Resuelve el equipo (tenant) actual del usuario autenticado, si existe.
+     */
     protected function resolveTenant()
     {
         // Logic to resolve the tenant, e.g., fetching from the database or session
         return Auth::user()->currentTeam ?? null; // Example implementation
     }
+    /**
+     * Devuelve el slug del tenant actual para construir URLs limpias,
+     * o null si no hay tenant resuelto.
+     */
     protected function getTenantPrefix(): ?string
 {
     $tenant = $this->resolveTenant();
@@ -59,6 +75,9 @@ class ObrasPanelProvider extends PanelProvider
     // Usar un slug limpio en lugar del nombre completo
     return Str::slug(trim($tenant->name));
 }
+    /**
+     * Define identidad, recursos, páginas, widgets y middleware del panel obras.
+     */
     public function panel(Panel $panel): Panel
     {
         return $panel

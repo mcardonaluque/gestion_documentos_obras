@@ -13,6 +13,14 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
+/**
+ * Recurso Filament de consulta del histórico de ejecuciones de reglas de fechas.
+ *
+ * Gestiona el modelo App\Models\DateRuleExecution en el panel de
+ * administración, grupo «Validacion de fechas». Es de solo lectura:
+ * únicamente expone la página de listado, con filtros por severidad,
+ * cumplimiento y disparo.
+ */
 class DateRuleExecutionResource extends Resource
 {
     protected static ?string $model = DateRuleExecution::class;
@@ -25,11 +33,13 @@ class DateRuleExecutionResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema->components([]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -68,11 +78,13 @@ class DateRuleExecutionResource extends Resource
             ->toolbarActions([]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

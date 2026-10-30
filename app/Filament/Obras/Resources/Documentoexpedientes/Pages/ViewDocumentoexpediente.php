@@ -7,6 +7,10 @@ use App\Filament\Obras\Resources\Documentoexpedientes\DocumentoexpedienteResourc
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 
+/**
+ * Vista de detalle del documento de expediente, con acción "Cancelar" que
+ * devuelve al listado del recurso.
+ */
 class ViewDocumentoexpediente extends ViewRecord
 {
     protected static string $resource = DocumentoexpedienteResource::class;

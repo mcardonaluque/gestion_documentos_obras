@@ -6,6 +6,10 @@ use App\Filament\Obras\Resources\Contratistas\ContratistaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 
+/**
+ * Página de detalle del contratista con accesos rápidos (volver al listado,
+ * crear otro y editar).
+ */
 class ViewContratista extends ViewRecord
 {
     protected static string $resource = ContratistaResource::class;

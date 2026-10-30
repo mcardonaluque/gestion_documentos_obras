@@ -22,17 +22,27 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Base compartida de los recursos Filament de documentos de expediente.
+ *
+ * Clase abstracta sobre el modelo App\Models\DocumentoExpediente, heredada
+ * por los paneles (administración/ayuntamientos). Limita la consulta al
+ * tenant «team», autocompleta los datos del expediente al seleccionarlo y
+ * permite filtrar el listado por fase documental con el parámetro «?fase».
+ */
 abstract class DocumentoexpedienteResourceBase extends Resource
 {
     protected static ?string $model = DocumentoExpediente::class;
 
     protected static ?string $tenantOwnershipRelationshipName = 'team';
 
+    /** Obtiene la fase documental normalizada desde el parámetro «?fase» de la URL. */
     protected static function getCurrentPhase(): ?string
     {
         return DocumentoGenerico::normalizePhase((string) request()->query('fase'));
     }
 
+    /** Formulario del documento: al elegir expediente autocompleta plan, referencia y secuencia. */
     public static function form(Schema $schema): Schema
     {
         $initialExpedienteId = request()->query('expediente_id');
@@ -182,6 +192,7 @@ abstract class DocumentoexpedienteResourceBase extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -268,6 +279,7 @@ abstract class DocumentoexpedienteResourceBase extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -275,6 +287,7 @@ abstract class DocumentoexpedienteResourceBase extends Resource
         ];
     }
 
+    /** Precarga expediente y documentos y filtra por la fase activa si se indica. */
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()->with(['expedientes' => function ($expedienteQuery): void {

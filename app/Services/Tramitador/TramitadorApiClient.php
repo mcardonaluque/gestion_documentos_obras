@@ -27,16 +27,25 @@ class TramitadorApiClient
         return rtrim(config('tramitador.base_url'), '/') . '/' . ltrim($path, '/');
     }
 
+    /**
+     * Petición GET autenticada a la API del tramitador.
+     */
     public static function get(string $path): Response
     {
         return self::client()->get(self::url($path));
     }
 
+    /**
+     * Petición POST autenticada con cuerpo JSON.
+     */
     public static function post(string $path, array $data = []): Response
     {
         return self::client()->post(self::url($path), $data);
     }
 
+    /**
+     * Sube un fichero local como multipart/form-data al tramitador.
+     */
     public static function postFile(string $path, string $filePath, string $field = 'file'): Response
     {
         return self::client()
@@ -44,6 +53,10 @@ class TramitadorApiClient
             ->post(self::url($path));
     }
 
+    /**
+     * Petición genérica configurable (método, query, cuerpo, formato y timeout),
+     * empleada por TramitadorApiOperationService para las operaciones del catálogo.
+     */
     public static function request(
         string $method,
         string $path,

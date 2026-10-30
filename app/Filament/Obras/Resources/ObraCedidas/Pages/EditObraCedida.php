@@ -8,6 +8,7 @@ use App\Filament\Support\Concerns\NotifiesAndValidatesDates;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
+/** Página de edición de obras cedidas; valida fechas con NotifiesAndValidatesDates. */
 class EditObraCedida extends EditRecord
 {
     use NotifiesAndValidatesDates;

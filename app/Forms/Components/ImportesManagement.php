@@ -15,6 +15,15 @@ use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
 
+/**
+ * Fieldset de Filament para gestionar la distribución de importes de una
+ * obra entre organismos financiadores, por fase (`ImportesStage`).
+ *
+ * Carga y guarda el estado con `ImportesManagementRepository`, recalcula
+ * importes/porcentajes con `ImportesDistributionCalculator` y valida que
+ * los porcentajes de cada fase sumen 100 %. Se usa en el formulario de
+ * `DatosDeInicioDeObrasResource` (paneles Obras y Planes).
+ */
 class ImportesManagement extends Fieldset
 {
     private const PERCENTAGE_TOLERANCE = 0.01;
@@ -38,6 +47,10 @@ class ImportesManagement extends Fieldset
         $this->schema(fn (): array => $this->getSchemaComponents());
     }
 
+    /**
+     * Fija el expediente de trabajo, carga el estado de importes desde el
+     * repositorio y lo establece como valores por defecto del fieldset.
+     */
     public function setImportesContext(?string $expedienteId = null): static
     {
         $this->expedienteId = filled($expedienteId) ? (string) $expedienteId : null;
@@ -393,6 +406,10 @@ class ImportesManagement extends Fieldset
         ];
     }
 
+    /**
+     * Devuelve los mensajes de error por fase cuando la suma de
+     * porcentajes de las filas no alcanza el 100 % (con tolerancia).
+     */
     public static function percentageErrors(array $rows): array
     {
         $calculator = app(ImportesDistributionCalculator::class);

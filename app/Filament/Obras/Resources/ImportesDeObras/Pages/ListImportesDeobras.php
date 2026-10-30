@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\ImportesDeObras\ImportesDeObrasResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
+/** Listado estándar de importes de obras (sin lógica propia). */
 class ListImportesDeobras extends ListRecords
 {
     protected static string $resource = ImportesDeObrasResource::class;

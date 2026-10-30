@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\Expedientes\ExpedienteResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
+/** Página estándar de edición de expedientes (sin lógica propia). */
 class EditExpediente extends EditRecord
 {
     protected static string $resource = ExpedienteResource::class;

@@ -4,6 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Subvención asociada a una obra o expediente.
+ *
+ * Tabla 'Subvenciones' en la conexión 'Obras' (SQL Server), con clave
+ * primaria string 'Expediente' no autoincremental. Modelo de acceso directo
+ * sin relaciones Eloquent declaradas.
+ */
 class Subvenciones extends Model
 {
     //

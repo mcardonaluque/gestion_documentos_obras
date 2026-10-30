@@ -7,6 +7,7 @@ use App\Filament\Obras\Resources\ObraCedidas\ObraCedidaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
+/** Listado estándar de obras cedidas (sin lógica propia). */
 class ListObraCedidas extends ListRecords
 {
     protected static string $resource = ObraCedidaResource::class;

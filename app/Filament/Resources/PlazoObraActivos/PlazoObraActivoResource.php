@@ -20,6 +20,14 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
+/**
+ * Recurso Filament para los plazos de obra activos.
+ *
+ * Gestiona el modelo App\Models\PlazoObraActivo en el panel de
+ * administración, grupo «Administracion de prorrogas», sin aislamiento por
+ * tenant. Controla la fase, fechas de inicio y fin y la normativa PPAC
+ * aplicable a cada expediente.
+ */
 class PlazoObraActivoResource extends Resource
 {
     protected static ?string $model = PlazoObraActivo::class;
@@ -38,6 +46,7 @@ class PlazoObraActivoResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Plazos activos';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -93,6 +102,7 @@ class PlazoObraActivoResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -153,6 +163,7 @@ class PlazoObraActivoResource extends Resource
             ]);
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

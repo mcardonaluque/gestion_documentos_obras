@@ -8,6 +8,14 @@ use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Section;
 use Illuminate\Support\HtmlString;
 
+/**
+ * Fieldset de Filament que muestra una tabla HTML (solo lectura) con los
+ * plazos activos de la obra: fase, fechas, días base y de prórroga.
+ *
+ * Consulta el modelo `PlazoObraActivo` por expediente_id del registro.
+ * Se usa en `DatosDeInicioDeObrasResource` (panel Obras) y en
+ * `ExpedienteResourceBase` (recursos compartidos de expedientes).
+ */
 class PlazosObraInfo extends Fieldset
 {
     protected function setUp(): void

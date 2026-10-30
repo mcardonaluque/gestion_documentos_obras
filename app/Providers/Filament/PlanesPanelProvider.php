@@ -29,8 +29,20 @@ use App\Filament\Obras\Resources\ImportesDeObras\ImportesDeObrasResource;
 use App\Filament\Obras\Resources\ImportesPorOrganismos\ImportesPorOrganismoResource;
 use App\Filament\Widgets\UltimasObrasTableWidget;
 
+/**
+ * Configura el panel de planes provinciales de Filament (id `planes`,
+ * ruta /planes).
+ *
+ * Variante del panel de obras centrada en planes: reutiliza los recursos
+ * de importes y datos de inicio/ejecución del espacio Obras y ofrece una
+ * navegación superior por áreas (Inicio, Proyectos, Cesión y Ejecución).
+ * Se registra en bootstrap\providers.php.
+ */
 class PlanesPanelProvider extends PanelProvider
 {
+    /**
+     * Define identidad, recursos, navegación y middleware del panel planes.
+     */
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -90,6 +102,10 @@ class PlanesPanelProvider extends PanelProvider
             ->topNavigation();
 
     }
+    /**
+     * Construye la navegación superior agrupada del panel
+     * (Inicio, Proyectos, Cesión y Ejecución).
+     */
     protected function getTopNavigation(NavigationBuilder $builder): NavigationBuilder
             {
                 return $builder->groups([

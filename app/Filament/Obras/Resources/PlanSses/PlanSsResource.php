@@ -21,6 +21,15 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Recurso Filament para gestionar los planes de seguridad y salud.
+ *
+ * Gestiona el modelo {@see \App\Models\Planseguridadysalud}: tramitación
+ * del plan de seguridad y salud de cada obra (petición/recepción de
+ * informes técnicos, propuesta, decreto, comunicaciones y coordinador).
+ * La consulta base se limita a los dos últimos años de ejecución.
+ * Multi-tenant mediante la relación 'team'.
+ */
 class PlanSsResource extends Resource
 {
     protected static ?string $model = Planseguridadysalud::class;
@@ -32,10 +41,17 @@ class PlanSsResource extends Resource
     //protected static ?string $navigationGroup="Ejecución";**/
     protected static ?string $navigationLabel ='Planes de Seguridad y Salud';
 
+    /**
+     * Encabezado personalizado de la página.
+     */
     protected function getHeading(): string
     {
     return 'Título personalizado';
     }
+
+    /**
+     * Devuelve el título del formulario según la operación (crear/editar).
+     */
     public static function getFormTitle(?string $operation = null): string
 {
     return match ($operation) {
@@ -45,6 +61,9 @@ class PlanSsResource extends Resource
     };
 
 }
+    /**
+     * Consulta base: planes de los dos últimos años de ejecución.
+     */
     public static function getEloquentQuery(): Builder
     {
         $añoActual = now()->year;
@@ -60,6 +79,9 @@ class PlanSsResource extends Resource
             //->where('codigo_municipio','=', )
 
     }
+    /**
+     * Define el formulario del plan de seguridad y salud.
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -133,6 +155,9 @@ class PlanSsResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla del listado de planes de seguridad y salud.
+     */
     public static function table(Table $table): Table
     {
         return $table

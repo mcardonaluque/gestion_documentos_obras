@@ -22,6 +22,11 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Relation manager de las certificaciones ('certificaciones') de la obra en
+ * ejecución: número, tipo de justificante, fechas de tramitación e
+ * importes. Usado por DatosEjecucionObrasResource.
+ */
 class CertificacionesRelationManager extends RelationManager
 {
     protected static string $relationship = 'certificaciones';

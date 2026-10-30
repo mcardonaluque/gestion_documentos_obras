@@ -19,12 +19,20 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Recurso Filament para el catálogo de carreteras provinciales.
+ *
+ * Gestiona el modelo App\Models\TablaDeCarretera en el panel de
+ * administración. El formulario y la tabla están pendientes de definir
+ * (esqueleto generado sin campos).
+ */
 class TablaDeCarreteraResource extends Resource
 {
     protected static ?string $model = TablaDeCarretera::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -33,6 +41,7 @@ class TablaDeCarreteraResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -52,6 +61,7 @@ class TablaDeCarreteraResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -59,6 +69,7 @@ class TablaDeCarreteraResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

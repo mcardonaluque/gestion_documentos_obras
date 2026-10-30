@@ -19,6 +19,15 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Recurso Filament para gestionar el catálogo de contratistas.
+ *
+ * Gestiona el modelo {@see \App\Models\Contratista} con sus datos de
+ * contacto, dirección postal y fiscal, clasificación por tipo de
+ * contratista y bajas. Incluye la lógica de asignación automática del
+ * siguiente código disponible según el tipo de contratista (tabla
+ * {@see \App\Models\TipoContratista}) y una vista de detalle (infolist).
+ */
 class ContratistaResource extends Resource
 {
     protected static ?string $model = Contratista::class;
@@ -27,6 +36,10 @@ class ContratistaResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'Nombre';
 
+    /**
+     * Actualiza el último código usado del tipo de contratista si el
+     * código recién asignado es mayor que el almacenado.
+     */
     public static function actualizarUltimoCodigoTipo(?string $tipoContratista, mixed $codigoContratista): void
     {
         if (blank($tipoContratista) || ! is_numeric((string) $codigoContratista)) {
@@ -53,6 +66,10 @@ class ContratistaResource extends Resource
         }
     }
 
+    /**
+     * Calcula el siguiente código de contratista libre para un tipo dado,
+     * partiendo del último código registrado y evitando duplicados.
+     */
     public static function getSiguienteCodigoDisponiblePorTipo(?string $tipoContratista): ?string
     {
         if (blank($tipoContratista)) {
@@ -78,12 +95,19 @@ class ContratistaResource extends Resource
         return (string) $siguiente;
     }
 
+    /**
+     * Consulta base con las relaciones de provincia y tipo precargadas.
+     */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->with(['provincia', 'provinciaFiscal', 'tipoContratista']);
     }
 
+    /**
+     * Define el formulario del contratista con propuesta automática de
+     * código según el tipo seleccionado.
+     */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -249,6 +273,9 @@ class ContratistaResource extends Resource
             ]);
     }
 
+    /**
+     * Define la vista de detalle (infolist) del contratista.
+     */
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -359,6 +386,9 @@ class ContratistaResource extends Resource
             ]);
     }
 
+    /**
+     * Define la tabla del listado de contratistas con sus filtros.
+     */
     public static function table(Table $table): Table
     {
         return $table

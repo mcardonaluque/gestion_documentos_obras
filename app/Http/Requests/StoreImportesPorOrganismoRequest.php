@@ -5,6 +5,13 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Form request de scaffolding para la creación de `ImportesPorOrganismo`.
+ *
+ * Solo lo referencia `ImportesPorOrganismoController::store()`, que no
+ * tiene rutas registradas; por ello `authorize()` devuelve false y
+ * `rules()` está vacío. El reparto por organismo se gestiona en Filament.
+ */
 class StoreImportesPorOrganismoRequest extends FormRequest
 {
     /**

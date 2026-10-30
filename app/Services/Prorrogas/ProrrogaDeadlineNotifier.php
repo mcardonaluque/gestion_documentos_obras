@@ -9,10 +9,20 @@ use App\Models\Expediente;
 use App\Models\PlazoObraActivo;
 use App\Services\NotificationService;
 
+/**
+ * Notificador de plazos límite para solicitar prórrogas.
+ *
+ * Calcula la ventana de solicitud mediante ProrrogaRulesService sobre el plazo
+ * activo del expediente y notifica (vía NotificationService, evitando duplicados
+ * diarios) a los usuarios asignados (obras de carretera) o al equipo del
+ * ayuntamiento. Invocado desde la página Filament ViewExpediente (panel Obras).
+ */
 final class ProrrogaDeadlineNotifier
 {
     /**
-     * @return array{fase: string, tipo: string, fecha_limite: \Carbon\Carbon, fecha_maxima_solicitud: \Carbon\Carbon, recipients: int}|null
+     * Notifica la fecha máxima de solicitud de prórroga del plazo activo del expediente.
+     *
+     * @return array{fase: string, tipo: string, fecha_limite: \Carbon\Carbon, fecha_maxima_solicitud: \Carbon\Carbon, recipients: int}|null Datos de la ventana notificada o null si no aplica.
      */
     public function notifyForExpediente(Expediente $expediente): ?array
     {

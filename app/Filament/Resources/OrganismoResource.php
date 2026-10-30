@@ -13,6 +13,13 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
 
+/**
+ * Recurso Filament para la gestión del catálogo de organismos.
+ *
+ * Gestiona el modelo App\Models\Organismo en el panel de administración.
+ * No define grupo de navegación propio y sus páginas CRUD viven en
+ * OrganismoResource\Pages (archivo situado en la raíz de Resources).
+ */
 class OrganismoResource extends Resource
 {
     protected static ?string $model = Organismo::class;
@@ -21,6 +28,7 @@ class OrganismoResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'organismo';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -34,6 +42,7 @@ class OrganismoResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -68,6 +77,7 @@ class OrganismoResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -75,6 +85,7 @@ class OrganismoResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

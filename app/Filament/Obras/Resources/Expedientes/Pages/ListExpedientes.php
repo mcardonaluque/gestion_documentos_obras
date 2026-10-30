@@ -8,6 +8,10 @@ use App\Models\DocumentoExpediente;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
+/**
+ * Listado de expedientes con soporte de expansión de filas y selección de
+ * expediente para mostrar sus relation managers bajo demanda.
+ */
 class ListExpedientes extends ListRecords
 {
     protected static string $resource = ExpedienteResource::class;
@@ -20,6 +24,9 @@ class ListExpedientes extends ListRecords
     }
     public array $expandedRecords = [];
 
+/**
+ * Alterna la expansión/contracción de una fila del listado.
+ */
 public function toggleRecordExpansion($key): void
 {
     //dd($key);
@@ -33,6 +40,9 @@ public function toggleRecordExpansion($key): void
         $this->expandedRecords[] = $key;
     }
 }
+/**
+ * Solo muestra los relation managers cuando hay un expediente seleccionado.
+ */
 protected function getRelationManagers(): array
 {
     // Solo mostrar el Relation Manager si hay un expediente seleccionado
@@ -43,7 +53,9 @@ protected function getRelationManagers(): array
     return parent::getRelationManagers();
 }
 
-// Obtener el expediente seleccionado para el Relation Manager
+/**
+ * Devuelve el expediente seleccionado para alimentar el relation manager.
+ */
 public function getSelectedRecord(): ?DocumentoExpediente
 {
     if (!$this->expedienteSeleccionado) {
@@ -53,7 +65,10 @@ public function getSelectedRecord(): ?DocumentoExpediente
     return $this->getResource()::getModel()::find($this->expedienteSeleccionado);
 }
 
-// Método para manejar la selección desde la tabla
+/**
+ * Registra el expediente seleccionado desde la tabla y refresca el
+ * relation manager asociado.
+ */
 public function seleccionarExpediente($expedienteId): void
 {
     $this->expedienteSeleccionado = $expedienteId;

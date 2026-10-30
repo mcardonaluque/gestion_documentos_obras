@@ -200,6 +200,7 @@ class DocumentoGenericoResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

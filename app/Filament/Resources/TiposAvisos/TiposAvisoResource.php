@@ -21,6 +21,12 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+/**
+ * Recurso Filament para el catálogo de tipos de avisos.
+ *
+ * Gestiona el modelo App\Models\TiposAviso en el panel de administración,
+ * grupo «Notificaciones», sin aislamiento por tenant.
+ */
 class TiposAvisoResource extends Resource
 {
     protected static ?string $model = TiposAviso::class;
@@ -29,6 +35,7 @@ class TiposAvisoResource extends Resource
     protected static ?string $navigationLabel = 'Tipos de Avisos';
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    /** Define el esquema del formulario del recurso. */
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -45,6 +52,7 @@ class TiposAvisoResource extends Resource
             ]);
     }
 
+    /** Configura la tabla de listado del recurso. */
     public static function table(Table $table): Table
     {
         return $table
@@ -71,6 +79,7 @@ class TiposAvisoResource extends Resource
             ]);
     }
 
+    /** Declara los relation managers asociados al recurso. */
     public static function getRelations(): array
     {
         return [
@@ -78,6 +87,7 @@ class TiposAvisoResource extends Resource
         ];
     }
 
+    /** Declara las páginas y rutas del recurso. */
     public static function getPages(): array
     {
         return [

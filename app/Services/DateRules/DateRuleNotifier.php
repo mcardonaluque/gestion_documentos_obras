@@ -16,9 +16,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Notificador de resultados de reglas de fechas a los usuarios afectados.
+ *
+ * Filtra los resultados con acción NOTIFY o de tipo notificación, resuelve los
+ * destinatarios (actor o equipo del expediente) y crea CustomNotification, en
+ * diferido mediante DispatchDateRuleNotificationsJob si date_rules.async_notifications
+ * está activo. Invocado por DateRuleObserver y el trait NotifiesAndValidatesDates.
+ */
 final class DateRuleNotifier
 {
     /**
+     * Notifica los resultados disparados que requieren aviso a actor o equipo.
+     *
      * @param Collection<int, DateRuleEvaluationResult> $results
      */
     public function notify(Model $model, Collection $results, ?int $actorUserId = null): void

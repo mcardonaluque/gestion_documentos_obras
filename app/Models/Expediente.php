@@ -26,6 +26,7 @@
 
         protected $keyType = 'string';
 
+        /** Accessor: código de plan tolerante a distintas variantes de nombre de columna. */
         public function getCodigoPlanAttribute(): ?string
         {
             return $this->attributes['codigo_plan']
@@ -37,18 +38,22 @@
         public function obraInicio(){
             return $this->hasOne (DatosDeInicioDeObras::class, 'expediente_id', 'expediente_id');
         }
+        /** Datos de la fase de ejecución de la obra del expediente. */
         public function obraEjecucion(){
             return $this->hasOne(DatosEjecucionObras::class, 'expediente_id', 'expediente_id');
 
         }
+        /** Proyecto técnico asociado al expediente. */
         public function proyecto(): HasOne
         {
             return $this->hasOne(Proyecto::class, 'expediente_id', 'expediente_id');
         }
+        /** Datos de justificación de la obra del expediente. */
         public Function obraJustificacion(){
             return $this->hasOne(Justificacion_Obra::class, 'expediente_id', 'expediente_id');
 
         }
+        /** Datos de cesión de la obra del expediente. */
         public function obraCesion(){
             return $this->hasOne(ObraCedida::class, 'expediente_id', 'expediente_id');
 
@@ -63,31 +68,38 @@
         {
             return $this->belongsTo(Team::class);
         }
+        /** Estado de tramitación actual del expediente. */
         public function estados(): BelongsTo
         {
             return $this->belongsTo(TablaDeEstados::class, 'cod_estado', 'cod_estado');
         }
+        /** Forma de ejecución/contratación de la obra del expediente. */
         public function ejecucion():BelongsTo
         {
             return $this->belongsTo(FormaEjecucion::class, 'forma_ejecucion', 'COD_CONTRATA' );
         }
+        /** Municipio en el que se desarrolla la obra del expediente. */
         public function municipios():BelongsTo
         {
             return $this->belongsTo(TablaDeMunicipio::class, 'municipio', 'codigo_municipio' );
         }
+        /** Importes globales de la obra del expediente. */
         public function importes(){
             return $this->hasOne(ImportesDeObras::class, 'expediente_id', 'expediente_id');
 
         }
+        /** Distribución de importes por organismo financiador. */
         public function importesOrganismo(){
             return $this->HasMany(ImportesPorOrganismo::class, 'expediente_id', 'expediente_id');
 
         }
 
+        /** Alias de importesOrganismo(). */
         public function importesPorOrganismo(): HasMany
         {
             return $this->importesOrganismo();
         }
+        /** Plan provincial al que pertenece el expediente. */
         public function planes(): BelongsTo{
             return $this->belongsTo(Planes::class, 'codigo_plan', 'codigo_plan');
     }
@@ -105,6 +117,7 @@
                 ->withTimestamps();
         }
 
+        /** Prórrogas solicitadas sobre el expediente. */
         public function solicitudesProrroga(): HasMany
         {
             return $this->hasMany(Prorroga::class, 'expediente_id', 'expediente_id');

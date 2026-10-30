@@ -15,6 +15,12 @@ use Illuminate\Validation\Rule;
 
 /**
  * Normativa general anual del plan provincial.
+ *
+ * Define las fechas límite y plazos (aprobación, publicación, contratación,
+ * justificación, presentación de proyectos y documentación) aplicables a un
+ * año de plan, de forma general o específica por Codigo_Plan. Tabla
+ * 'NormativaPPAC' en la conexión 'Obras' (SQL Server).
+ * Tiene muchos PlazoObraActivo y pertenece a Planes.
  */
 class NormativaPpac extends Model
 {
@@ -74,6 +80,7 @@ class NormativaPpac extends Model
         'dias_prorroga_max_porcentaje' => 'integer',
     ];
 
+    /** Al guardar, recalcula los campos derivados (año fin y fechas límite). */
     protected static function booted(): void
     {
         static::saving(function (self $model): void {
@@ -82,6 +89,8 @@ class NormativaPpac extends Model
     }
 
     /**
+     * Plazos de obra activos gobernados por esta normativa.
+     *
      * @return HasMany<PlazoObraActivo, self>
      */
     public function plazosActivos(): HasMany
@@ -90,6 +99,8 @@ class NormativaPpac extends Model
     }
 
     /**
+     * Plan provincial al que aplica específicamente la normativa.
+     *
      * @return BelongsTo<Planes, self>
      */
     public function plan(): BelongsTo
@@ -182,6 +193,7 @@ class NormativaPpac extends Model
         return $asignados;
     }
 
+    /** Recalcula el año fin del plan y las fechas límite derivadas de la publicación. */
     public function syncDerivedFields(): void
     {
         if (is_numeric($this->ao_plan)) {
@@ -201,6 +213,7 @@ class NormativaPpac extends Model
         $this->fecha_proyectoA_siguiente = $projectDate;
     }
 
+    /** Reglas de validación de unicidad del año de plan por Codigo_Plan. */
     public static function aoPlanValidationRules(?int $ignoreId = null, ?string $codigoPlan = null): array
     {
         $rules = ['required', 'integer', 'min:2000', 'max:2100'];
@@ -219,16 +232,19 @@ class NormativaPpac extends Model
         return $rules;
     }
 
+    /** Calcula el año de finalización del plan (año de inicio + 2). */
     public static function calculatePlanEndYear(int $aoPlan): int
     {
         return $aoPlan + 2;
     }
 
+    /** Fecha límite de documentación: publicación definitiva + 2 meses. */
     public static function calculateDocumentationDeadline(string|\DateTimeInterface $publicationDate): Carbon
     {
         return Carbon::parse($publicationDate)->addMonths(2)->startOfDay();
     }
 
+    /** Fecha límite de proyecto: publicación definitiva + 4 meses. */
     public static function calculateProjectDeadline(string|\DateTimeInterface $publicationDate): Carbon
     {
         return Carbon::parse($publicationDate)->addMonths(4)->startOfDay();

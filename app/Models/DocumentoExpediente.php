@@ -48,30 +48,38 @@ class DocumentoExpediente extends Model
         'remitidopor',
         'notificado'
     ];
+    /** Expediente administrativo al que pertenece el documento. */
     public function expedientes(): BelongsTo{
         return $this->belongsTo(Expediente::class,'expediente_id','expediente_id',);
     }
+    /** Ficha de inicio de obra asociada al documento. */
     public function obra(): BelongsTo{
         return $this->belongsTo(DatosDeInicioDeObras::class,'expediente_id','expediente_id',);
     }
+    /** Tipo de documento del catálogo de documentos genéricos. */
     public function tipodocumentos(): BelongsTo{
         return $this->belongsTo(DocumentoGenerico::class,'cod_documento','id');
     }
+    /** Team (ayuntamiento/ámbito) propietario del documento. */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
+    /** Destino del documento (unidad u organismo receptor). */
     public function destinos(): BelongsTo
     {
         return $this->belongsTo(DestinoDeDocumentos::class, 'destino', 'id');
     }
+    /** Procedencia del documento (unidad u organismo emisor). */
     public function procedencias(): BelongsTo
     {
         return $this->belongsTo(DestinoDeDocumentos::class, 'procedencia', 'id');
     }
+    /** Estado de tramitación del documento. */
     public function estados(): BelongsTo{
         return $this->belongsTo(TBestadosdeDocumentos::class,'estado','id');
     }
+    /** Plan provincial al que pertenece el documento. */
     public function planes(): BelongsTo{
         return $this->belongsTo(Planes::class, 'Codigo_Plan', 'codigo_plan');
     }

@@ -26,6 +26,12 @@ class TramitadorApiOperationService
     {
     }
 
+    /**
+     * Ejecuta la operación activa identificada por su código, validando los
+     * valores de entrada y lanzando la petición mediante TramitadorApiClient.
+     *
+     * @param array<string, mixed> $valores Valores de los parámetros de entrada.
+     */
     public function ejecutar(string $codigo, array $valores = []): Response
     {
         // Solo se pueden invocar las operaciones activas administradas en el portal.

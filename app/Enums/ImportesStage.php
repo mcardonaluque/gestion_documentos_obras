@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+/**
+ * Fase económica de la obra sobre la que se gestionan los importes:
+ * inicio/aprobación, cesión, contratación o ejecución.
+ *
+ * Lo usan el componente de formulario `ImportesManagement`, el widget
+ * Livewire `ManageImportesWidget` y `ImportesDistributionCalculator`
+ * para saber qué columnas de importes/porcentajes son editables.
+ */
 enum ImportesStage: string
 {
     case INICIO = 'inicio';
@@ -11,6 +19,9 @@ enum ImportesStage: string
     case CONTRATACION = 'contratacion';
     case EJECUCION = 'ejecucion';
 
+    /**
+     * Etiqueta legible de la fase.
+     */
     public function label(): string
     {
         return match ($this) {
@@ -22,6 +33,8 @@ enum ImportesStage: string
     }
 
     /**
+     * Opciones (valor => etiqueta) para selects de fase.
+     *
      * @return array<int, string>
      */
     public static function options(): array

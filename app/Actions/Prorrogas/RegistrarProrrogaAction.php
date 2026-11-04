@@ -6,6 +6,7 @@ namespace App\Actions\Prorrogas;
 
 use App\Enums\ProrrogaTipo;
 use App\Models\DatosEjecucionObras;
+use App\Models\NormativaPpac;
 use App\Models\PlazoObraActivo;
 use App\Models\Prorroga;
 use App\Services\Prorrogas\ProrrogaRulesService;
@@ -91,6 +92,18 @@ final class RegistrarProrrogaAction
                 $oldLimit = Carbon::parse((string) $plazo->fecha_fin);
                 $requestedDays = max(0, $oldLimit->diffInDays($newLimit, false));
 
+                $normativaCheck = $this->rulesService->validateNormativaDeadline(
+                    $plazo,
+                    $this->resolveNormativaDeadlineFor($owner, $plazo),
+                    $requestDate,
+                );
+
+                if (! $normativaCheck->valid) {
+                    throw ValidationException::withMessages([
+                        'tipo_prorroga' => $normativaCheck->message ?? 'El plazo aprobado en la normativa ya ha vencido.',
+                    ]);
+                }
+
                 $validation = $this->rulesService->validateRequest(
                     $plazo,
                     $requestDate,
@@ -132,6 +145,24 @@ final class RegistrarProrrogaAction
 
             return $prorroga;
         });
+    }
+
+    /**
+     * Resuelve la fecha límite inicial aprobada en normativa para la fase del plazo.
+     *
+     * Usa la normativa vinculada al propio plazo y, en su defecto, la que
+     * aplique al plan y año de la obra (específica del plan o general).
+     */
+    private function resolveNormativaDeadlineFor(DatosEjecucionObras $owner, PlazoObraActivo $plazo): ?Carbon
+    {
+        $normativa = $plazo->normativa
+            ?? NormativaPpac::resolveFor($owner->ao_ejecucion, trim((string) ($owner->Codigo_Plan ?? '')));
+
+        $fase = (string) $plazo->fase;
+        $redaccionDiputacion = in_array($fase, ['proyecto_memoria', 'documentacion'], true)
+            && (bool) ($owner->expediente?->proyecto?->SubvencionEconRedaccion ?? false);
+
+        return $this->rulesService->resolveNormativaDeadline($normativa, $fase, $redaccionDiputacion);
     }
 
     /**

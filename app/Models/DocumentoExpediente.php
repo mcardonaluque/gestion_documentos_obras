@@ -85,6 +85,16 @@ class DocumentoExpediente extends Model
     }
 
     /**
+     * Solicitudes de subsanación que requieren este documento.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Subsanacion, $this>
+     */
+    public function subsanaciones(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Subsanacion::class, 'documento_id', 'idDocumento');
+    }
+
+    /**
      * Devuelve la ruta o URL utilizable del PDF asociado al documento.
      */
     public function getPdfSourceAttribute(): ?string

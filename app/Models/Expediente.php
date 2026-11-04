@@ -63,6 +63,15 @@
             return $this->HasMany(DocumentoExpediente::class, 'expediente_id', 'expediente_id');
 
         }
+        /**
+         * Solicitudes de subsanación de documentos del expediente.
+         *
+         * @return HasMany<Subsanacion, $this>
+         */
+        public function subsanaciones(): HasMany
+        {
+            return $this->hasMany(Subsanacion::class, 'expediente_id', 'expediente_id');
+        }
         /** Team o ayuntamiento propietario del expediente. */
         public function team(): BelongsTo
         {

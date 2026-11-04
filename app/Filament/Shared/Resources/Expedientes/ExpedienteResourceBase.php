@@ -453,6 +453,7 @@ abstract class ExpedienteResourceBase extends Resource
         $relations = [
             DocumentosRelationManager::class,
             \App\Filament\Ayuntamientos\Resources\Expedientes\RelationManagers\SolicitudesProrrogaRelationManager::class,
+            \App\Filament\Obras\Resources\Expedientes\RelationManagers\SubsanacionesRelationManager::class,
         ];
 
         if (Filament::getCurrentPanel()?->getId() === 'ayuntamientos') {

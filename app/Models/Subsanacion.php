@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -32,6 +33,10 @@ use Illuminate\Support\Carbon;
  * @property ?Carbon $fecha_solicitud_subsanacion
  * @property ?Carbon $fecha_subsanacion
  * @property ?int $team_id
+ * @property ?string $archivo_solicitud
+ * @property ?string $tipo_documental_solicitud
+ * @property ?string $id_peticion_firma
+ * @property ?Carbon $fecha_solicitud_firma
  * @property-read string $estado
  * @property-read ?Carbon $fecha_limite_subsanacion
  */
@@ -68,6 +73,10 @@ class Subsanacion extends Model
         'fecha_solicitud_subsanacion',
         'fecha_subsanacion',
         'team_id',
+        'archivo_solicitud',
+        'tipo_documental_solicitud',
+        'id_peticion_firma',
+        'fecha_solicitud_firma',
     ];
 
     /**
@@ -81,6 +90,7 @@ class Subsanacion extends Model
         'fecha_solicitud_subsanacion' => 'date',
         'fecha_subsanacion' => 'date',
         'team_id' => 'integer',
+        'fecha_solicitud_firma' => 'datetime',
     ];
 
     /**
@@ -92,6 +102,13 @@ class Subsanacion extends Model
     {
         static::creating(function (self $subsanacion): void {
             $subsanacion->fillDatosObraDesdeDocumento();
+        });
+
+        static::saved(function (self $subsanacion): void {
+            $subsanacion->documento()->update([
+                'fecha_solicitud_subsanacion' => $subsanacion->fecha_solicitud_subsanacion,
+                'fecha_subsanacion' => $subsanacion->fecha_subsanacion,
+            ]);
         });
     }
 
@@ -111,6 +128,16 @@ class Subsanacion extends Model
     public function documentoSubsanacion(): BelongsTo
     {
         return $this->belongsTo(DocumentoExpediente::class, 'documento_subsanacion_id', 'idDocumento');
+    }
+
+    /**
+     * Cadena ordenada de validadores y firmantes de la solicitud.
+     *
+     * @return HasMany<SubsanacionFirmante, $this>
+     */
+    public function firmantes(): HasMany
+    {
+        return $this->hasMany(SubsanacionFirmante::class)->orderBy('orden');
     }
 
     /** Plan provincial al que pertenece la obra subsanada. */

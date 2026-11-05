@@ -5,10 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
-
-use function GuzzleHttp\describe_type;
-use function Psy\debug;
 
 /**
  * Modelo que representa un documento concreto incorporado a un expediente.
@@ -19,12 +17,18 @@ use function Psy\debug;
 class DocumentoExpediente extends Model
 {
     use HasFactory;
-    protected $connection='Obras';
-    //protected $table='documentacionexpediente';
-    protected $table='dbo.documentacionexpedientes';
-    protected $primaryKey='idDocumento';
-    protected $foreignKey='expediente_id';
+
+    protected $connection = 'Obras';
+
+    // protected $table='documentacionexpediente';
+    protected $table = 'dbo.documentacionexpedientes';
+
+    protected $primaryKey = 'idDocumento';
+
+    protected $foreignKey = 'expediente_id';
+
     protected $keyType = 'string';
+
     protected $fillable = [
         'Codigo_Plan',
         'cod_plan',
@@ -33,6 +37,8 @@ class DocumentoExpediente extends Model
         'ao_ejecucion',
         'fechaincorporacion',
         'fechaHelp',
+        'fecha_solicitud_subsanacion',
+        'fecha_subsanacion',
         'cod_documento',
         'expediente_id',
         'csv',
@@ -46,50 +52,70 @@ class DocumentoExpediente extends Model
         'procedencia',
         'destino',
         'remitidopor',
-        'notificado'
+        'notificado',
     ];
+
+    protected $casts = [
+        'fechaincorporacion' => 'date',
+        'fechaHelp' => 'date',
+        'fecha_solicitud_subsanacion' => 'date',
+        'fecha_subsanacion' => 'date',
+    ];
+
     /** Expediente administrativo al que pertenece el documento. */
-    public function expedientes(): BelongsTo{
-        return $this->belongsTo(Expediente::class,'expediente_id','expediente_id',);
+    public function expedientes(): BelongsTo
+    {
+        return $this->belongsTo(Expediente::class, 'expediente_id', 'expediente_id');
     }
+
     /** Ficha de inicio de obra asociada al documento. */
-    public function obra(): BelongsTo{
-        return $this->belongsTo(DatosDeInicioDeObras::class,'expediente_id','expediente_id',);
+    public function obra(): BelongsTo
+    {
+        return $this->belongsTo(DatosDeInicioDeObras::class, 'expediente_id', 'expediente_id');
     }
+
     /** Tipo de documento del catálogo de documentos genéricos. */
-    public function tipodocumentos(): BelongsTo{
-        return $this->belongsTo(DocumentoGenerico::class,'cod_documento','id');
+    public function tipodocumentos(): BelongsTo
+    {
+        return $this->belongsTo(DocumentoGenerico::class, 'cod_documento', 'id');
     }
+
     /** Team (ayuntamiento/ámbito) propietario del documento. */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
+
     /** Destino del documento (unidad u organismo receptor). */
     public function destinos(): BelongsTo
     {
         return $this->belongsTo(DestinoDeDocumentos::class, 'destino', 'id');
     }
+
     /** Procedencia del documento (unidad u organismo emisor). */
     public function procedencias(): BelongsTo
     {
         return $this->belongsTo(DestinoDeDocumentos::class, 'procedencia', 'id');
     }
+
     /** Estado de tramitación del documento. */
-    public function estados(): BelongsTo{
-        return $this->belongsTo(TBestadosdeDocumentos::class,'estado','id');
+    public function estados(): BelongsTo
+    {
+        return $this->belongsTo(TBestadosdeDocumentos::class, 'estado', 'id');
     }
+
     /** Plan provincial al que pertenece el documento. */
-    public function planes(): BelongsTo{
+    public function planes(): BelongsTo
+    {
         return $this->belongsTo(Planes::class, 'Codigo_Plan', 'codigo_plan');
     }
 
     /**
      * Solicitudes de subsanación que requieren este documento.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Subsanacion, $this>
+     * @return HasMany<Subsanacion, $this>
      */
-    public function subsanaciones(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function subsanaciones(): HasMany
     {
         return $this->hasMany(Subsanacion::class, 'documento_id', 'idDocumento');
     }
@@ -171,8 +197,8 @@ class DocumentoExpediente extends Model
             $path,
             base_path($relativePath),
             public_path($relativePath),
-            storage_path('app' . DIRECTORY_SEPARATOR . $relativePath),
-            storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $relativePath),
+            storage_path('app'.DIRECTORY_SEPARATOR.$relativePath),
+            storage_path('app'.DIRECTORY_SEPARATOR.'public'.DIRECTORY_SEPARATOR.$relativePath),
         ]);
 
         foreach (array_unique($candidates) as $candidate) {
@@ -203,7 +229,7 @@ class DocumentoExpediente extends Model
     /**
      * Rellena automáticamente los metadatos documentales a partir del expediente indicado.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     public static function applyExpedienteDefaults(array $data): array

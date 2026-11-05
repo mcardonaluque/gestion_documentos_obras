@@ -6,7 +6,12 @@ namespace App\Filament\Obras\Resources\Subsanaciones\Schemas;
 
 use App\Models\DocumentoExpediente;
 use App\Models\Expediente;
+use App\Models\SubsanacionFirmante;
+use App\Models\User;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Field;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -26,7 +31,7 @@ final class SubsanacionForm
      * Componentes del formulario.
      *
      * @param  ?string  $expedienteId  Expediente fijo (relation manager); null para seleccionarlo en el formulario.
-     * @return array<int, \Filament\Forms\Components\Field>
+     * @return array<int, Field>
      */
     public static function components(?string $expedienteId = null): array
     {
@@ -50,6 +55,7 @@ final class SubsanacionForm
             ...$components,
             Select::make('documento_id')
                 ->label('Documento a subsanar')
+                ->default(request()->query('documento_id'))
                 ->required()
                 ->searchable()
                 ->preload()
@@ -77,6 +83,60 @@ final class SubsanacionForm
             DatePicker::make('fecha_subsanacion')
                 ->label('Fecha de subsanación')
                 ->afterOrEqual('fecha_solicitud_subsanacion'),
+            FileUpload::make('archivo_solicitud')
+                ->label('Documento de solicitud')
+                ->helperText('PDF que se enviará a la cadena de validación y firma.')
+                ->disk('local')
+                ->directory('subsanaciones/solicitudes')
+                ->acceptedFileTypes(['application/pdf'])
+                ->maxSize(10240)
+                ->preserveFilenames()
+                ->required()
+                ->columnSpanFull(),
+            TextInput::make('tipo_documental_solicitud')
+                ->label('Tipo documental NIMBUS')
+                ->default('TD01')
+                ->required()
+                ->maxLength(50),
+            Repeater::make('firmantes')
+                ->label('Cadena de validación y firma')
+                ->relationship()
+                ->schema([
+                    Select::make('user_id')
+                        ->label('Usuario')
+                        ->options(fn (): array => User::query()
+                            ->role(['Jefe Del Servicio', 'Abogado', 'TAC', 'Diputado'])
+                            ->whereNotNull('id_usuario')
+                            ->where('id_usuario', '<>', '')
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
+                            ->all())
+                        ->searchable()
+                        ->required(),
+                    Select::make('id_rol')
+                        ->label('Rol NIMBUS')
+                        ->options([
+                            'Jefe Del Servicio' => 'Jefe Del Servicio',
+                            'Abogado' => 'Abogado',
+                            'TAC' => 'TAC',
+                            'Diputado' => 'Diputado',
+                        ])
+                        ->required(),
+                    Select::make('tipo')
+                        ->label('Acción')
+                        ->options([
+                            SubsanacionFirmante::TIPO_VALIDACION => 'Valida',
+                            SubsanacionFirmante::TIPO_FIRMA => 'Firma',
+                        ])
+                        ->default(SubsanacionFirmante::TIPO_FIRMA)
+                        ->required(),
+                ])
+                ->orderColumn('orden')
+                ->defaultItems(1)
+                ->addActionLabel('Añadir integrante')
+                ->reorderableWithButtons()
+                ->required()
+                ->columnSpanFull(),
         ];
     }
 
@@ -98,10 +158,10 @@ final class SubsanacionForm
             ->get(['idDocumento', 'descripcion', 'fechaincorporacion'])
             ->mapWithKeys(function (DocumentoExpediente $documento): array {
                 $fecha = filled($documento->fechaincorporacion)
-                    ? ' (' . Carbon::parse((string) $documento->fechaincorporacion)->format('d/m/Y') . ')'
+                    ? ' ('.Carbon::parse((string) $documento->fechaincorporacion)->format('d/m/Y').')'
                     : '';
 
-                return [(string) $documento->idDocumento => trim((string) $documento->descripcion) . $fecha];
+                return [(string) $documento->idDocumento => trim((string) $documento->descripcion).$fecha];
             })
             ->all();
     }
@@ -114,7 +174,7 @@ final class SubsanacionForm
     public static function expedienteSearch(string $search): array
     {
         return Expediente::query()
-            ->where('expediente_id', 'like', '%' . $search . '%')
+            ->where('expediente_id', 'like', '%'.$search.'%')
             ->orderByDesc('ao_ejecucion')
             ->limit(50)
             ->pluck('expediente_id', 'expediente_id')

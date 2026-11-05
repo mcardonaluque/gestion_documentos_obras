@@ -1,10 +1,14 @@
 <?php
 
+use App\Filament\Resources\Roles\RoleResource;
+use App\Models\Role;
+use App\Models\User;
+
 return [
     'shield_resource' => [
-        'enabled'=>true,
-        //'model' => \Spatie\Permission\Models\Role::class,
-          'model' => \App\Models\Role::class,
+        'enabled' => true,
+        // 'model' => \Spatie\Permission\Models\Role::class,
+        'model' => Role::class,
         'should_register_navigation' => true,
         'slug' => 'shield/roles',
         'navigation_sort' => -1,
@@ -14,11 +18,17 @@ return [
         'show_model_path' => true,
         'is_scoped_to_tenant' => false,
         'cluster' => null,
+        'tabs' => [
+            'pages' => true,
+            'widgets' => true,
+            'resources' => true,
+            'custom_permissions' => false,
+        ],
     ],
     'guard' => 'web',
     'tenant_model' => 'Team',
 
-    'auth_provider_model' => App\Models\User::class,
+    'auth_provider_model' => User::class,
 
     'super_admin' => [
         'enabled' => true,
@@ -77,7 +87,7 @@ return [
         ],
 
         'resources' => [
-            'role'=>\App\Filament\Resources\Roles\RoleResource::class,
+            'role' => RoleResource::class,
         ],
     ],
 

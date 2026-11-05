@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\UsesSqlServerSequencePrimaryKey;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 
 /**
@@ -13,6 +14,9 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
  */
 class Permission extends SpatiePermission
 {
-    //
+    use UsesSqlServerSequencePrimaryKey;
+
+    protected $connection = 'Obras';
+
     public $incrementing = false;
 }

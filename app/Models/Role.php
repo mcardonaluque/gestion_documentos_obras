@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Concerns\UsesSqlServerSequencePrimaryKey;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Permission\Models\Role as SpatieRole;
 
@@ -14,13 +14,20 @@ use Spatie\Permission\Models\Role as SpatieRole;
  */
 class Role extends SpatieRole
 {
-    //
+    use UsesSqlServerSequencePrimaryKey;
+
+    protected $connection = 'Obras';
+
+    public $incrementing = false;
+
     /** Usuarios que tienen asignado este rol. */
-    public function members():BelongsToMany{
+    public function members(): BelongsToMany
+    {
         return $this->belongsToMany(User::class);
     }
-     /** Team (tenant) al que pertenece el rol. */
-     public function team()
+
+    /** Team (tenant) al que pertenece el rol. */
+    public function team()
     {
         return $this->belongsTo(Team::class);
     }

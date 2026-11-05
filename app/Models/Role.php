@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\UsesSqlServerSequencePrimaryKey;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Permission\Models\Role as SpatieRole;
 
@@ -14,11 +13,7 @@ use Spatie\Permission\Models\Role as SpatieRole;
  */
 class Role extends SpatieRole
 {
-    use UsesSqlServerSequencePrimaryKey;
-
     protected $connection = 'Obras';
-
-    public $incrementing = false;
 
     /** Usuarios que tienen asignado este rol. */
     public function members(): BelongsToMany

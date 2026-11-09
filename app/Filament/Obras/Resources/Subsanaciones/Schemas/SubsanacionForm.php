@@ -6,7 +6,7 @@ namespace App\Filament\Obras\Resources\Subsanaciones\Schemas;
 
 use App\Models\DocumentoExpediente;
 use App\Models\Expediente;
-use App\Models\SubsanacionFirmante;
+use App\Models\FirmanteDocumento;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Field;
@@ -16,6 +16,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Schema reutilizable del formulario de subsanaciones.
@@ -42,7 +43,13 @@ final class SubsanacionForm
                 ->label('Expediente')
                 ->required()
                 ->searchable()
+                ->default(request()->query('expediente_id'))
                 ->getSearchResultsUsing(fn (string $search): array => self::expedienteSearch($search))
+                ->getOptionLabelUsing(
+                    fn (?string $value): ?string => filled($value)
+                        ? Expediente::query()->where('expediente_id', $value)->value('expediente_id')
+                        : null
+                )
                 ->live()
                 ->afterStateUpdated(function (callable $set): void {
                     $set('documento_id', null);
@@ -59,7 +66,12 @@ final class SubsanacionForm
                 ->required()
                 ->searchable()
                 ->preload()
-                ->options(fn (callable $get): array => self::documentoOptions($expedienteId ?? $get('expediente_id'))),
+                ->options(fn (callable $get): array => self::documentoOptions($expedienteId ?? $get('expediente_id')))
+                ->getOptionLabelUsing(
+                    fn (string|int|null $value): ?string => self::documentoOptionLabel(
+                        $value !== null ? DocumentoExpediente::query()->find($value) : null,
+                    ),
+                ),
             Select::make('documento_subsanacion_id')
                 ->label('Documento de subsanación')
                 ->helperText('Documento aportado que resuelve la subsanación.')
@@ -93,23 +105,36 @@ final class SubsanacionForm
                 ->preserveFilenames()
                 ->required()
                 ->columnSpanFull(),
-            TextInput::make('tipo_documental_solicitud')
-                ->label('Tipo documental NIMBUS')
+            Select::make('tipo_documental_solicitud')
+                ->label('Tipo documental')
+                ->options(fn (): array => DB::connection('Obras')
+                    ->table('catalogo_tipos_documentales')
+                    ->orderBy('descripcion')
+                    ->get(['identificador', 'descripcion'])
+                    ->mapWithKeys(
+                        fn (object $tipo): array => [(string) $tipo->identificador => trim((string) $tipo->descripcion)]
+                    )
+                    ->all())
                 ->default('TD01')
+                ->searchable()
+                ->preload()
                 ->required()
-                ->maxLength(50),
+                ->helperText('Se muestra el nombre del tipo; se enviará su código NIMBUS al tramitador.'),
             Repeater::make('firmantes')
                 ->label('Cadena de validación y firma')
                 ->relationship()
                 ->schema([
-                    Select::make('user_id')
+                    Select::make('id_usuario')
                         ->label('Usuario')
                         ->options(fn (): array => User::query()
                             ->role(['Jefe Del Servicio', 'Abogado', 'TAC', 'Diputado'])
                             ->whereNotNull('id_usuario')
                             ->where('id_usuario', '<>', '')
                             ->orderBy('name')
-                            ->pluck('name', 'id')
+                            ->get(['id_usuario', 'name'])
+                            ->mapWithKeys(
+                                fn (User $user): array => [trim((string) $user->id_usuario) => $user->name]
+                            )
                             ->all())
                         ->searchable()
                         ->required(),
@@ -122,13 +147,13 @@ final class SubsanacionForm
                             'Diputado' => 'Diputado',
                         ])
                         ->required(),
-                    Select::make('tipo')
+                    Select::make('tipo_firma')
                         ->label('Acción')
                         ->options([
-                            SubsanacionFirmante::TIPO_VALIDACION => 'Valida',
-                            SubsanacionFirmante::TIPO_FIRMA => 'Firma',
+                            FirmanteDocumento::TIPO_VALIDACION => 'Valida',
+                            FirmanteDocumento::TIPO_FIRMA => 'Firma',
                         ])
-                        ->default(SubsanacionFirmante::TIPO_FIRMA)
+                        ->default(FirmanteDocumento::TIPO_FIRMA)
                         ->required(),
                 ])
                 ->orderColumn('orden')
@@ -155,15 +180,27 @@ final class SubsanacionForm
             ->where('expediente_id', $expedienteId)
             ->orderByDesc('fechaincorporacion')
             ->limit(200)
-            ->get(['idDocumento', 'descripcion', 'fechaincorporacion'])
-            ->mapWithKeys(function (DocumentoExpediente $documento): array {
-                $fecha = filled($documento->fechaincorporacion)
-                    ? ' ('.Carbon::parse((string) $documento->fechaincorporacion)->format('d/m/Y').')'
-                    : '';
-
-                return [(string) $documento->idDocumento => trim((string) $documento->descripcion).$fecha];
-            })
+            ->get(['idDocumento', 'nombre_documento', 'descripcion', 'fechaincorporacion'])
+            ->mapWithKeys(fn (DocumentoExpediente $documento): array => [
+                (string) $documento->idDocumento => self::documentoOptionLabel($documento),
+            ])
             ->all();
+    }
+
+    /** Devuelve la etiqueta legible de un documento de expediente. */
+    private static function documentoOptionLabel(?DocumentoExpediente $documento): ?string
+    {
+        if (! $documento instanceof DocumentoExpediente) {
+            return null;
+        }
+
+        $nombre = trim((string) ($documento->nombre_documento ?: $documento->descripcion));
+        $nombre = $nombre !== '' ? $nombre : 'Documento '.$documento->idDocumento;
+        $fecha = filled($documento->fechaincorporacion)
+            ? ' ('.Carbon::parse((string) $documento->fechaincorporacion)->format('d/m/Y').')'
+            : '';
+
+        return $nombre.$fecha;
     }
 
     /**

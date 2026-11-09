@@ -2,15 +2,17 @@
 
 namespace App\Filament\Shared\Resources\Documentoexpedientes;
 
+use App\Filament\Widgets\DocumentoPdfViewerWidget;
 use App\Models\DocumentoExpediente;
 use App\Models\DocumentoGenerico;
 use App\Models\Planes;
-use Filament\Facades\Filament;
+use App\Models\Subsanacion;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -40,6 +42,35 @@ abstract class DocumentoexpedienteResourceBase extends Resource
     protected static function getCurrentPhase(): ?string
     {
         return DocumentoGenerico::normalizePhase((string) request()->query('fase'));
+    }
+
+    /**
+     * Solicitudes pendientes del expediente que pueden resolverse con el documento aportado.
+     *
+     * @return array<int, string>
+     */
+    protected static function pendingSubsanacionOptions(?string $expedienteId): array
+    {
+        if (blank($expedienteId)) {
+            return [];
+        }
+
+        return Subsanacion::query()
+            ->pendientes()
+            ->where('expediente_id', $expedienteId)
+            ->with('documento')
+            ->orderBy('fecha_solicitud_subsanacion')
+            ->get()
+            ->mapWithKeys(function (Subsanacion $subsanacion): array {
+                $documento = $subsanacion->documento;
+                $nombre = trim((string) ($documento?->nombre_documento ?: $documento?->descripcion));
+                $nombre = $nombre !== '' ? $nombre : 'Documento '.$subsanacion->documento_id;
+
+                return [
+                    $subsanacion->id => $nombre.' - '.trim((string) $subsanacion->motivo_subsanacion),
+                ];
+            })
+            ->all();
     }
 
     /** Formulario del documento: al elegir expediente autocompleta plan, referencia y secuencia. */
@@ -152,12 +183,12 @@ abstract class DocumentoexpedienteResourceBase extends Resource
                     ->maxLength(1000)
                     ->default(null),
                 FileUpload::make('archivo')
-                            ->label('Archivo PDF')
-                            ->acceptedFileTypes(['application/pdf'])
-                            ->maxSize(10240)
-                            ->directory('documentos-expedientes')
-                            ->preserveFilenames()
-                            ->required(),
+                    ->label('Archivo PDF')
+                    ->acceptedFileTypes(['application/pdf'])
+                    ->maxSize(10240)
+                    ->directory('documentos-expedientes')
+                    ->preserveFilenames()
+                    ->required(),
                 TextInput::make('csv')
                     ->required()
                     ->maxLength(50)
@@ -175,6 +206,17 @@ abstract class DocumentoexpedienteResourceBase extends Resource
                 TextInput::make('descripcion')
                     ->maxLength(255)
                     ->default(null),
+                TextInput::make('nombre_documento')
+                    ->label('Nombre del documento')
+                    ->maxLength(250),
+                Select::make('subsanacion_id')
+                    ->label('Solicitud de subsanación que se atiende')
+                    ->helperText('Vincula el documento aportado a una solicitud pendiente del expediente.')
+                    ->options(fn (callable $get): array => self::pendingSubsanacionOptions($get('expediente_id')))
+                    ->searchable()
+                    ->preload()
+                    ->visible(fn (): bool => Filament::getCurrentPanel()?->getId() === 'ayuntamientos')
+                    ->dehydrated(false),
                 Select::make('team_id')
                     ->label('Municipio')
                     ->relationship('team', 'name')
@@ -185,7 +227,7 @@ abstract class DocumentoexpedienteResourceBase extends Resource
                 Select::make('procedencia')
                     ->relationship('procedencias', 'destino')
                     ->label('Procedencia'),
-                Livewire::make(\App\Filament\Widgets\DocumentoPdfViewerWidget::class, [
+                Livewire::make(DocumentoPdfViewerWidget::class, [
                     'compact' => true,
                 ])
                     ->columnSpanFull(),
@@ -264,7 +306,7 @@ abstract class DocumentoexpedienteResourceBase extends Resource
                     ->icon('heroicon-o-folder-open')
                     ->slideOver()
                     ->modalWidth('xl')
-                    ->modalHeading(fn ($record) => 'Documentos del expediente ' . ($record->expedientes?->expediente_id ?? $record->expediente_id))
+                    ->modalHeading(fn ($record) => 'Documentos del expediente '.($record->expedientes?->expediente_id ?? $record->expediente_id))
                     ->modalContent(fn ($record) => view('documentos-slideover', [
                         'expediente' => $record->expedientes,
                         'documentos' => $record->expedientes?->documentos ?? collect(),

@@ -46,6 +46,7 @@ class DocumentoExpediente extends Model
         'nsecuencia',
         'estado',
         'descripcion',
+        'nombre_documento',
         'archivo',
         'team_id',
         'destino',

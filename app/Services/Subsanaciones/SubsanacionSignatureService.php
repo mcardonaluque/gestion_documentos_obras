@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Subsanaciones;
 
+use App\Models\FirmanteDocumento;
 use App\Models\Subsanacion;
-use App\Models\SubsanacionFirmante;
 use App\Services\Tramitador\TramitadorApiClient;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -35,8 +35,8 @@ final class SubsanacionSignatureService
         }
 
         $firmantes = $subsanacion->firmantes
-            ->map(function (SubsanacionFirmante $firmante): array {
-                $idUsuario = trim((string) $firmante->user?->id_usuario);
+            ->map(function (FirmanteDocumento $firmante): array {
+                $idUsuario = trim((string) $firmante->id_usuario);
 
                 if ($idUsuario === '') {
                     throw new RuntimeException(sprintf(
@@ -54,7 +54,7 @@ final class SubsanacionSignatureService
                 return [
                     'id_usu' => $idUsuario,
                     'id_rol' => $firmante->id_rol,
-                    'tipo' => $firmante->tipo,
+                    'tipo' => $firmante->tipo_firma,
                     'orden' => $firmante->orden,
                 ];
             })
@@ -112,5 +112,9 @@ final class SubsanacionSignatureService
             'id_peticion_firma' => (string) $idPeticion,
             'fecha_solicitud_firma' => now(),
         ])->save();
+
+        $subsanacion->firmantes()->update([
+            'fecha_envio_firma' => now(),
+        ]);
     }
 }

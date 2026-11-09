@@ -3,17 +3,19 @@
 namespace App\Filament\Shared\Resources\Expedientes;
 
 use App\Events\SystemEventOccurred;
+use App\Filament\Ayuntamientos\Resources\Expedientes\RelationManagers\SolicitudesProrrogaRelationManager;
 use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
+use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\ImportesPorOrganismoRelationManager;
+use App\Filament\Obras\Resources\Expedientes\RelationManagers\SubsanacionesRelationManager;
 use App\Filament\Shared\Resources\Expedientes\RelationManagers\DocumentosRelationManager;
 use App\Filament\Traits\CommonFilters;
 use App\Forms\Components\PlazosObraInfo;
 use App\Models\DestinoDeDocumentos;
+use App\Models\DocumentoExpediente;
 use App\Models\DocumentoGenerico;
 use App\Models\Expediente;
-use App\Models\DocumentoExpediente;
 use App\Models\Planes;
 use App\Models\PlazoObraActivo;
-use App\Models\User;
 use App\Services\Prorrogas\ProrrogaRulesService;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -34,7 +36,6 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -49,8 +50,8 @@ use Illuminate\Validation\ValidationException;
  */
 abstract class ExpedienteResourceBase extends Resource
 {
-    use HasAssignedExpedienteVisibility;
     use CommonFilters;
+    use HasAssignedExpedienteVisibility;
 
     protected static ?string $model = Expediente::class;
 
@@ -83,11 +84,11 @@ abstract class ExpedienteResourceBase extends Resource
                     ->disabled()
                     ->required()
                     ->numeric(),
-               TextInput::make('nombre_obra')
+                TextInput::make('nombre_obra')
                     ->disabled()
                     ->required()
                     ->maxLength(510),
-               Select::make('cod_estado')
+                Select::make('cod_estado')
                     ->relationship('estados', 'estado')
                     ->disabled()
                     ->required(),
@@ -221,6 +222,11 @@ abstract class ExpedienteResourceBase extends Resource
                                     ->label('Descripción del Documento')
                                     ->required()
                                     ->maxLength(255)
+                                    ->columnSpanFull(),
+
+                                TextInput::make('nombre_documento')
+                                    ->label('Nombre del documento')
+                                    ->maxLength(250)
                                     ->columnSpanFull(),
 
                                 Select::make('cod_documento')
@@ -374,6 +380,7 @@ abstract class ExpedienteResourceBase extends Resource
                             'subreferencia' => $subreferencia,
                             'ao_ejecucion' => $aoEjecucion,
                             'descripcion' => $data['descripcion'],
+                            'nombre_documento' => $data['nombre_documento'] ?? null,
                             'cod_documento' => $data['cod_documento'],
                             'fechaincorporacion' => $data['fechaincorporacion'] ?? now(),
                             'fechaHelp' => $data['fechaHelp'] ?? null,
@@ -433,9 +440,9 @@ abstract class ExpedienteResourceBase extends Resource
             ->modifyQueryUsing(fn (Builder $query) => $query
                 ->withCount('documentos')
                 ->with('documentos'))
-                        ->recordUrl(fn ($record): string => static::getUrl('view', ['record' => $record]))
+            ->recordUrl(fn ($record): string => static::getUrl('view', ['record' => $record]))
             ->toolbarActions([
-                  BulkActionGroup::make([
+                BulkActionGroup::make([
                     // DeleteBulkAction::make(),
                 ]),
             ]);
@@ -452,12 +459,12 @@ abstract class ExpedienteResourceBase extends Resource
     {
         $relations = [
             DocumentosRelationManager::class,
-            \App\Filament\Ayuntamientos\Resources\Expedientes\RelationManagers\SolicitudesProrrogaRelationManager::class,
-            \App\Filament\Obras\Resources\Expedientes\RelationManagers\SubsanacionesRelationManager::class,
+            SolicitudesProrrogaRelationManager::class,
+            SubsanacionesRelationManager::class,
         ];
 
         if (Filament::getCurrentPanel()?->getId() === 'ayuntamientos') {
-            $relations[] = \App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\ImportesPorOrganismoRelationManager::class;
+            $relations[] = ImportesPorOrganismoRelationManager::class;
         }
 
         return $relations;

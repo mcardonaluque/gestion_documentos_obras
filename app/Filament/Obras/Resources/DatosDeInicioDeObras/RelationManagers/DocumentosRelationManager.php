@@ -76,6 +76,9 @@ class DocumentosRelationManager extends RelationManager
                 TextInput::make('descripcion')
                     ->maxLength(255)
                     ->default(null),
+                TextInput::make('nombre_documento')
+                    ->label('Nombre del documento')
+                    ->maxLength(250),
                 Select::make('destino')
                     ->options(fn (): array => DestinoDeDocumentos::query()->orderBy('destino')->pluck('destino', 'id')->all())
                     ->searchable()

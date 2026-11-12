@@ -21,6 +21,7 @@ class FirmanteDocumento extends Model
     protected $table = 'firmantes_documentos';
 
     protected $fillable = [
+        'subsanacion_id',
         'id_usuario',
         'expediente_id',
         'documento_id',
@@ -45,13 +46,27 @@ class FirmanteDocumento extends Model
         static::creating(function (self $firmante): void {
             $firmante->id_usuario = trim((string) $firmante->id_usuario);
 
-            if (filled($firmante->expediente_id) || blank($firmante->documento_id)) {
-                return;
+            if (blank($firmante->documento_id) && filled($firmante->subsanacion_id)) {
+                $subsanacion = Subsanacion::query()
+                    ->find($firmante->subsanacion_id, ['documento_id', 'expediente_id']);
+
+                if (! $subsanacion instanceof Subsanacion) {
+                    throw new \LogicException('No se encuentra la solicitud de subsanación del firmante.');
+                }
+
+                $firmante->documento_id = $subsanacion->documento_id;
+                $firmante->expediente_id = $subsanacion->expediente_id;
             }
 
-            $firmante->expediente_id = DocumentoExpediente::query()
-                ->whereKey($firmante->documento_id)
-                ->value('expediente_id');
+            if (blank($firmante->expediente_id) && filled($firmante->documento_id)) {
+                $firmante->expediente_id = DocumentoExpediente::query()
+                    ->whereKey($firmante->documento_id)
+                    ->value('expediente_id');
+            }
+
+            if (blank($firmante->expediente_id) || blank($firmante->documento_id)) {
+                throw new \LogicException('El firmante debe estar asociado a un expediente y a un documento.');
+            }
         });
     }
 

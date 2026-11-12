@@ -2,13 +2,16 @@
 
 namespace App\Filament\Shared\Resources\Expedientes\RelationManagers;
 
+use App\Filament\Obras\Resources\Subsanaciones\SubsanacionResource;
 use App\Models\DocumentoExpediente;
 use App\Models\DocumentoGenerico;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -176,12 +179,27 @@ class DocumentosRelationManager extends RelationManager
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                ...(Filament::getCurrentPanel()?->getId() === 'obras'
+                    ? [
+                        Action::make('solicitarSubsanacion')
+                            ->label('Solicitar subsanación')
+                            ->icon('heroicon-o-document-plus')
+                            ->color('warning')
+                            ->url(fn (DocumentoExpediente $record): string => SubsanacionResource::getUrl('create', [
+                                'documento_id' => $record->getKey(),
+                                'expediente_id' => $record->expediente_id,
+                            ])),
+                    ]
+                    : [DeleteAction::make()]),
             ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->toolbarActions(
+                Filament::getCurrentPanel()?->getId() === 'obras'
+                    ? []
+                    : [
+                        BulkActionGroup::make([
+                            DeleteBulkAction::make(),
+                        ]),
+                    ],
+            );
     }
 }

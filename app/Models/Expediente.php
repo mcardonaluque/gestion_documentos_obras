@@ -72,6 +72,15 @@
         {
             return $this->hasMany(Subsanacion::class, 'expediente_id', 'expediente_id');
         }
+        /**
+         * Declaración documental Anexo III, Modelo 0 de aprobación, del expediente.
+         *
+         * @return HasOne<ModeloCeroAprobacion, $this>
+         */
+        public function modeloCeroAprobacion(): HasOne
+        {
+            return $this->hasOne(ModeloCeroAprobacion::class, 'expediente_id', 'expediente_id');
+        }
         /** Team o ayuntamiento propietario del expediente. */
         public function team(): BelongsTo
         {

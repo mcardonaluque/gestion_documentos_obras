@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Obras\Resources\Expedientes\RelationManagers;
 
-use App\Filament\Obras\Resources\Subsanaciones\Schemas\SubsanacionForm;
+use App\Filament\Obras\Resources\Subsanaciones\SubsanacionResource;
 use App\Models\Subsanacion;
-use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\Action;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,17 +28,6 @@ class SubsanacionesRelationManager extends RelationManager
 
     /** Título visible del bloque de relación en Filament. */
     protected static ?string $title = 'Subsanaciones de documentos';
-
-    /** Formulario compartido, con los documentos acotados al expediente propietario. */
-    public function form(Schema $schema): Schema
-    {
-        /** @var string $expedienteId */
-        $expedienteId = $this->getOwnerRecord()->getAttribute('expediente_id');
-
-        return $schema
-            ->columns(3)
-            ->components(SubsanacionForm::components($expedienteId));
-    }
 
     /** Tabla de seguimiento de las subsanaciones del expediente. */
     public function table(Table $table): Table
@@ -79,8 +67,13 @@ class SubsanacionesRelationManager extends RelationManager
                     }),
             ])
             ->headerActions([
-                CreateAction::make()
-                    ->label('Solicitar subsanación'),
+                Action::make('solicitarSubsanacion')
+                    ->label('Solicitar subsanación')
+                    ->icon('heroicon-o-document-plus')
+                    ->color('warning')
+                    ->url(fn (): string => SubsanacionResource::getUrl('create', [
+                        'expediente_id' => $this->getOwnerRecord()->getAttribute('expediente_id'),
+                    ])),
             ])
             ->recordActions([
                 EditAction::make(),

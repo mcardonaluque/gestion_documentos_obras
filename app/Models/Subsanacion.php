@@ -131,14 +131,13 @@ class Subsanacion extends Model
     }
 
     /**
-     * Cadena ordenada de validadores y firmantes de la solicitud.
+     * Cadena ordenada de validadores y firmantes de esta solicitud.
      *
      * @return HasMany<FirmanteDocumento, $this>
      */
     public function firmantes(): HasMany
     {
-        return $this->hasMany(FirmanteDocumento::class, 'documento_id', 'documento_id')
-            ->where('expediente_id', $this->expediente_id)
+        return $this->hasMany(FirmanteDocumento::class, 'subsanacion_id')
             ->orderBy('orden');
     }
 

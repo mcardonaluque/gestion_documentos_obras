@@ -4,6 +4,7 @@ namespace App\Filament\Shared\Resources\Expedientes;
 
 use App\Events\SystemEventOccurred;
 use App\Filament\Ayuntamientos\Resources\Expedientes\RelationManagers\SolicitudesProrrogaRelationManager;
+use App\Filament\Ayuntamientos\Resources\Expedientes\RelationManagers\SubsanacionesDocumentosRelationManager;
 use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\ImportesPorOrganismoRelationManager;
 use App\Filament\Obras\Resources\Expedientes\RelationManagers\SubsanacionesRelationManager;
@@ -460,11 +461,13 @@ abstract class ExpedienteResourceBase extends Resource
         $relations = [
             DocumentosRelationManager::class,
             SolicitudesProrrogaRelationManager::class,
-            SubsanacionesRelationManager::class,
         ];
 
         if (Filament::getCurrentPanel()?->getId() === 'ayuntamientos') {
             $relations[] = ImportesPorOrganismoRelationManager::class;
+            $relations[] = SubsanacionesDocumentosRelationManager::class;
+        } else {
+            $relations[] = SubsanacionesRelationManager::class;
         }
 
         return $relations;

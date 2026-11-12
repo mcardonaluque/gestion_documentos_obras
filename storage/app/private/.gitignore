@@ -1,2 +1,5 @@
 *
 !.gitignore
+!plantillas/
+!plantillas/aprobacion/
+!plantillas/aprobacion/modelo-0.docx

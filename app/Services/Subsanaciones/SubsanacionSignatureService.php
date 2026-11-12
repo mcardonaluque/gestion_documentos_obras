@@ -6,8 +6,10 @@ namespace App\Services\Subsanaciones;
 
 use App\Models\FirmanteDocumento;
 use App\Models\Subsanacion;
+use App\Models\User;
 use App\Services\Tramitador\TramitadorApiClient;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
@@ -18,8 +20,6 @@ final class SubsanacionSignatureService
 {
     public function requestSignature(Subsanacion $subsanacion): void
     {
-        $subsanacion->loadMissing('firmantes.user');
-
         if ($subsanacion->id_peticion_firma !== null) {
             return;
         }
@@ -34,8 +34,22 @@ final class SubsanacionSignatureService
             throw new RuntimeException('No se encuentra el documento de solicitud adjunto.');
         }
 
-        $firmantes = $subsanacion->firmantes
-            ->map(function (FirmanteDocumento $firmante): array {
+        $firmantesDocumento = $subsanacion->firmantes()->get();
+        $idUsuarios = $firmantesDocumento
+            ->pluck('id_usuario')
+            ->map(fn (string $idUsuario): string => trim($idUsuario))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+        $usuariosPorId = User::query()
+            ->with('roles')
+            ->whereIn(DB::raw('RTRIM(id_usuario)'), $idUsuarios)
+            ->get()
+            ->keyBy(fn (User $usuario): string => trim((string) $usuario->id_usuario));
+
+        $firmantes = $firmantesDocumento
+            ->map(function (FirmanteDocumento $firmante) use ($usuariosPorId): array {
                 $idUsuario = trim((string) $firmante->id_usuario);
 
                 if ($idUsuario === '') {
@@ -44,7 +58,16 @@ final class SubsanacionSignatureService
                     ));
                 }
 
-                if (! $firmante->user?->hasRole($firmante->id_rol)) {
+                $usuario = $usuariosPorId->get($idUsuario);
+
+                if (! $usuario instanceof User) {
+                    throw new RuntimeException(sprintf(
+                        'No se encuentra el usuario de Tramitador "%s" seleccionado para la cadena de firma.',
+                        $idUsuario,
+                    ));
+                }
+
+                if (! $usuario->hasRole($firmante->id_rol)) {
                     throw new RuntimeException(sprintf(
                         'El usuario seleccionado no tiene asignado el rol NIMBUS "%s".',
                         $firmante->id_rol,

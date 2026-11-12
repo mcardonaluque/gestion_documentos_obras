@@ -47,6 +47,7 @@ class User extends Authenticatable implements FilamentUser , HasTenants
         'name',
         'email',
         'password',
+        'id_usuario',
     ];
 
     /**
@@ -75,6 +76,14 @@ class User extends Authenticatable implements FilamentUser , HasTenants
     public function setNameAttribute($value)
     {
         $this->attributes['name'] = trim($value);
+    }
+
+    /** Mutator: guarda el identificador de Tramitador sin el relleno de CHAR(13). */
+    public function setIdUsuarioAttribute($value): void
+    {
+        $idUsuario = trim((string) $value);
+
+        $this->attributes['id_usuario'] = $idUsuario !== '' ? $idUsuario : null;
     }
 
 

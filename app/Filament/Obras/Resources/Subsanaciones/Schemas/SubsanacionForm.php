@@ -29,6 +29,18 @@ use Illuminate\Support\Facades\DB;
 final class SubsanacionForm
 {
     /**
+     * Roles de la aplicación admitidos por NIMEXP en una cadena de firma.
+     *
+     * @var list<string>
+     */
+    private const ROLES_FIRMANTES = [
+        'Jefe del servicio',
+        'Abogado',
+        'TAC',
+        'Diputado',
+    ];
+
+    /**
      * Componentes del formulario.
      *
      * @param  ?string  $expedienteId  Expediente fijo (relation manager); null para seleccionarlo en el formulario.
@@ -127,7 +139,7 @@ final class SubsanacionForm
                     Select::make('id_usuario')
                         ->label('Usuario')
                         ->options(fn (): array => User::query()
-                            ->role(['Jefe Del Servicio', 'Abogado', 'TAC', 'Diputado'])
+                            ->role(self::ROLES_FIRMANTES)
                             ->whereNotNull('id_usuario')
                             ->where('id_usuario', '<>', '')
                             ->orderBy('name')
@@ -137,15 +149,17 @@ final class SubsanacionForm
                             )
                             ->all())
                         ->searchable()
+                        ->live()
+                        ->afterStateUpdated(function (?string $state, callable $set): void {
+                            $roles = self::rolesFirmante($state);
+
+                            $set('id_rol', count($roles) === 1 ? array_key_first($roles) : null);
+                        })
                         ->required(),
                     Select::make('id_rol')
-                        ->label('Rol NIMBUS')
-                        ->options([
-                            'Jefe Del Servicio' => 'Jefe Del Servicio',
-                            'Abogado' => 'Abogado',
-                            'TAC' => 'TAC',
-                            'Diputado' => 'Diputado',
-                        ])
+                        ->label('Rol para la firma')
+                        ->options(fn (callable $get): array => self::rolesFirmante($get('id_usuario')))
+                        ->disabled(fn (callable $get): bool => blank($get('id_usuario')))
                         ->required(),
                     Select::make('tipo_firma')
                         ->label('Acción')
@@ -158,7 +172,7 @@ final class SubsanacionForm
                 ])
                 ->orderColumn('orden')
                 ->defaultItems(1)
-                ->addActionLabel('Añadir integrante')
+                ->addActionLabel('Añadir firmante')
                 ->reorderableWithButtons()
                 ->required()
                 ->columnSpanFull(),
@@ -184,6 +198,32 @@ final class SubsanacionForm
             ->mapWithKeys(fn (DocumentoExpediente $documento): array => [
                 (string) $documento->idDocumento => self::documentoOptionLabel($documento),
             ])
+            ->all();
+    }
+
+    /**
+     * Obtiene los roles del usuario que se pueden enviar a NIMEXP.
+     *
+     * @return array<string, string>
+     */
+    private static function rolesFirmante(?string $idUsuario): array
+    {
+        if (blank($idUsuario)) {
+            return [];
+        }
+
+        $usuario = User::query()
+            ->whereRaw('RTRIM(id_usuario) = ?', [trim($idUsuario)])
+            ->with('roles:id,name')
+            ->first();
+
+        if (! $usuario instanceof User) {
+            return [];
+        }
+
+        return $usuario->roles
+            ->filter(fn ($role): bool => in_array($role->name, self::ROLES_FIRMANTES, true))
+            ->mapWithKeys(fn ($role): array => [$role->name => $role->name])
             ->all();
     }
 

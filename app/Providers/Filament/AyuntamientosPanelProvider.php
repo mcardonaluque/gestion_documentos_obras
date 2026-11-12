@@ -6,6 +6,7 @@ use App\Filament\Livewire\PersistentDatabaseNotifications;
 use App\Filament\Widgets\NotificationsWidget;
 use App\Filament\Ayuntamientos\Resources\Documentoexpedientes\DocumentoexpedienteResource;
 use App\Filament\Ayuntamientos\Resources\Expedientes\ExpedienteResource;
+use App\Filament\Obras\Resources\ModelosCeroAprobacion\ModeloCeroAprobacionResource;
 use App\Filament\Obras\Pages\Dashboard as AyuntamientosDashboard;
 use App\Http\Middleware\CleanTenantUrl;
 use App\Models\Team;
@@ -13,6 +14,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Facades\Filament;
 use Filament\Navigation\NavigationBuilder;
 use Filament\Navigation\NavigationGroup;
 use Filament\Navigation\NavigationItem;
@@ -54,6 +56,7 @@ class AyuntamientosPanelProvider extends PanelProvider
             ->resources([
                 DocumentoexpedienteResource::class,
                 ExpedienteResource::class,
+                ModeloCeroAprobacionResource::class,
             ])
             ->navigation(false)
             ->navigation(fn (NavigationBuilder $builder) => $this->getTopNavigation($builder))
@@ -133,6 +136,18 @@ class AyuntamientosPanelProvider extends PanelProvider
                     NavigationItem::make('Justificación')
                         ->icon('heroicon-o-document-plus')
                         ->url(DocumentoexpedienteResource::getUrl('index', ['fase' => 'justificacion'])),
+                ]),
+            NavigationGroup::make('Aprobación')
+                ->items([
+                    NavigationItem::make('Modelo 0')
+                        ->icon('heroicon-o-document-text')
+                        ->url(
+                            ModeloCeroAprobacionResource::getUrl(
+                                'index',
+                                ['tenant' => Filament::getTenant()],
+                                panel: 'ayuntamientos',
+                            ),
+                        ),
                 ]),
         ]);
     }

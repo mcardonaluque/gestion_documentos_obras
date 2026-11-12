@@ -63,9 +63,16 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
+                TextInput::make('id_usuario')
+                    ->label('ID de usuario Tramitador')
+                    ->helperText('Necesario para solicitar firmas mediante NIMEXP.')
+                    ->maxLength(13)
+                    ->formatStateUsing(fn (?string $state): ?string => filled($state) ? trim($state) : null)
+                    ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? trim($state) : null),
                 TextInput::make('password')
                     ->password()
-                    ->required()
+                    ->required(fn (string $operation): bool => $operation === 'create')
+                    ->helperText('Déjelo vacío para conservar la contraseña actual.')
                     ->dehydrated(fn ($state) => filled($state))
                     ->dehydrateStateUsing(fn ($state) => Hash::make($state)),
                 Select::make('roles')

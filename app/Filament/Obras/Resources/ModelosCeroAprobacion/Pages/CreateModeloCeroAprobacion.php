@@ -46,4 +46,14 @@ class CreateModeloCeroAprobacion extends CreateRecord
 
         return $data;
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return static::getResource()::getUrl('edit', ['record' => $this->record]);
+    }
+
+    protected function getCreatedNotificationTitle(): ?string
+    {
+        return 'Modelo 0 creado. Añada ahora los documentos electrónicos.';
+    }
 }

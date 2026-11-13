@@ -6,6 +6,7 @@ namespace App\Services\Aprobacion;
 
 use App\Models\ModeloCeroAprobacion;
 use App\Models\ModeloCeroDocumentoAprobacion;
+use App\Services\Templates\WordTemplatePrintService;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpWord\TemplateProcessor;
 use RuntimeException;
@@ -19,10 +20,15 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
  */
 final class ModeloCeroAprobacionDocumentService
 {
+    public function __construct(
+        private readonly AprobacionExpedienteDocumentService $expedienteDocumentService,
+        private readonly WordTemplatePrintService $wordTemplatePrintService,
+    ) {}
+
     /**
      * Genera un DOCX descargable para el Modelo 0 de aprobación indicado.
      */
-    public function download(ModeloCeroAprobacion $modelo): BinaryFileResponse
+    public function download(ModeloCeroAprobacion $modelo, bool $asPdf = false): BinaryFileResponse
     {
         $modelo->loadMissing('documentos');
         $templatePath = Storage::disk('local')->path($this->templatePath());
@@ -38,6 +44,12 @@ final class ModeloCeroAprobacionDocumentService
             throw new RuntimeException('Debe incluir al menos un documento antes de generar el Modelo 0 de aprobación.');
         }
 
+        if (trim($modelo->secretario_nombre) === '') {
+            throw new RuntimeException(
+                'Debe informar el Secretario en TablaDeMunicipios antes de generar el Modelo 0 de aprobación.',
+            );
+        }
+
         $processor = new TemplateProcessor($templatePath);
         $this->fillHeader($processor, $modelo);
         $this->fillDocumentRows($processor, $modelo);
@@ -49,12 +61,22 @@ final class ModeloCeroAprobacionDocumentService
         }
 
         $outputPath = $temporaryPath.'.docx';
-        @unlink($temporaryPath);
-        $processor->saveAs($outputPath);
 
-        return response()
-            ->download($outputPath, sprintf('modelo-0-%s.docx', $modelo->expediente_id))
-            ->deleteFileAfterSend(true);
+        try {
+            $processor->saveAs($outputPath);
+            $generatedPath = $asPdf
+                ? $this->wordTemplatePrintService->convertDocxToPdf($outputPath)
+                : $outputPath;
+            $documentPath = $this->expedienteDocumentService->persist($modelo, $generatedPath, 0, 7);
+        } finally {
+            @unlink($temporaryPath);
+            @unlink($outputPath);
+            @unlink($temporaryPath.'.pdf');
+        }
+
+        $extension = $asPdf ? 'pdf' : 'docx';
+
+        return response()->download($documentPath, sprintf('modelo-0-%s.%s', $modelo->expediente_id, $extension));
     }
 
     private function fillHeader(TemplateProcessor $processor, ModeloCeroAprobacion $modelo): void
@@ -80,8 +102,8 @@ final class ModeloCeroAprobacionDocumentService
 
                 $processor->setValues([
                     "LINEA_ID#{$position}" => '',
-                    "REFERENCIA#{$position}" => (string) $documento->referencia,
-                    "CONTENIDO#{$position}" => $documento->contenido,
+                    "REFERENCIA#{$position}" => $documento->denominacion,
+                    "CONTENIDO#{$position}" => (string) $documento->contenido,
                     "DENOMINACION#{$position}" => $documento->denominacion,
                     "CSV#{$position}" => $documento->csv,
                 ]);

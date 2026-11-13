@@ -51,6 +51,7 @@ class DocumentoExpediente extends Model
         'team_id',
         'destino',
         'procedencia',
+        'fase',
         'destino',
         'remitidopor',
         'notificado',

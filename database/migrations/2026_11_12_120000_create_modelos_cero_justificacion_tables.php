@@ -42,7 +42,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->unsignedSmallInteger('orden');
             $table->string('referencia', 255)->nullable();
-            $table->text('contenido');
+            $table->text('contenido')->nullable();
             $table->string('denominacion', 1000);
             $table->string('csv', 255);
             $table->timestamps();

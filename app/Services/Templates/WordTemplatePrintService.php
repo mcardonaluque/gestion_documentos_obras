@@ -8,11 +8,6 @@ use App\DTOs\Templates\TemplateRenderResult;
 use App\Enums\TemplateVariableSourceType;
 use App\Models\DocumentoGenerico;
 use App\Models\DocumentoGenericoVariable;
-use App\Services\Templates\TemplateContextFactory;
-use App\Services\Templates\TemplatePathResolver;
-use App\Services\Templates\TemplateVariableValueResolver;
-use App\Services\Templates\WordTemplatePlaceholderExtractor;
-use App\Services\Templates\WordTemplateVariableSynchronizer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -38,13 +33,12 @@ final class WordTemplatePrintService
         private readonly TemplateContextFactory $contextFactory,
         private readonly TemplateVariableValueResolver $valueResolver,
         private readonly WordTemplateVariableSynchronizer $variableSynchronizer,
-    ) {
-    }
+    ) {}
 
     /**
      * Genera el documento y devuelve una respuesta de descarga en formato DOCX.
      *
-     * @param array<string, string|int|float|bool|null> $input
+     * @param  array<string, string|int|float|bool|null>  $input
      */
     public function downloadDocx(
         DocumentoGenerico $documento,
@@ -60,7 +54,7 @@ final class WordTemplatePrintService
     /**
      * Genera el documento final y lo entrega como PDF descargable.
      *
-     * @param array<string, string|int|float|bool|null> $input
+     * @param  array<string, string|int|float|bool|null>  $input
      */
     public function downloadPdf(
         DocumentoGenerico $documento,
@@ -76,7 +70,7 @@ final class WordTemplatePrintService
     /**
      * Genera un PDF desde una plantilla y valores de placeholders ya resueltos.
      *
-     * @param array<string, string> $values
+     * @param  array<string, string>  $values
      */
     public function downloadPdfFromTemplate(
         string $templatePath,
@@ -101,9 +95,17 @@ final class WordTemplatePrintService
     }
 
     /**
+     * Convierte un DOCX ya generado a PDF con el conversor corporativo.
+     */
+    public function convertDocxToPdf(string $docxPath): string
+    {
+        return $this->convertToPdf($docxPath);
+    }
+
+    /**
      * Renderiza una plantilla Word a un archivo temporal de salida.
      *
-     * @param array<string, string|int|float|bool|null> $input
+     * @param  array<string, string|int|float|bool|null>  $input
      */
     public function render(
         DocumentoGenerico $documento,
@@ -127,7 +129,7 @@ final class WordTemplatePrintService
         /** @var Collection<string, DocumentoGenericoVariable> $definitions */
         $definitions = $documento->exists
             ? $documento->variables()->where('is_active', true)->get()->keyBy('variable')
-            : new Collection();
+            : new Collection;
 
         foreach ($variables as $variableName) {
             $definition = $definitions->get($variableName);
@@ -201,7 +203,7 @@ final class WordTemplatePrintService
     /**
      * Sustituye macros estándar o los placeholders sin delimitadores de las .dot heredadas.
      *
-     * @param array<string, string> $values
+     * @param  array<string, string>  $values
      */
     private function replaceTemplateValues(
         TemplateProcessor $processor,
@@ -248,7 +250,7 @@ final class WordTemplatePrintService
 
         exec($command, $output, $exitCode);
 
-        $outputPath = $outputDirectory . DIRECTORY_SEPARATOR . pathinfo($sourcePath, PATHINFO_FILENAME) . '.' . $targetExtension;
+        $outputPath = $outputDirectory.DIRECTORY_SEPARATOR.pathinfo($sourcePath, PATHINFO_FILENAME).'.'.$targetExtension;
 
         if ($exitCode !== 0 || ! is_file($outputPath)) {
             throw new RuntimeException(sprintf('No se ha podido convertir el documento Word a %s.', strtoupper($targetExtension)));
@@ -271,7 +273,7 @@ final class WordTemplatePrintService
             $slug = 'documento';
         }
 
-        return $slug . '.' . $extension;
+        return $slug.'.'.$extension;
     }
 
     private function buildDownloadNameFromBase(string $baseName, string $extension): string
@@ -282,7 +284,7 @@ final class WordTemplatePrintService
             $slug = 'documento';
         }
 
-        return $slug . '.' . $extension;
+        return $slug.'.'.$extension;
     }
 
     private function createTemporaryFilePath(string $extension): string
@@ -293,7 +295,7 @@ final class WordTemplatePrintService
             throw new RuntimeException('No se ha podido crear un archivo temporal para la plantilla.');
         }
 
-        $targetPath = $temporaryBase . '.' . $extension;
+        $targetPath = $temporaryBase.'.'.$extension;
 
         if (! rename($temporaryBase, $targetPath)) {
             throw new RuntimeException('No se ha podido preparar el archivo temporal de salida.');

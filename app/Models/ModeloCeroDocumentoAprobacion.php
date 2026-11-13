@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $modelo_cero_aprobacion_id
  * @property int $orden
  * @property string|null $referencia
- * @property string $contenido
+ * @property string|null $contenido
  * @property string $denominacion
  * @property string $csv
  * @property-read ModeloCeroAprobacion $modeloCeroAprobacion

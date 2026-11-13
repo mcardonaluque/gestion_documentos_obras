@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Aprobacion;
 
 use App\Models\Expediente;
+use App\Models\TablaDeMunicipio;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -13,14 +14,32 @@ use Illuminate\Validation\ValidationException;
 final class ModeloCeroAprobacionContextService
 {
     /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
+     * @param  array<string, string|int|float|bool|null>  $data
+     * @return array<string, string|int|float|bool|null>
      *
      * @throws ValidationException
      */
     public function enrich(array $data): array
     {
         $expedienteId = trim((string) ($data['expediente_id'] ?? ''));
+        $context = $this->contextForExpediente($expedienteId);
+
+        return [
+            ...$data,
+            ...$context,
+            'anualidad' => $data['anualidad'] ?? $context['ao_ejecucion'],
+        ];
+    }
+
+    /**
+     * Obtiene el contexto de obra y los datos institucionales del ayuntamiento.
+     *
+     * @return array<string, string|int|null>
+     *
+     * @throws ValidationException
+     */
+    public function contextForExpediente(string $expedienteId): array
+    {
         $expediente = Expediente::query()
             ->with(['planes', 'team'])
             ->where('expediente_id', $expedienteId)
@@ -32,6 +51,16 @@ final class ModeloCeroAprobacionContextService
             ]);
         }
 
+        $codigoMunicipio = trim((string) $expediente->getAttribute('municipio'));
+        $ayuntamiento = $codigoMunicipio === ''
+            ? null
+            : TablaDeMunicipio::query()
+                ->where('codigo_municipio', $codigoMunicipio)
+                ->first();
+
+        $entidadLocal = trim((string) $ayuntamiento?->getAttribute('nombre_municipio'));
+        $secretario = trim((string) $ayuntamiento?->getAttribute('Secretario'));
+
         $codigoPlan = $this->stringAttribute($expediente, ['codigo_plan', 'Codigo_Plan']);
         $numeroObra = $this->integerAttribute($expediente, ['numero_obra', 'referencia']);
         $subreferencia = $this->integerAttribute($expediente, ['subreferencia', 'subreferecnia']);
@@ -39,18 +68,17 @@ final class ModeloCeroAprobacionContextService
         $nombreObra = $this->stringAttribute($expediente, ['nombre_obra', 'nombre_obra1']);
 
         return [
-            ...$data,
             'expediente_id' => $expedienteId,
             'codigo_plan' => $codigoPlan,
             'numero_obra' => $numeroObra,
             'subreferencia' => $subreferencia,
             'ao_ejecucion' => $aoEjecucion,
             'nombre_obra' => $nombreObra,
-            'anualidad' => $data['anualidad'] ?? $aoEjecucion,
             'programa_denominacion' => $expediente->planes?->denominacion_plan,
             'proyecto_actuacion' => $nombreObra,
             'referencia_actuacion' => $expedienteId,
-            'entidad_local' => $data['entidad_local'] ?? $expediente->team?->name,
+            'entidad_local' => $entidadLocal,
+            'secretario_nombre' => $secretario,
             'team_id' => $expediente->team_id,
         ];
     }

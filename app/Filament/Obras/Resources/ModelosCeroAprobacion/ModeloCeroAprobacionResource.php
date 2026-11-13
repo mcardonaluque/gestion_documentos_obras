@@ -7,16 +7,16 @@ namespace App\Filament\Obras\Resources\ModelosCeroAprobacion;
 use App\Filament\Obras\Resources\ModelosCeroAprobacion\Pages\CreateModeloCeroAprobacion;
 use App\Filament\Obras\Resources\ModelosCeroAprobacion\Pages\EditModeloCeroAprobacion;
 use App\Filament\Obras\Resources\ModelosCeroAprobacion\Pages\ListModelosCeroAprobacion;
+use App\Filament\Obras\Resources\ModelosCeroAprobacion\RelationManagers\DocumentosRelationManager;
 use App\Models\Expediente;
 use App\Models\ModeloCeroAprobacion;
+use App\Services\Aprobacion\ModeloCeroAprobacionContextService;
 use App\Services\Aprobacion\ModeloCeroAprobacionDocumentService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -61,19 +61,43 @@ class ModeloCeroAprobacionResource extends Resource
                     ->label('Expediente')
                     ->required()
                     ->searchable()
+                    ->options(fn (): array => static::expedienteOptions())
+                    ->optionsLimit(100)
+                    ->preload()
                     ->getSearchResultsUsing(
-                        fn (string $search): array => static::expedienteQuery()
-                            ->where('expediente_id', 'like', '%'.$search.'%')
-                            ->orderBy('expediente_id')
-                            ->limit(50)
-                            ->pluck('expediente_id', 'expediente_id')
-                            ->all(),
+                        fn (string $search): array => static::expedienteOptions($search),
                     )
                     ->getOptionLabelUsing(
-                        fn (string $value): ?string => static::expedienteQuery()
-                            ->where('expediente_id', $value)
-                            ->value('expediente_id'),
+                        fn (string $value): ?string => static::expedienteOptions($value)[$value] ?? null,
                     )
+                    ->live()
+                    ->afterStateUpdated(function (
+                        ?string $state,
+                        callable $set,
+                        ModeloCeroAprobacionContextService $contextService,
+                    ): void {
+                        if (blank($state)) {
+                            $set('entidad_local', null);
+                            $set('secretario_nombre', null);
+
+                            return;
+                        }
+
+                        $context = $contextService->contextForExpediente($state);
+
+                        $set('entidad_local', $context['entidad_local']);
+                        $set('secretario_nombre', $context['secretario_nombre']);
+                        $set('anualidad', $context['ao_ejecucion']);
+
+                        if (blank($context['secretario_nombre'])) {
+                            Notification::make()
+                                ->warning()
+                                ->title('Falta el secretario del ayuntamiento')
+                                ->body('Complete el campo Secretario en TablaDeMunicipios antes de generar el documento Word.')
+                                ->persistent()
+                                ->send();
+                        }
+                    })
                     ->disabledOn('edit'),
                 TextInput::make('anualidad')
                     ->label('Anualidad')
@@ -83,42 +107,15 @@ class ModeloCeroAprobacionResource extends Resource
                     ->maxValue(2100),
                 TextInput::make('secretario_nombre')
                     ->label('Secretario/a o secretario/a-interventor/a')
-                    ->required()
-                    ->maxLength(255)
+                    ->disabled()
+                    ->dehydrated()
+                    ->placeholder('Se completa al seleccionar el expediente')
                     ->columnSpan(2),
                 TextInput::make('entidad_local')
                     ->label('Entidad local')
-                    ->required()
-                    ->maxLength(255)
-                    ->columnSpanFull(),
-                Repeater::make('documentos')
-                    ->label('Documentos electrónicos')
-                    ->relationship()
-                    ->schema([
-                        TextInput::make('referencia')
-                            ->label('Ref.')
-                            ->maxLength(255),
-                        Textarea::make('contenido')
-                            ->label('Contenido')
-                            ->required()
-                            ->maxLength(65535)
-                            ->columnSpan(2),
-                        TextInput::make('denominacion')
-                            ->label('Documento (denominación)')
-                            ->required()
-                            ->maxLength(1000)
-                            ->columnSpan(2),
-                        TextInput::make('csv')
-                            ->label('Código seguro de verificación')
-                            ->required()
-                            ->maxLength(255),
-                    ])
-                    ->orderColumn('orden')
-                    ->defaultItems(1)
-                    ->addActionLabel('Añadir documento')
-                    ->reorderableWithButtons()
-                    ->required()
-                    ->minItems(1)
+                    ->disabled()
+                    ->dehydrated()
+                    ->placeholder('Se completa al seleccionar el expediente')
                     ->columnSpanFull(),
             ]);
     }
@@ -186,7 +183,11 @@ class ModeloCeroAprobacionResource extends Resource
             ])
             ->recordActions([
                 Action::make('generarDocx')
-                    ->label('Generar DOCX')
+                    ->label(
+                        fn (): string => Filament::getCurrentPanel()?->getId() === 'ayuntamientos'
+                            ? 'Generar PDF'
+                            : 'Generar DOCX',
+                    )
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(
                         function (
@@ -194,7 +195,10 @@ class ModeloCeroAprobacionResource extends Resource
                             ModeloCeroAprobacionDocumentService $documentService,
                         ): ?BinaryFileResponse {
                             try {
-                                return $documentService->download($record);
+                                return $documentService->download(
+                                    $record,
+                                    Filament::getCurrentPanel()?->getId() === 'ayuntamientos',
+                                );
                             } catch (RuntimeException $exception) {
                                 Notification::make()
                                     ->danger()
@@ -233,6 +237,39 @@ class ModeloCeroAprobacionResource extends Resource
     }
 
     /**
+     * @return array<string, string>
+     */
+    private static function expedienteOptions(?string $search = null): array
+    {
+        $query = static::expedienteQuery()
+            ->select(['expediente_id', 'nombre_obra'])
+            ->orderBy('expediente_id');
+
+        if ($search !== null && $search !== '') {
+            $query->where('expediente_id', 'like', '%'.$search.'%');
+        }
+
+        return $query
+            ->limit(100)
+            ->get()
+            ->mapWithKeys(
+                fn (Expediente $expediente): array => [
+                    (string) $expediente->expediente_id => static::expedienteLabel($expediente),
+                ],
+            )
+            ->all();
+    }
+
+    private static function expedienteLabel(Expediente $expediente): string
+    {
+        $nombreObra = trim((string) $expediente->nombre_obra);
+
+        return $nombreObra === ''
+            ? (string) $expediente->expediente_id
+            : sprintf('%s - %s', $expediente->expediente_id, $nombreObra);
+    }
+
+    /**
      * Restringe el listado del panel de Ayuntamientos al tenant actual.
      *
      * @return Builder<ModeloCeroAprobacion>
@@ -261,6 +298,16 @@ class ModeloCeroAprobacionResource extends Resource
             'index' => ListModelosCeroAprobacion::route('/'),
             'create' => CreateModeloCeroAprobacion::route('/create'),
             'edit' => EditModeloCeroAprobacion::route('/{record}/edit'),
+        ];
+    }
+
+    /**
+     * @return array<class-string>
+     */
+    public static function getRelations(): array
+    {
+        return [
+            DocumentosRelationManager::class,
         ];
     }
 }

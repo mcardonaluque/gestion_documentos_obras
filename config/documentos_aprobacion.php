@@ -15,4 +15,21 @@ return [
     'modelo_cero' => [
         'template_path' => 'plantillas/aprobacion/modelo-0.docx',
     ],
+    'modelo_uno' => [
+        /*
+         * Macros: ${ANUALIDAD}, ${SECRETARIO_NOMBRE}, ${ENTIDAD_LOCAL},
+         * ${ACTUACION}, ${FECHA_DOCUMENTO}, ${COMPETENCIA_PROPIA},
+         * ${COMPETENCIA_DELEGADA} y ${COMPETENCIA_DISTINTA}.
+         */
+        'template_path' => 'plantillas/aprobacion/modelo-1.docx',
+    ],
+    'modelo_tres' => [
+        /*
+         * Macros: ${ANUALIDAD}, ${SECRETARIO_NOMBRE}, ${CATEGORIA_SECRETARIO},
+         * ${ENTIDAD_LOCAL}, ${IMPORTE_APROBADO_AYUNTAMIENTO},
+         * ${PARTIDA_PRESUPUESTARIA} y ${ACTUACION}.
+         */
+        '3a_template_path' => 'plantillas/aprobacion/modelo-3a.docx',
+        '3b_template_path' => 'plantillas/aprobacion/modelo-3b.docx',
+    ],
 ];

@@ -20,6 +20,17 @@ final class ModeloTresAprobacionDocumentService
 
     public function download(ModeloTresAprobacion $modelo, bool $asPdf = false): BinaryFileResponse
     {
+        $documentPath = $this->generate($modelo, $asPdf);
+        $extension = $asPdf ? 'pdf' : 'docx';
+
+        return response()->download(
+            $documentPath,
+            sprintf('modelo-%s-%s.%s', strtolower($modelo->modalidad_presupuesto === 'anticipado' ? '3B' : '3A'), $modelo->expediente_id, $extension),
+        );
+    }
+
+    public function generate(ModeloTresAprobacion $modelo, bool $asPdf = false): string
+    {
         if (trim($modelo->secretario_nombre) === '') {
             throw new RuntimeException('Debe informar el secretario antes de generar el Modelo 3.');
         }
@@ -65,12 +76,7 @@ final class ModeloTresAprobacionDocumentService
             @unlink($temporaryPath.'.pdf');
         }
 
-        $extension = $asPdf ? 'pdf' : 'docx';
-
-        return response()->download(
-            $documentPath,
-            sprintf('modelo-%s-%s.%s', strtolower($modeloCodigo), $modelo->expediente_id, $extension),
-        );
+        return $documentPath;
     }
 
     private function templatePath(string $modeloCodigo): string

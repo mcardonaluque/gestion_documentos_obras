@@ -80,15 +80,20 @@ final class AprobacionExpedienteDocumentService
             'fase' => 'aprobacion',
         ];
 
-        if ($documento instanceof DocumentoExpediente) {
-            $documento->fill($data)->save();
+        DocumentoExpediente::withoutEvents(function () use ($data, $documento, $modelo): void {
+            if ($documento instanceof DocumentoExpediente) {
+                $documento->fill($data)->save();
 
-            return;
-        }
+                return;
+            }
 
-        DocumentoExpediente::query()->create([
-            ...$data,
-            'nsecuencia' => DocumentoExpediente::nextSequenceForExpediente($modelo->expediente_id),
-        ]);
+            $nuevoDocumento = new DocumentoExpediente;
+            $nuevoDocumento->forceFill([
+                ...$data,
+                'idDocumento' => ((int) (DocumentoExpediente::query()->max('idDocumento') ?? 0)) + 1,
+                'nsecuencia' => DocumentoExpediente::nextSequenceForExpediente($modelo->expediente_id),
+            ]);
+            $nuevoDocumento->save();
+        });
     }
 }

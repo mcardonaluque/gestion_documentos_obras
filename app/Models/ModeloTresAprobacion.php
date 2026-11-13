@@ -44,6 +44,15 @@ class ModeloTresAprobacion extends Model
         ];
     }
 
+    /**
+     * SQL Server interpreta de forma independiente de la configuración regional
+     * este formato para las columnas datetime heredadas.
+     */
+    public function getDateFormat(): string
+    {
+        return 'Ymd H:i:s.v';
+    }
+
     /** @return BelongsTo<Expediente, $this> */
     public function expediente(): BelongsTo
     {
@@ -54,5 +63,14 @@ class ModeloTresAprobacion extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    public function documentoGenerado(): ?DocumentoExpediente
+    {
+        return DocumentoExpediente::query()
+            ->where('expediente_id', $this->expediente_id)
+            ->where('cod_documento', 11)
+            ->where('nombre_documento', 'Anexo III. Modelo 3')
+            ->first();
     }
 }

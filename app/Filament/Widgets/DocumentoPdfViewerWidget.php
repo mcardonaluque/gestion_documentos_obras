@@ -16,6 +16,8 @@ class DocumentoPdfViewerWidget extends Widget
 
     public ?DocumentoExpediente $record = null;
 
+    public ?int $documentoExpedienteId = null;
+
     public bool $compact = false;
 
     public int $refreshIteration = 0;
@@ -75,6 +77,11 @@ class DocumentoPdfViewerWidget extends Widget
      */
     protected function getViewData(): array
     {
+        if ($this->documentoExpedienteId !== null) {
+            $this->record = DocumentoExpediente::query()
+                ->find($this->documentoExpedienteId);
+        }
+
         return [
             'record' => $this->record,
             'compact' => $this->compact,

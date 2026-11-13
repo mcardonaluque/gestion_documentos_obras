@@ -108,7 +108,7 @@ class ModeloTresAprobacionResource extends Resource
                 ->columnSpan(1),
             TextInput::make('partida_presupuestaria')
                 ->label('Partida presupuestaria')
-                ->disabled()
+                // ->disabled()
                 ->dehydrated()
                 ->columnSpan(1),
         ]);
@@ -130,7 +130,7 @@ class ModeloTresAprobacionResource extends Resource
             TextColumn::make('anualidad')->label('Anualidad')->numeric(),
         ])->recordActions([
             Action::make('generarDocumento')
-                ->label(fn (): string => Filament::getCurrentPanel()?->getId() === 'ayuntamientos' ? 'Generar PDF' : 'Generar DOCX')
+                ->label(fn (): string => Filament::getCurrentPanel()?->getId() === 'ayuntamientos' ? 'Regenerar y descargar PDF' : 'Regenerar y descargar DOCX')
                 ->icon('heroicon-o-arrow-down-tray')
                 ->action(function (ModeloTresAprobacion $record, ModeloTresAprobacionDocumentService $service): ?BinaryFileResponse {
                     try {

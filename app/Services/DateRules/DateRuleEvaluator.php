@@ -42,7 +42,7 @@ final class DateRuleEvaluator
     /**
      * Evalúa todas las reglas activas aplicables al modelo y a los campos modificados.
      *
-     * @param array<int, string> $changedFields
+     * @param  array<int, string>  $changedFields
      * @return Collection<int, DateRuleEvaluationResult>
      */
     public function evaluate(Model $model, array $changedFields, DateRuleOperation $operation): Collection
@@ -111,7 +111,7 @@ final class DateRuleEvaluator
     /**
      * Agrupa por campo los mensajes de error bloqueantes de los resultados disparados.
      *
-     * @param Collection<int, DateRuleEvaluationResult> $results
+     * @param  Collection<int, DateRuleEvaluationResult>  $results
      * @return array<string, array<int, string>>
      */
     public function blockingErrorsByField(Collection $results): array
@@ -155,7 +155,10 @@ final class DateRuleEvaluator
         $table = $this->normalizeIdentifier($tableName);
         $field = $this->normalizeIdentifier($fieldName);
 
-        if ($table === $this->normalizeIdentifier($model->getTable())) {
+        if (
+            $table === self::WILDCARD
+            || $table === $this->normalizeIdentifier($model->getTable())
+        ) {
             return $this->stringOrNull($model->getAttribute($fieldName));
         }
 
@@ -278,8 +281,8 @@ final class DateRuleEvaluator
     }
 
     /**
-     * @param array<int, string> $changedFields
-     * @param array<int, string> $normalizedChangedFields
+     * @param  array<int, string>  $changedFields
+     * @param  array<int, string>  $normalizedChangedFields
      * @return array<int, string>
      */
     private function resolveTargetFields(?string $ruleField, array $changedFields, array $normalizedChangedFields): array
@@ -375,15 +378,13 @@ final class DateRuleEvaluator
 
         if (str_contains($normalized, '.')) {
             $parts = explode('.', $normalized);
+
             return (string) end($parts);
         }
 
         return $normalized;
     }
 
-    /**
-     * @param mixed $value
-     */
     private function stringOrNull(mixed $value): ?string
     {
         if ($value === null) {

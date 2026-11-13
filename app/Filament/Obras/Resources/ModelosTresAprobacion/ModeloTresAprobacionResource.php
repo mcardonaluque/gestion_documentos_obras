@@ -57,12 +57,16 @@ class ModeloTresAprobacionResource extends Resource
                 ->options(fn (): array => static::expedienteOptions())
                 ->preload()
                 ->live()
-                ->afterStateUpdated(function (?string $state, callable $set, ModeloTresAprobacionContextService $context): void {
+                ->afterStateUpdated(function (
+                    ?string $state,
+                    callable $set,
+                    ModeloTresAprobacionContextService $contextService,
+                ): void {
                     if (blank($state)) {
                         return;
                     }
 
-                    $data = $context->contextForExpediente($state);
+                    $data = $contextService->contextForExpediente($state);
                     $set('entidad_local', $data['entidad_local']);
                     $set('secretario_nombre', $data['secretario_nombre']);
                     $set('importe_aprobado_ayuntamiento', $data['importe_aprobado_ayuntamiento']);

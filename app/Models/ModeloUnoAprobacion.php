@@ -30,6 +30,11 @@ class ModeloUnoAprobacion extends Model
         ];
     }
 
+    public function getDateFormat(): string
+    {
+        return 'Ymd H:i:s.v';
+    }
+
     /** @return BelongsTo<Expediente, $this> */
     public function expediente(): BelongsTo
     {
@@ -40,5 +45,14 @@ class ModeloUnoAprobacion extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    public function documentoGenerado(): ?DocumentoExpediente
+    {
+        return DocumentoExpediente::query()
+            ->where('expediente_id', $this->expediente_id)
+            ->where('cod_documento', 9)
+            ->where('nombre_documento', 'Anexo III. Modelo 1')
+            ->first();
     }
 }

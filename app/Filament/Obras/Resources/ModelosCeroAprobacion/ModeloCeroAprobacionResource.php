@@ -107,7 +107,7 @@ class ModeloCeroAprobacionResource extends Resource
                     ->maxValue(2100),
                 TextInput::make('secretario_nombre')
                     ->label('Secretario/a o secretario/a-interventor/a')
-                    ->disabled()
+                    ->required()
                     ->dehydrated()
                     ->placeholder('Se completa al seleccionar el expediente')
                     ->columnSpan(2),

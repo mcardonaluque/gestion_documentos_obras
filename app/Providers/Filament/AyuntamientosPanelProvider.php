@@ -8,6 +8,7 @@ use App\Filament\Ayuntamientos\Resources\Expedientes\ExpedienteResource;
 use App\Filament\Livewire\PersistentDatabaseNotifications;
 use App\Filament\Obras\Pages\Dashboard as AyuntamientosDashboard;
 use App\Filament\Obras\Resources\ModelosCeroAprobacion\ModeloCeroAprobacionResource;
+use App\Filament\Obras\Resources\ModelosDosAprobacion\ModeloDosAprobacionResource;
 use App\Filament\Obras\Resources\ModelosTresAprobacion\ModeloTresAprobacionResource;
 use App\Filament\Obras\Resources\ModelosUnoAprobacion\ModeloUnoAprobacionResource;
 use App\Filament\Widgets\DocumentosTable;
@@ -63,6 +64,7 @@ class AyuntamientosPanelProvider extends PanelProvider
                 ExpedienteResource::class,
                 ModeloCeroAprobacionResource::class,
                 ModeloUnoAprobacionResource::class,
+                ModeloDosAprobacionResource::class,
                 ModeloTresAprobacionResource::class,
             ])
             ->navigation(false)
@@ -159,6 +161,15 @@ class AyuntamientosPanelProvider extends PanelProvider
                         ->icon('heroicon-o-document-text')
                         ->url(
                             ModeloUnoAprobacionResource::getUrl(
+                                'index',
+                                ['tenant' => Filament::getTenant()],
+                                panel: 'ayuntamientos',
+                            ),
+                        ),
+                    NavigationItem::make('Modelo 2')
+                        ->icon('heroicon-o-document-text')
+                        ->url(
+                            ModeloDosAprobacionResource::getUrl(
                                 'index',
                                 ['tenant' => Filament::getTenant()],
                                 panel: 'ayuntamientos',

@@ -72,6 +72,11 @@ class ModeloCeroAprobacion extends Model
         ];
     }
 
+    public function getDateFormat(): string
+    {
+        return 'Ymd H:i:s.v';
+    }
+
     /**
      * @return BelongsTo<Expediente, $this>
      */
@@ -93,7 +98,6 @@ class ModeloCeroAprobacion extends Model
      */
     public function documentos(): HasMany
     {
-        return $this->hasMany(ModeloCeroDocumentoAprobacion::class)
-            ->orderBy('orden');
+        return $this->hasMany(ModeloCeroDocumentoAprobacion::class);
     }
 }

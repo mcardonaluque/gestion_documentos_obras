@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\DocumentoExpediente;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
+use Illuminate\Database\Eloquent\Model;
 
 class DocumentoPdfViewerWidget extends Widget
 {
@@ -12,9 +13,9 @@ class DocumentoPdfViewerWidget extends Widget
 
     protected static bool $isDiscovered = false;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
-    public ?DocumentoExpediente $record = null;
+    public ?Model $record = null;
 
     public ?int $documentoExpedienteId = null;
 
@@ -34,7 +35,7 @@ class DocumentoPdfViewerWidget extends Widget
 
     public function validatePdfSource(): void
     {
-        if (! $this->record?->exists) {
+        if (! $this->record instanceof DocumentoExpediente || ! $this->record->exists) {
             Notification::make()
                 ->title('Guarda el documento antes de validar el PDF')
                 ->warning()

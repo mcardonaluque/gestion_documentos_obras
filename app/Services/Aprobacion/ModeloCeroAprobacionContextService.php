@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Aprobacion;
 
 use App\Models\Expediente;
+use App\Models\Planes;
 use App\Models\TablaDeMunicipio;
 use Illuminate\Validation\ValidationException;
 
@@ -41,7 +42,6 @@ final class ModeloCeroAprobacionContextService
     public function contextForExpediente(string $expedienteId): array
     {
         $expediente = Expediente::query()
-            ->with(['planes', 'team'])
             ->where('expediente_id', $expedienteId)
             ->first();
 
@@ -66,6 +66,9 @@ final class ModeloCeroAprobacionContextService
         $subreferencia = $this->integerAttribute($expediente, ['subreferencia', 'subreferecnia']);
         $aoEjecucion = $this->integerAttribute($expediente, ['ao_ejecucion']);
         $nombreObra = $this->stringAttribute($expediente, ['nombre_obra', 'nombre_obra1']);
+        $programaDenominacion = $codigoPlan === null
+            ? null
+            : $this->programaDenominacion($codigoPlan);
 
         return [
             'expediente_id' => $expedienteId,
@@ -74,7 +77,7 @@ final class ModeloCeroAprobacionContextService
             'subreferencia' => $subreferencia,
             'ao_ejecucion' => $aoEjecucion,
             'nombre_obra' => $nombreObra,
-            'programa_denominacion' => $expediente->planes?->denominacion_plan,
+            'programa_denominacion' => $programaDenominacion,
             'proyecto_actuacion' => $nombreObra,
             'referencia_actuacion' => $expedienteId,
             'entidad_local' => $entidadLocal,
@@ -113,5 +116,16 @@ final class ModeloCeroAprobacionContextService
         }
 
         return null;
+    }
+
+    private function programaDenominacion(string $codigoPlan): ?string
+    {
+        $denominacion = Planes::query()
+            ->where('codigo_plan', $codigoPlan)
+            ->value('denominacion_plan');
+
+        return is_scalar($denominacion) && trim((string) $denominacion) !== ''
+            ? trim((string) $denominacion)
+            : null;
     }
 }

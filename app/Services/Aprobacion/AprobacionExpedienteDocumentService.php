@@ -6,6 +6,7 @@ namespace App\Services\Aprobacion;
 
 use App\Models\DocumentoExpediente;
 use App\Models\ModeloCeroAprobacion;
+use App\Models\ModeloDosAprobacion;
 use App\Models\ModeloTresAprobacion;
 use App\Models\ModeloUnoAprobacion;
 use Illuminate\Support\Facades\Storage;
@@ -15,7 +16,7 @@ use Throwable;
 final class AprobacionExpedienteDocumentService
 {
     public function persist(
-        ModeloCeroAprobacion|ModeloUnoAprobacion|ModeloTresAprobacion $modelo,
+        ModeloCeroAprobacion|ModeloDosAprobacion|ModeloUnoAprobacion|ModeloTresAprobacion $modelo,
         string $sourcePath,
         int|string $modeloNumero,
         int $documentoGenericoId,
@@ -52,7 +53,7 @@ final class AprobacionExpedienteDocumentService
     }
 
     private function upsertDocumento(
-        ModeloCeroAprobacion|ModeloUnoAprobacion|ModeloTresAprobacion $modelo,
+        ModeloCeroAprobacion|ModeloDosAprobacion|ModeloUnoAprobacion|ModeloTresAprobacion $modelo,
         string $relativePath,
         int|string $modeloNumero,
         int $documentoGenericoId,

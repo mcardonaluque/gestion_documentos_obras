@@ -55,15 +55,20 @@ class ModeloUnoAprobacionResource extends Resource
                 ->label('Expediente')
                 ->required()
                 ->searchable()
+
                 ->options(fn (): array => static::expedienteOptions())
                 ->preload()
                 ->live()
-                ->afterStateUpdated(function (?string $state, callable $set, ModeloUnoAprobacionContextService $context): void {
+                ->afterStateUpdated(function (
+                    ?string $state,
+                    callable $set,
+                    ModeloUnoAprobacionContextService $contextService,
+                ): void {
                     if ($state === null || $state === '') {
                         return;
                     }
 
-                    $data = $context->contextForExpediente($state);
+                    $data = $contextService->contextForExpediente($state);
                     $set('entidad_local', $data['entidad_local']);
                     $set('secretario_nombre', $data['secretario_nombre']);
                 })
@@ -89,8 +94,8 @@ class ModeloUnoAprobacionResource extends Resource
             TextInput::make('entidad_local')
                 ->label('Entidad local')
                 ->disabled()
-                ->dehydrated()
-               // ->columnSpanFull(),
+                ->dehydrated(),
+            // ->columnSpanFull(),
         ]);
     }
 
@@ -133,7 +138,8 @@ class ModeloUnoAprobacionResource extends Resource
     /** @return Builder<DatosDeInicioDeObras> */
     private static function expedienteQuery(): Builder
     {
-        $query = DatosDeInicioDeObras::query();
+        $query = DatosDeInicioDeObras::query()
+            ->whereNotIn('expediente_id', ModeloUnoAprobacion::query()->select('expediente_id'));
         $tenant = Filament::getTenant();
 
         if (Filament::getCurrentPanel()?->getId() === 'ayuntamientos' && $tenant instanceof Model) {
@@ -148,7 +154,8 @@ class ModeloUnoAprobacionResource extends Resource
     {
         return static::expedienteQuery()
             ->select(['expediente_id', 'nombre_obra1'])
-            ->orderBy('expediente_id')
+            ->orderByDesc('ao_ejecucion')
+            ->orderByDesc('expediente_id')
             ->limit(100)
             ->get()
             ->mapWithKeys(fn (DatosDeInicioDeObras $obra): array => [

@@ -23,6 +23,16 @@ return [
          */
         'template_path' => 'plantillas/aprobacion/modelo-1.docx',
     ],
+    'modelo_dos' => [
+        /*
+         * Macros: ${PROGRAMA}, ${ANUALIDAD}, ${SECRETARIO_NOMBRE},
+         * ${ENTIDAD_LOCAL}, ${ACTUACION}, ${NORMATIVA_CUMPLIDA},
+         * ${TERRENOS_DISPONIBLES}, ${TERRENOS_NO_DISPONIBLES},
+         * ${AUTORIZACIONES_NO_REQUIERE}, ${AUTORIZACIONES_CUENTAN}
+         * y ${AUTORIZACIONES_TRAMITE}.
+         */
+        'template_path' => 'plantillas/aprobacion/modelo-2.docx',
+    ],
     'modelo_tres' => [
         /*
          * Macros: ${ANUALIDAD}, ${SECRETARIO_NOMBRE}, ${CATEGORIA_SECRETARIO},

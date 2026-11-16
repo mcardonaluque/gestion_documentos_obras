@@ -46,6 +46,11 @@ class ModeloCeroDocumentoAprobacion extends Model
         ];
     }
 
+    public function getDateFormat(): string
+    {
+        return 'Ymd H:i:s.v';
+    }
+
     /**
      * @return BelongsTo<ModeloCeroAprobacion, $this>
      */

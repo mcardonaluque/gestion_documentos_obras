@@ -20,6 +20,14 @@ final class ModeloUnoAprobacionDocumentService
 
     public function download(ModeloUnoAprobacion $modelo, bool $asPdf = false): BinaryFileResponse
     {
+        $documentPath = $this->generate($modelo, $asPdf);
+        $extension = $asPdf ? 'pdf' : 'docx';
+
+        return response()->download($documentPath, sprintf('modelo-1-%s.%s', $modelo->expediente_id, $extension));
+    }
+
+    public function generate(ModeloUnoAprobacion $modelo, bool $asPdf = false): string
+    {
         if (trim($modelo->secretario_nombre) === '') {
             throw new RuntimeException('Debe informar el secretario antes de generar el Modelo 1 de aprobación.');
         }
@@ -36,9 +44,9 @@ final class ModeloUnoAprobacionDocumentService
             'ENTIDAD_LOCAL' => $modelo->entidad_local,
             'ACTUACION' => (string) $modelo->nombre_obra,
             'FECHA_DOCUMENTO' => $modelo->fecha_documento->format('d/m/Y'),
-            'COMPETENCIA_PROPIA' => $modelo->tipo_competencia === 'propia' ? 'X' : '',
-            'COMPETENCIA_DELEGADA' => $modelo->tipo_competencia === 'delegada' ? 'X' : '',
-            'COMPETENCIA_DISTINTA' => $modelo->tipo_competencia === 'distinta' ? 'X' : '',
+            'COMPETENCIA_PROPIA' => $modelo->tipo_competencia === 'propia' ? '☒' : '☐',
+            'COMPETENCIA_DELEGADA' => $modelo->tipo_competencia === 'delegada' ? '☒' : '☐',
+            'COMPETENCIA_DISTINTA' => $modelo->tipo_competencia === 'distinta' ? '☒' : '☐',
         ]);
 
         $temporaryPath = tempnam(sys_get_temp_dir(), 'modelo-uno-');
@@ -60,9 +68,7 @@ final class ModeloUnoAprobacionDocumentService
             @unlink($temporaryPath.'.pdf');
         }
 
-        $extension = $asPdf ? 'pdf' : 'docx';
-
-        return response()->download($documentPath, sprintf('modelo-1-%s.%s', $modelo->expediente_id, $extension));
+        return $documentPath;
     }
 
     private function templatePath(): string

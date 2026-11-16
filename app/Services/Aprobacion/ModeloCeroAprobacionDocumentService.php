@@ -6,6 +6,7 @@ namespace App\Services\Aprobacion;
 
 use App\Models\ModeloCeroAprobacion;
 use App\Models\ModeloCeroDocumentoAprobacion;
+use App\Models\Planes;
 use App\Services\Templates\WordTemplatePrintService;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpWord\TemplateProcessor;
@@ -85,7 +86,7 @@ final class ModeloCeroAprobacionDocumentService
             'ANUALIDAD' => (string) $modelo->anualidad,
             'SECRETARIO_NOMBRE' => $modelo->secretario_nombre,
             'ENTIDAD_LOCAL' => $modelo->entidad_local,
-            'PROGRAMA_DENOMINACION' => (string) $modelo->programa_denominacion,
+            'PROGRAMA_DENOMINACION' => $this->programaDenominacion($modelo),
             'PROYECTO_ACTUACION' => (string) $modelo->proyecto_actuacion,
             'REFERENCIA_ACTUACION' => (string) $modelo->referencia_actuacion,
         ]);
@@ -108,6 +109,19 @@ final class ModeloCeroAprobacionDocumentService
                     "CSV#{$position}" => $documento->csv,
                 ]);
             });
+    }
+
+    private function programaDenominacion(ModeloCeroAprobacion $modelo): string
+    {
+        $denominacion = trim((string) $modelo->programa_denominacion);
+
+        if ($denominacion !== '' || blank($modelo->codigo_plan)) {
+            return $denominacion;
+        }
+
+        return trim((string) Planes::query()
+            ->where('codigo_plan', $modelo->codigo_plan)
+            ->value('denominacion_plan'));
     }
 
     private function templatePath(): string

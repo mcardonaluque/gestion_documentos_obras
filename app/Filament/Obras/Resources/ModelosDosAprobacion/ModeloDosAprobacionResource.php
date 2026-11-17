@@ -164,7 +164,8 @@ class ModeloDosAprobacionResource extends Resource
     {
         return static::expedienteQuery()
             ->select(['expediente_id', 'nombre_obra1'])
-            ->orderBy('expediente_id')
+            ->orderByDesc('ao_ejecucion')
+            ->orderByDesc('expediente_id')
             ->limit(100)
             ->get()
             ->mapWithKeys(fn (DatosDeInicioDeObras $obra): array => [

@@ -118,6 +118,15 @@ class Subsanacion extends Model
         return $this->belongsTo(Expediente::class, 'expediente_id', 'expediente_id');
     }
 
+    /**
+     * SQL Server interpreta este formato con independencia de la configuración
+     * regional del servidor (las fechas con guiones fallan con idioma español).
+     */
+    public function getDateFormat(): string
+    {
+        return 'Ymd H:i:s.v';
+    }
+
     /** Documento del expediente objeto de la subsanación. */
     public function documento(): BelongsTo
     {

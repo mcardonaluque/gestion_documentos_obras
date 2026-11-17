@@ -425,6 +425,9 @@
                 <a href="/obras/documentoexpedientes" class="custom-submenu-item">
                     🗒️ Documentos de Expedientes
                 </a>
+                <a href="/obras/subsanaciones-generales" class="custom-submenu-item">
+                    📝 Subsanaciones
+                </a>
             </div>
         </div>
         <div class="custom-tab" data-tab="Documentos">

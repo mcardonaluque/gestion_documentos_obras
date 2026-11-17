@@ -243,8 +243,8 @@ class ModeloCeroAprobacionResource extends Resource
     {
         $query = static::expedienteQuery()
             ->select(['expediente_id', 'nombre_obra'])
-            ->orderBy('expediente_id');
-
+            ->orderByDesc('ao_ejecucion')
+            ->orderByDesc('expediente_id');
         if ($search !== null && $search !== '') {
             $query->where('expediente_id', 'like', '%'.$search.'%');
         }

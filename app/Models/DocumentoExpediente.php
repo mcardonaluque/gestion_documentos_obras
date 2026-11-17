@@ -123,6 +123,33 @@ class DocumentoExpediente extends Model
     }
 
     /**
+     * Indica si el documento tiene una solicitud de subsanación sin resolver,
+     * según las columnas espejo sincronizadas por {@see Subsanacion}.
+     */
+    public function tieneSubsanacionPendiente(): bool
+    {
+        return $this->fecha_solicitud_subsanacion !== null
+            && $this->fecha_subsanacion === null;
+    }
+
+    /**
+     * Leyenda del estado de subsanación del documento: «Subsanación
+     * solicitada», «Subsanada» o null si nunca se solicitó.
+     */
+    public function getEstadoSubsanacionAttribute(): ?string
+    {
+        if ($this->tieneSubsanacionPendiente()) {
+            return 'Subsanación solicitada';
+        }
+
+        if ($this->fecha_subsanacion !== null) {
+            return 'Subsanada';
+        }
+
+        return null;
+    }
+
+    /**
      * Devuelve la ruta o URL utilizable del PDF asociado al documento.
      */
     public function getPdfSourceAttribute(): ?string

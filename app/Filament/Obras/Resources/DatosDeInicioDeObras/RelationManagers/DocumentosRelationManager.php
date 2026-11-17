@@ -2,10 +2,9 @@
 
 namespace App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers;
 
-use App\Filament\Obras\Resources\Subsanaciones\SubsanacionResource;
+use App\Filament\Support\SolicitarSubsanacionDocumentoAction;
 use App\Models\DestinoDeDocumentos;
 use App\Models\DocumentoGenerico;
-use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -123,6 +122,11 @@ class DocumentosRelationManager extends RelationManager
                     ->searchable(),
                 TextColumn::make('nregistro')
                     ->searchable(),
+                TextColumn::make('estado_subsanacion')
+                    ->label('Subsanación')
+                    ->badge()
+                    ->color(fn (?string $state): string => $state === 'Subsanada' ? 'success' : 'warning')
+                    ->placeholder('—'),
             ])
             ->filters([
                 //
@@ -131,14 +135,8 @@ class DocumentosRelationManager extends RelationManager
                 CreateAction::make(),
             ])
             ->recordActions([
-                Action::make('solicitarSubsanacion')
-                    ->label('Solicitar subsanación')
-                    ->icon('heroicon-o-document-plus')
-                    ->color('warning')
-                    ->url(fn ($record): string => SubsanacionResource::getUrl('create', [
-                        'documento_id' => $record->getKey(),
-                        'expediente_id' => $record->expediente_id,
-                    ])),
+                // Oculta mientras exista una solicitud sin subsanar (leyenda «Subsanación solicitada»).
+                SolicitarSubsanacionDocumentoAction::make(),
             ])
             ->toolbarActions([
             ]);

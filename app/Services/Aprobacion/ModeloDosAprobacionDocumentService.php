@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpWord\TemplateProcessor;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use ZipArchive;
 
 final class ModeloDosAprobacionDocumentService
 {
@@ -46,12 +47,12 @@ final class ModeloDosAprobacionDocumentService
             'SECRETARIO_NOMBRE' => $modelo->secretario_nombre,
             'ENTIDAD_LOCAL' => $modelo->entidad_local,
             'ACTUACION' => $modelo->nombre_obra ?? '',
-            'NORMATIVA_CUMPLIDA' => $modelo->normativa_cumplida ? 'X' : '',
-            'TERRENOS_DISPONIBLES' => $modelo->terrenos_disponibles ? 'X' : '',
-            'TERRENOS_NO_DISPONIBLES' => $modelo->terrenos_disponibles ? '' : 'X',
-            'AUTORIZACIONES_NO_REQUIERE' => $modelo->autorizaciones === 'no_requiere' ? 'X' : '',
-            'AUTORIZACIONES_CUENTAN' => $modelo->autorizaciones === 'cuentan' ? 'X' : '',
-            'AUTORIZACIONES_TRAMITE' => $modelo->autorizaciones === 'tramite' ? 'X' : '',
+            'NORMATIVA_CUMPLIDA' => $modelo->normativa_cumplida ? '☒' : '☐',
+            'TERRENOS_DISPONIBLES' => $modelo->terrenos_disponibles ? '☒' : '☐',
+            'TERRENOS_NO_DISPONIBLES' => $modelo->terrenos_disponibles ? '☐' : '☒',
+            'AUTORIZACIONES_NO_REQUIERE' => $modelo->autorizaciones === 'no_requiere' ? '☒' : '☐',
+            'AUTORIZACIONES_CUENTAN' => $modelo->autorizaciones === 'cuentan' ? '☒' : '☐',
+            'AUTORIZACIONES_TRAMITE' => $modelo->autorizaciones === 'tramite' ? '☒' : '☐',
         ]);
 
         $temporaryPath = tempnam(sys_get_temp_dir(), 'modelo-dos-');
@@ -63,6 +64,7 @@ final class ModeloDosAprobacionDocumentService
 
         try {
             $processor->saveAs($outputPath);
+            $this->normalizeCheckboxes($outputPath);
             $generatedPath = $asPdf
                 ? $this->wordTemplatePrintService->convertDocxToPdf($outputPath)
                 : $outputPath;
@@ -83,5 +85,34 @@ final class ModeloDosAprobacionDocumentService
         }
 
         return $path;
+    }
+
+    private function normalizeCheckboxes(string $documentPath): void
+    {
+        $archive = new ZipArchive;
+
+        if ($archive->open($documentPath) !== true) {
+            throw new RuntimeException('No se ha podido preparar las casillas del Modelo 2.');
+        }
+
+        try {
+            $content = $archive->getFromName('word/document.xml');
+
+            if (! is_string($content)) {
+                throw new RuntimeException('No se ha encontrado el contenido Word del Modelo 2.');
+            }
+
+            $content = str_replace(
+                ['[☒]', '[☐]'],
+                ['☒', '☐'],
+                $content,
+            );
+
+            if (! $archive->addFromString('word/document.xml', $content)) {
+                throw new RuntimeException('No se han podido actualizar las casillas del Modelo 2.');
+            }
+        } finally {
+            $archive->close();
+        }
     }
 }

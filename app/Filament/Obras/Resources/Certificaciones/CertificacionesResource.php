@@ -36,7 +36,7 @@ use App\Forms\Components\ObraGeneralInfo;
  */
 class CertificacionesResource extends Resource
 {
-    protected static ?string $model = Certificaciones::class;
+    protected static ?string $model = certificaciones::class;
 
     protected static ?string $modelLabel = 'Certificación';
     protected static ?string $pluralModelLabel = 'Certificaciones';

@@ -99,6 +99,15 @@ class DatosDeInicioDeObras extends Model
     public function datosjecucion():HasOne    {
         return $this->hasOne(DatosEjecucionObras::class, 'expediente_id','expediente_id');
     }
+    /**
+     * Prórrogas de la obra (relation manager de prórrogas).
+     *
+     * @return HasMany<Prorroga, $this>
+     */
+    public function prorrogas(): HasMany
+    {
+        return $this->hasMany(Prorroga::class, 'expediente_id', 'expediente_id');
+    }
      /** Estado de tramitación actual de la obra. */
      public function estados():BelongsTo
     {

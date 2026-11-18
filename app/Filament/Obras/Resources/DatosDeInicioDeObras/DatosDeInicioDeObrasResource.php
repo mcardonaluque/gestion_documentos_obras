@@ -20,6 +20,7 @@ use App\Filament\Obras\Resources\DatosDeInicioDeObras\Pages\ViewInicioDeObra;
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\ImportesPorOrganismoRelationManager;
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\AyudaRelationManager;
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\DocumentosRelationManager;
+use App\Filament\Obras\Resources\DatosEjecucionObras\RelationManagers\ProrrogasRelationManager;
 use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
 use App\Filament\Obras\Resources\Concerns\HasWordTemplatePrinting;
 use App\Filament\Support\DateFieldRules;
@@ -621,7 +622,8 @@ class DatosDeInicioDeObrasResource extends BaseResource
             //
             ImportesPorOrganismoRelationManager::class,
             AyudaRelationManager::class,
-            DocumentosRelationManager::class
+            DocumentosRelationManager::class,
+            ProrrogasRelationManager::class,
         ];
     }
 

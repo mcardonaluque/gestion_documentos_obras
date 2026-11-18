@@ -140,4 +140,14 @@
         {
             return $this->hasMany(Prorroga::class, 'expediente_id', 'expediente_id');
         }
+
+        /**
+         * Prórrogas del expediente (alias usado por el relation manager de prórrogas).
+         *
+         * @return HasMany<Prorroga, $this>
+         */
+        public function prorrogas(): HasMany
+        {
+            return $this->hasMany(Prorroga::class, 'expediente_id', 'expediente_id');
+        }
     }

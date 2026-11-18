@@ -6,6 +6,9 @@ use App\Actions\Prorrogas\RegistrarProrrogaAction;
 use App\Enums\ProrrogaAlcance;
 use App\Enums\ProrrogaOrigen;
 use App\Enums\ProrrogaTipo;
+use App\Models\DatosEjecucionObras;
+use App\Models\DatosDeInicioDeObras;
+use App\Models\Expediente;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -16,6 +19,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -25,7 +29,8 @@ use Filament\Tables\Table;
  * Relation manager de las prórrogas ('prorrogas') del expediente de
  * ejecución: alta/edición con tipo, alcance, origen y fechas, delegando el
  * registro en {@see RegistrarProrrogaAction}. Usado por
- * DatosEjecucionObrasResource y ProrrogaResource.
+ * DatosEjecucionObrasResource, ProrrogaResource y el recurso de expedientes
+ * del panel Obras (el alta resuelve los datos de ejecución del expediente).
  */
 class ProrrogasRelationManager extends RelationManager
 {
@@ -160,7 +165,19 @@ class ProrrogasRelationManager extends RelationManager
                 CreateAction::make()
                     ->label('Añadir prórroga')
                     ->action(function (array $data): void {
-                        app(RegistrarProrrogaAction::class)->execute($this->getOwnerRecord(), $data);
+                        $ejecucion = $this->resolveDatosEjecucion();
+
+                        if (! $ejecucion instanceof DatosEjecucionObras) {
+                            Notification::make()
+                                ->danger()
+                                ->title('El expediente no tiene datos de ejecución de obra')
+                                ->body('No se puede registrar la prórroga sin la ficha de ejecución.')
+                                ->send();
+
+                            return;
+                        }
+
+                        app(RegistrarProrrogaAction::class)->execute($ejecucion, $data);
                     }),
             ])
             ->recordActions([
@@ -172,5 +189,28 @@ class ProrrogasRelationManager extends RelationManager
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    /**
+     * Resuelve los datos de ejecución de obra del registro propietario, tanto
+     * si el relation manager cuelga de DatosEjecucionObras como de Expediente.
+     */
+    private function resolveDatosEjecucion(): ?DatosEjecucionObras
+    {
+        $owner = $this->getOwnerRecord();
+
+        if ($owner instanceof DatosEjecucionObras) {
+            return $owner;
+        }
+
+        if ($owner instanceof Expediente) {
+            return $owner->obraEjecucion;
+        }
+
+        if ($owner instanceof DatosDeInicioDeObras) {
+            return $owner->datosjecucion;
+        }
+
+        return null;
     }
 }

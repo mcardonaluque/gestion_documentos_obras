@@ -7,6 +7,7 @@ use App\Models\DocumentoExpediente;
 use App\Models\DocumentoGenerico;
 use App\Models\Planes;
 use App\Models\Subsanacion;
+use App\Models\TablaDeMunicipio;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -21,6 +22,9 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -297,8 +301,84 @@ abstract class DocumentoexpedienteResourceBase extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('Codigo_Plan')
+                    ->label('Plan')
+                    ->searchable()
+                    ->preload()
+                    ->optionsLimit(500)
+                    ->options(
+                        fn (): array => Planes::query()
+                            ->orderBy('codigo_plan')
+                            ->get()
+                            ->mapWithKeys(fn ($plan): array => [
+                                $plan->codigo_plan => "{$plan->codigo_plan} - {$plan->denominacion_plan}",
+                            ])
+                            ->toArray()
+                    ),
+                SelectFilter::make('expediente_id')
+                    ->label('Expediente')
+                    ->searchable()
+                    ->preload()
+                    ->optionsLimit(500)
+                    ->options(
+                        fn (): array => DocumentoExpediente::query()
+                            ->select('expediente_id')
+                            ->whereNotNull('expediente_id')
+                            ->where('expediente_id', '<>', '')
+                            ->distinct()
+                            ->orderByDesc('expediente_id')
+                            ->limit(500)
+                            ->pluck('expediente_id', 'expediente_id')
+                            ->toArray()
+                    ),
+                Filter::make('busqueda')
+                    ->label('Búsqueda rápida')
+                    ->schema([
+                        TextInput::make('referencia')
+                            ->label('Nº obra'),
+                        TextInput::make('subreferencia')
+                            ->label('Subreferencia'),
+                        TextInput::make('expediente_id')
+                            ->label('Expediente'),
+                    ])
+                    ->columns(3)
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(filled($data['referencia'] ?? null), fn (Builder $query): Builder => $query->where('referencia', '=', $data['referencia']))
+                            ->when(filled($data['subreferencia'] ?? null), fn (Builder $query): Builder => $query->where('subreferencia', '=', $data['subreferencia']))
+                            ->when(filled($data['expediente_id'] ?? null), fn (Builder $query): Builder => $query->where('expediente_id', 'like', '%'.$data['expediente_id'].'%'));
+                    }),
+                SelectFilter::make('ao_ejecucion')
+                    ->label('Año de ejecución')
+                    ->options(
+                        fn (): array => DocumentoExpediente::query()
+                            ->select('ao_ejecucion')
+                            ->distinct()
+                            ->whereNotNull('ao_ejecucion')
+                            ->orderByDesc('ao_ejecucion')
+                            ->pluck('ao_ejecucion', 'ao_ejecucion')
+                            ->toArray()
+                    ),
+                SelectFilter::make('municipio')
+                    ->label('Municipio')
+                    ->searchable()
+                    ->preload()
+                    ->options(
+                        fn (): array => TablaDeMunicipio::query()
+                            ->orderBy('nombre_municipio')
+                            ->pluck('nombre_municipio', 'codigo_municipio')
+                            ->toArray()
+                    )
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        filled($data['value'] ?? null),
+                        fn (Builder $query): Builder => $query->whereHas(
+                            'expedientes',
+                            fn (Builder $expedientes): Builder => $expedientes->where('municipio', $data['value']),
+                        ),
+                    )),
             ])
+            ->filtersLayout(FiltersLayout::AboveContent)
+            ->filtersFormColumns(4)
             ->recordActions([
                 EditAction::make(),
                 Action::make('ver_documentos_agrupados')

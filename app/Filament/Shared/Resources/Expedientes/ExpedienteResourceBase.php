@@ -7,6 +7,7 @@ use App\Filament\Ayuntamientos\Resources\Expedientes\RelationManagers\Solicitude
 use App\Filament\Ayuntamientos\Resources\Expedientes\RelationManagers\SubsanacionesDocumentosRelationManager;
 use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
 use App\Filament\Obras\Resources\DatosDeInicioDeObras\RelationManagers\ImportesPorOrganismoRelationManager;
+use App\Filament\Obras\Resources\DatosEjecucionObras\RelationManagers\ProrrogasRelationManager;
 use App\Filament\Obras\Resources\Expedientes\RelationManagers\SubsanacionesRelationManager;
 use App\Filament\Shared\Resources\Expedientes\RelationManagers\DocumentosRelationManager;
 use App\Filament\Traits\CommonFilters;
@@ -17,6 +18,7 @@ use App\Models\DocumentoGenerico;
 use App\Models\Expediente;
 use App\Models\Planes;
 use App\Models\PlazoObraActivo;
+use App\Models\TablaDeMunicipio;
 use App\Services\Prorrogas\ProrrogaRulesService;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -34,6 +36,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -174,6 +177,16 @@ abstract class ExpedienteResourceBase extends Resource
             ->filters([
                 self::assignedExpedientesFilter(),
                 ...self::getCommonFilters(),
+                SelectFilter::make('municipio')
+                    ->label('Municipio')
+                    ->searchable()
+                    ->preload()
+                    ->options(
+                        fn (): array => TablaDeMunicipio::query()
+                            ->orderBy('nombre_municipio')
+                            ->pluck('nombre_municipio', 'codigo_municipio')
+                            ->toArray()
+                    ),
             ])
             ->filtersLayout(FiltersLayout::AboveContent)
             ->filtersFormColumns(4)
@@ -455,7 +468,7 @@ abstract class ExpedienteResourceBase extends Resource
         return $documentType->isJustification();
     }
 
-    /** Relation managers comunes; en el panel de ayuntamientos añade importes por organismo. */
+    /** Relation managers comunes; ayuntamientos añade importes y subsanaciones propias, obras añade prórrogas. */
     public static function getRelations(): array
     {
         $relations = [
@@ -467,6 +480,7 @@ abstract class ExpedienteResourceBase extends Resource
             $relations[] = ImportesPorOrganismoRelationManager::class;
             $relations[] = SubsanacionesDocumentosRelationManager::class;
         } else {
+            $relations[] = ProrrogasRelationManager::class;
             $relations[] = SubsanacionesRelationManager::class;
         }
 

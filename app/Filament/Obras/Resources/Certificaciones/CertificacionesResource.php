@@ -15,7 +15,7 @@ use App\Filament\Obras\Resources\Certificaciones\Pages\ListCertificaciones;
 use App\Filament\Obras\Resources\Certificaciones\Pages\CreateCertificaciones;
 use App\Filament\Obras\Resources\Certificaciones\Pages\EditCertificaciones;
 use App\Filament\Obras\Resources\CertificacionesResource\Pages;
-use App\Models\Certificaciones;
+use App\Models\certificaciones;
 use App\Models\DatosDeInicioDeObras;
 use Filament\Forms;
 use Filament\Schemas\Schema;

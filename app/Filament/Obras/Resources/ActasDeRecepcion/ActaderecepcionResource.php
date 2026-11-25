@@ -8,6 +8,7 @@ use App\Filament\Obras\Resources\ActasDeRecepcion\Pages\ListActaderecepcions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use App\Filament\Support\DateFieldRules;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -50,23 +51,23 @@ class ActaderecepcionResource extends Resource
                     ->maxLength(50),
                 TextInput::make('TipoActaRecepcion')
                     ->maxLength(1),
-                DateTimePicker::make('Fecha_Acta_RecProv'),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Acta_RecProv')),
                 TextInput::make('Lugar_Acta_Rec')
                     ->maxLength(25),
-                DateTimePicker::make('Fecha_Com_Inf'),
-                DateTimePicker::make('Fecha_Edicto_BOE'),
-                DateTimePicker::make('Fecha_BOE'),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Com_Inf')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Edicto_BOE')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_BOE')),
                 TextInput::make('Num_BOE')
                     ->maxLength(3),
                 TextInput::make('Plazo_Reclam')
                     ->numeric(),
-                DateTimePicker::make('Fecha_Certif_NO_Reclam'),
-                DateTimePicker::make('Fecha_Com_Inf_2'),
-                DateTimePicker::make('Fecha_Com_Gob'),
-                DateTimePicker::make('Fecha_Comun_Contrat'),
-                DateTimePicker::make('Fecha_Certif_Liquid'),
-                DateTimePicker::make('Fecha_Rem_Interv'),
-                DateTimePicker::make('Fecha_Rem_MAP'),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Certif_NO_Reclam')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Com_Inf_2')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Com_Gob')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Comun_Contrat')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Certif_Liquid')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Rem_Interv')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Rem_MAP')),
                 TextInput::make('Admin_ActaRecepcion')
                     ->maxLength(60),
                 TextInput::make('Dir_ActaRecepcion')
@@ -81,16 +82,16 @@ class ActaderecepcionResource extends Resource
                     ->maxLength(60),
                 Textarea::make('Texto')
                     ->columnSpanFull(),
-                DateTimePicker::make('Fecha_Paralizacion_Temporal'),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Paralizacion_Temporal')),
                 TextInput::make('Motivo_Paralizacion')
                     ->maxLength(200),
-                DateTimePicker::make('Fecha_Aprob_Paralizacion_Temporal'),
-                DateTimePicker::make('Fecha_Inicio_Paralizacion'),
-                DateTimePicker::make('Fecha_Final_Paralizacion'),
-                DateTimePicker::make('Fecha_Acta_Rec'),
-                DateTimePicker::make('Fecha_Aviso_Finalizacion'),
-                DateTimePicker::make('Fecha_Aviso_FinalizacionMAP'),
-                DateTimePicker::make('Fecha_Medicion'),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Aprob_Paralizacion_Temporal')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Inicio_Paralizacion')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Final_Paralizacion')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Acta_Rec')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Aviso_Finalizacion')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Aviso_FinalizacionMAP')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Medicion')),
                 TextInput::make('team_id')
                     ->numeric(),
             ]);

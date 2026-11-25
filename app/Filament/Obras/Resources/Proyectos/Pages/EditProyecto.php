@@ -4,6 +4,7 @@ namespace App\Filament\Obras\Resources\Proyectos\Pages;
 
 use Filament\Actions\DeleteAction;
 use App\Filament\Obras\Resources\Proyectos\ProyectoResource;
+use App\Filament\Support\Concerns\NotifiesAndValidatesDates;
 use Filament\Resources\Pages\EditRecord;
 
 /**
@@ -15,6 +16,8 @@ use Filament\Resources\Pages\EditRecord;
  */
 class EditProyecto extends EditRecord
 {
+    use NotifiesAndValidatesDates;
+
     protected static string $resource = ProyectoResource::class;
 
     protected function getHeaderActions(): array

@@ -6,6 +6,7 @@ use App\Filament\Obras\Resources\Proyectos\ProyectoResource;
 use App\Models\DatosDeInicioDeObras;
 use App\Models\PorcentajesProyectos;
 use App\Models\Proyecto;
+use App\Filament\Support\Concerns\NotifiesAndValidatesDates;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Validation\ValidationException;
 
@@ -19,6 +20,8 @@ use Illuminate\Validation\ValidationException;
  */
 class CreateProyecto extends CreateRecord
 {
+    use NotifiesAndValidatesDates;
+
     protected static string $resource = ProyectoResource::class;
 
     /**

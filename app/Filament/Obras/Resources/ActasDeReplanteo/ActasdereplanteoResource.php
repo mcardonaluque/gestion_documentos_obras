@@ -10,6 +10,7 @@ use App\Models\Planes;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use App\Filament\Support\DateFieldRules;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -57,12 +58,12 @@ class ActasdereplanteoResource extends Resource
                     ->label('Expediente')
                     ->required()
                     ->maxLength(50),
-                DateTimePicker::make('Fecha_Inicio_Acta_Replanteo')
-                    ->label('Fecha inicio'),
-                DateTimePicker::make('Fecha_Final_Acta_Replanteo')
-                    ->label('Fecha final'),
-                DateTimePicker::make('Fecha_Prorroga_Acta_Replanteo')
-                    ->label('Fecha prorroga'),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Inicio_Acta_Replanteo')
+                    ->label('Fecha inicio')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Final_Acta_Replanteo')
+                    ->label('Fecha final')),
+                DateFieldRules::apply(DateTimePicker::make('Fecha_Prorroga_Acta_Replanteo')
+                    ->label('Fecha prorroga')),
                 Toggle::make('Indicador_Impresion_AR')
                     ->label('Impresion AR'),
                 Toggle::make('Indicador_Recepcion_AR')

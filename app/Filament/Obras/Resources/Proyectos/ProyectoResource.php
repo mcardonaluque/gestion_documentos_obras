@@ -4,6 +4,7 @@ namespace App\Filament\Obras\Resources\Proyectos;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use App\Filament\Support\DateFieldRules;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
@@ -291,23 +292,23 @@ class ProyectoResource extends Resource
                     ->columnSpanFull()
                     ->columns(7)
                     ->schema([
-                        DateTimePicker  ::make('fecha_entrega_proyecto'),
-                        DateTimePicker::make('fecha_recepcion_proyecto'),
-                        DateTimePicker::make('fecha_remision_ayto'),
-                        DateTimePicker::make('fecha_aprobacion_ayto'),
-                        DateTimePicker::make('fecha_pet_rectificacion'),
-                        DateTimePicker::make('fecha_ent_rectificacion'),
-                        DateTimePicker::make('fecha_pet_reforma'),
-                        DateTimePicker::make('fecha_ent_reforma'),
-                        DateTimePicker::make('fecha_c_infor'),
-                        DateTimePicker::make('fecha_c_gob'),
+                        DateFieldRules::apply(DateTimePicker  ::make('fecha_entrega_proyecto')),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_recepcion_proyecto')),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_remision_ayto')),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_aprobacion_ayto')),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_pet_rectificacion')),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_ent_rectificacion')),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_pet_reforma')),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_ent_reforma')),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_c_infor')),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_c_gob')),
                         TextInput::make('Punto')
                             ->maxLength(10),
-                        DateTimePicker::make('fecha_pit_ref'),
-                        DateTimePicker::make('fecha_eit_ref'),
-                        DateTimePicker::make('fecha_ci_ref'),
-                        DateTimePicker::make('fecha_cg_ref'),
-                        DateTimePicker::make('fecha_dto'),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_pit_ref')),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_eit_ref')),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_ci_ref')),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_cg_ref')),
+                        DateFieldRules::apply(DateTimePicker::make('fecha_dto')),
                     ]),
                 TextInput::make('nro_dto')
                     ->numeric(),

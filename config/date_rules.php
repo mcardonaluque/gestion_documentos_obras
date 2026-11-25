@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Models\actaderecepcion;
+use App\Models\actadereplanteo;
 use App\Models\DatosDeInicioDeObras;
 use App\Models\DatosEjecucionObras;
 use App\Models\DocumentoExpediente;
 use App\Models\Expediente;
 use App\Models\Justificacion_Obra;
 use App\Models\ObraCedida;
+use App\Models\Proyecto;
 
 return [
     'async_notifications' => true,
@@ -20,6 +23,9 @@ return [
         DatosEjecucionObras::class,
         ObraCedida::class,
         Justificacion_Obra::class,
+        Proyecto::class,
+        actadereplanteo::class,
+        actaderecepcion::class,
     ],
 
     /*

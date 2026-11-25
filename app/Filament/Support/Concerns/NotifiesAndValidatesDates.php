@@ -6,6 +6,7 @@ namespace App\Filament\Support\Concerns;
 
 use App\Enums\DateRuleOperation;
 use App\Models\Team;
+use App\Services\DateRules\DateFieldDetector;
 use App\Services\DateRules\DateRuleEvaluator;
 use App\Services\DateRules\DateRuleExecutionLogger;
 use App\Services\DateRules\DateRuleNotifier;
@@ -122,7 +123,7 @@ trait NotifiesAndValidatesDates
     protected function persistWithDateControls(Model $model): void
     {
         $operation = DateRuleOperation::fromModelState($model->exists);
-        $dateFields = $this->resolveDateFieldsFromDirty($model);
+        $dateFields = app(DateFieldDetector::class)->dirtyDateFields($model);
 
         if ($dateFields === []) {
             $model->save();
@@ -203,21 +204,6 @@ trait NotifiesAndValidatesDates
             ->value('id');
 
         return $resolvedTeamId;
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function resolveDateFieldsFromDirty(Model $model): array
-    {
-        /** @var array<int, string> $dirtyFields */
-        $dirtyFields = array_keys($model->getDirty());
-
-        return array_values(array_filter($dirtyFields, static function (string $field): bool {
-            $normalized = strtolower($field);
-
-            return str_contains($normalized, 'fecha') || str_ends_with($normalized, '_at');
-        }));
     }
 
     private function buildDraftModelFromFormState(): ?Model

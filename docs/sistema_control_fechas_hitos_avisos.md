@@ -2,7 +2,7 @@
 
 Documento de referencia del sistema que valida fechas de la gestión de obras, mantiene una vista unificada de hitos por expediente y genera avisos/notificaciones, incluyendo los plazos de la normativa PPAC.
 
-Documentos relacionados: [catalogo_hitos_fechas_obras.md](./catalogo_hitos_fechas_obras.md) (listado completo de hitos) y [secuencia_comprobacion_reglas_fechas.md](./secuencia_comprobacion_reglas_fechas.md) (servicios, llamadas y secuencia detallada de la comprobación).
+Documentos relacionados: [catalogo_hitos_fechas_obras.md](./catalogo_hitos_fechas_obras.md) (listado completo de hitos) y [secuencia_comprobacion_reglas_fechas.md](./secuencia_comprobacion_reglas_fechas.md) (servicios, llamadas y secuencia detallada de la comprobación) y [control_fechas_guia_componentes.md](./control_fechas_guia_componentes.md) (guía de cada componente y su paso en la secuencia).
 
 ---
 
@@ -73,9 +73,9 @@ Las que comparan dos fechas exigen `tabla2/campo2`; las de plazo usan `plazo_dia
 
 | Componente | Función |
 |------------|---------|
-| `config/date_rules.php → observed_models` | Lista de modelos vigilados (`Expediente`, `DocumentoExpediente`, `DatosDeInicioDeObras`, `DatosEjecucionObras`, `ObraCedida`, `Justificacion_Obra`) |
+| `config/date_rules.php → observed_models` | Lista de modelos vigilados (`Expediente`, `DocumentoExpediente`, `DatosDeInicioDeObras`, `DatosEjecucionObras`, `ObraCedida`, `Justificacion_Obra`, `Proyecto`, `actadereplanteo`, `actaderecepcion`) |
 | `AppServiceProvider` | Registra `DateRuleObserver` en cada modelo observado |
-| `DateRuleObserver` | En `saving` (antes de guardar) evalúa y **lanza `ValidationException`** si hay reglas tipo `error`; en `saved` registra y notifica. Solo actúa si cambió algún campo cuyo nombre contiene `fecha` o termina en `_at` |
+| `DateRuleObserver` | En `saving` (antes de guardar) evalúa y **lanza `ValidationException`** si hay reglas tipo `error`; en `saved` registra y notifica. Solo actúa si cambió algún campo fecha según `DateFieldDetector` (cast de fecha o, sin cast, nombre que contiene `fecha`; nunca `created_at`/`updated_at`) |
 | `NotifiesAndValidatesDates` (trait) | Para páginas Filament: validación al salir del campo (`validateDateFieldOnBlur`), `persistWithDateControls` y `applyDateControlsForManualChanges` para guardados manuales |
 | `DateRuleEvaluator` | Núcleo: busca reglas activas para la tabla/campo/operación, resuelve ambos valores y evalúa la condición. Devuelve `DateRuleEvaluationResult` (regla, pasó, disparada, etapa, mensaje, valores) |
 | `DateRuleExecutionLogger` | Guarda cada evaluación en `date_rule_executions` (auditoría) |
@@ -203,7 +203,7 @@ Se activa por el scheduler (`routes/console.php`: `normativa-ppac:avisos` a las 
 
 ## 7. Limitaciones conocidas
 
-- La validación al guardar solo se ejecuta en los modelos de `observed_models`; `Proyectos` y `ActasRecepcionObra` no están incluidos, por lo que sus reglas de normativa solo generan avisos nocturnos (no validan al guardar) hasta que se añadan.
+- La validación al guardar solo se ejecuta en los modelos de `observed_models`. Desde el 26/11/2026 incluye `Proyectos`, `ActasDeReplanteo` y `ActasRecepcionObra`, por lo que sus reglas (también las de normativa) validan al guardar.
 - Los campos reales de las reglas `NORMATIVA_*` (p. ej. `Proyectos.fecha_aprobacion_ayto`) son una propuesta inicial y deben validarse con negocio.
 - No hay regla de justificación por falta de un campo fecha claro.
 - Los hitos materializados no disparan avisos; solo sirven de consulta.

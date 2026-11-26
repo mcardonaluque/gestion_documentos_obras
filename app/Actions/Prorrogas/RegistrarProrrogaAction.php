@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Prorrogas;
 
 use App\Enums\ProrrogaTipo;
+use App\Models\DatosDeInicioDeObras;
 use App\Models\DatosEjecucionObras;
 use App\Models\NormativaPpac;
 use App\Models\PlazoObraActivo;
@@ -35,15 +36,15 @@ final class RegistrarProrrogaAction
     /**
      * Ejecuta el alta de la prórroga dentro de una transacción.
      *
-     * @param DatosEjecucionObras $owner Expediente de ejecución desde el que se lanza la operación.
+     * @param DatosEjecucionObras|DatosDeInicioDeObras $owner Obra (ficha de ejecución o de inicio) desde la que se lanza la operación.
      * @param array<string, mixed> $data Datos del formulario Filament.
      * @return Prorroga Prórroga persistida.
      * @throws ValidationException Cuando faltan plazos activos o la petición incumple reglas.
      *
-     * @see ProrrogaRulesService::validateRequest()
+     * @see ProrrogaRulesService::validateAdmission()
      * @param array<string, mixed> $data
      */
-    public function execute(DatosEjecucionObras $owner, array $data): Prorroga
+    public function execute(DatosEjecucionObras|DatosDeInicioDeObras $owner, array $data): Prorroga
     {
         return DB::transaction(function () use ($owner, $data): Prorroga {
             $nextNumSec = (int) (Prorroga::query()
@@ -61,7 +62,12 @@ final class RegistrarProrrogaAction
             $tipo = ProrrogaTipo::from((string) ($data['tipo_prorroga'] ?? ProrrogaTipo::EJECUCION->value));
             $targetFases = $this->resolveTargetFases($tipo, (string) ($data['alcance_prorroga'] ?? ''));
 
-            $requestDate = Carbon::parse((string) ($data['FecPeticionProrrogaDeDip'] ?? now()->toDateString()));
+            // Fecha de la solicitud: petición a Diputación, o solicitud del contratista, o hoy.
+            $requestDate = Carbon::parse((string) (
+                $data['FecPeticionProrrogaDeDip']
+                ?? $data['FecSolicitudProrrogaDeCont']
+                ?? now()->toDateString()
+            ));
             $newLimit = Carbon::parse((string) ($data['fecha_limite_nueva'] ?? now()->toDateString()));
 
             $plazos = PlazoObraActivo::query()
@@ -87,11 +93,18 @@ final class RegistrarProrrogaAction
                 $data['dias_concedidos'] = max(0, $firstOldLimit->diffInDays($newLimit, false));
             }
 
+            // Plazo de ejecución vigente (con prórrogas): la de justificación no puede pedirse antes de que venza.
+            $plazoEjecucion = $tipo === ProrrogaTipo::JUSTIFICACION
+                ? PlazoObraActivo::query()
+                    ->where('expediente_id', $owner->expediente_id)
+                    ->where('fase', 'ejecucion')
+                    ->where('activo', true)
+                    ->orderByDesc('fecha_fin')
+                    ->first()
+                : null;
+
             /** @var PlazoObraActivo $plazo */
             foreach ($plazos as $plazo) {
-                $oldLimit = Carbon::parse((string) $plazo->fecha_fin);
-                $requestedDays = max(0, $oldLimit->diffInDays($newLimit, false));
-
                 $normativaCheck = $this->rulesService->validateNormativaDeadline(
                     $plazo,
                     $this->resolveNormativaDeadlineFor($owner, $plazo),
@@ -104,11 +117,12 @@ final class RegistrarProrrogaAction
                     ]);
                 }
 
-                $validation = $this->rulesService->validateRequest(
+                $validation = $this->rulesService->validateAdmission(
+                    $tipo,
                     $plazo,
+                    $plazoEjecucion,
                     $requestDate,
-                    $requestedDays,
-                    $tipo === ProrrogaTipo::EJECUCION,
+                    $newLimit,
                 );
 
                 if (! $validation->valid) {
@@ -128,6 +142,12 @@ final class RegistrarProrrogaAction
                 $plazo->dias_prorroga_acumulados += max(0, $oldLimit->diffInDays($newLimit, false));
                 $plazo->fuente_ultima_actualizacion = 'prorroga';
                 $plazo->save();
+            }
+
+            // El plazo de justificación se deriva del de ejecución (3 meses después):
+            // solo se recalcula cuando la prórroga amplía la ejecución.
+            if (! in_array('ejecucion', $targetFases, true)) {
+                return $prorroga;
             }
 
             $justificationDeadline = $this->rulesService->calculateJustificationDeadline($newLimit);
@@ -153,7 +173,7 @@ final class RegistrarProrrogaAction
      * Usa la normativa vinculada al propio plazo y, en su defecto, la que
      * aplique al plan y año de la obra (específica del plan o general).
      */
-    private function resolveNormativaDeadlineFor(DatosEjecucionObras $owner, PlazoObraActivo $plazo): ?Carbon
+    private function resolveNormativaDeadlineFor(DatosEjecucionObras|DatosDeInicioDeObras $owner, PlazoObraActivo $plazo): ?Carbon
     {
         $normativa = $plazo->normativa
             ?? NormativaPpac::resolveFor($owner->ao_ejecucion, trim((string) ($owner->Codigo_Plan ?? '')));

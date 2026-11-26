@@ -11,6 +11,7 @@ use App\Models\PlazoObraActivo;
 use App\Models\Prorroga;
 use App\Services\Prorrogas\ProrrogaRulesService;
 use App\Services\Prorrogas\SolicitudProrrogaService;
+use Carbon\Carbon;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -97,7 +98,11 @@ class SolicitudesProrrogaRelationManager extends RelationManager
      */
     public static function createForExpediente(Expediente $owner, array $data): void
     {
-        $plazo = $owner->obraEjecucion?->plazosActivos()->where('activo', true)->orderByDesc('id')->first();
+        $plazo = PlazoObraActivo::query()
+            ->where('expediente_id', $owner->expediente_id)
+            ->where('activo', true)
+            ->orderByDesc('id')
+            ->first();
 
         if (! $plazo) {
             Notification::make()->title('No hay un plazo activo para este expediente')->danger()->send();
@@ -142,6 +147,31 @@ class SolicitudesProrrogaRelationManager extends RelationManager
         if (! $phaseRule['valid']) {
             Notification::make()->title($phaseRule['message'])->danger()->send();
             return;
+        }
+
+        // Reglas comunes de admisión (antelación de 15 días, máximos por tipo y
+        // justificación solo tras vencer la ejecución), las mismas del panel Obras.
+        $tipo = ProrrogaTipo::tryFrom((string) ($data['tipo_prorroga'] ?? ''));
+        $plazoEjecucion = PlazoObraActivo::query()
+            ->where('expediente_id', $owner->expediente_id)
+            ->where('activo', true)
+            ->where('fase', 'ejecucion')
+            ->orderByDesc('fecha_fin')
+            ->first();
+
+        if ($tipo !== null) {
+            $admission = $rulesService->validateAdmission(
+                $tipo,
+                $plazo,
+                $plazoEjecucion,
+                now(),
+                Carbon::parse((string) $requestData['fecha_limite_nueva']),
+            );
+
+            if (! $admission->valid) {
+                Notification::make()->title('No se puede solicitar la prórroga')->body($admission->message)->danger()->send();
+                return;
+            }
         }
 
         $payload = [

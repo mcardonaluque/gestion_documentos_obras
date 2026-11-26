@@ -357,7 +357,7 @@
                     🏗️ Inicio de Obras
                 </a>
 
-                    <a href="/obras/prorrogas-ejecucion" class="custom-submenu-item">
+                    <a href="/obras/prorrogas-aprobacion" class="custom-submenu-item">
                         📅 Prórrogas y plazos
                     </a>
             </div>
@@ -413,6 +413,18 @@
                 </a>
                      <a href="/obras/prorrogas-ejecucion" class="custom-submenu-item">
                           📅 Prórrogas
+                </a>
+            </div>
+        </div>
+        <!-- Tab Justificación -->
+        <div class="custom-tab" data-tab="justificacion">
+            🧾 Justificación
+            <div class="custom-submenu">
+                <a href="/obras/documentoexpedientes?fase=justificacion" class="custom-submenu-item">
+                    🗒️ Documentos de Justificación
+                </a>
+                <a href="/obras/prorrogas-justificacion" class="custom-submenu-item">
+                    📅 Prórrogas de justificación
                 </a>
             </div>
         </div>

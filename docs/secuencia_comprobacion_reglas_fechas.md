@@ -1,6 +1,6 @@
 # Control de fechas: servicios, llamadas y secuencia de comprobación
 
-Complementa a [sistema_control_fechas_hitos_avisos.md](./sistema_control_fechas_hitos_avisos.md). Aquí se detalla **qué clases y métodos se ejecutan, en qué orden y quién llama a quién**, para cualquier regla de fechas, sea cual sea su tipo o su origen.
+Complementa a [sistema_control_fechas_hitos_avisos.md](./sistema_control_fechas_hitos_avisos.md). La explicación pieza a pieza (Resources, trait, DTO, servicios) está en [control_fechas_guia_componentes.md](./control_fechas_guia_componentes.md). Aquí se detalla **qué clases y métodos se ejecutan, en qué orden y quién llama a quién**, para cualquier regla de fechas, sea cual sea su tipo o su origen.
 
 ---
 
@@ -47,7 +47,7 @@ No escribe nada en base de datos: ni log ni notificaciones persistentes. Es solo
 $modelo->save()   (o create / update desde Filament)
  │
  ├─ evento saving → DateRuleObserver::saving($modelo)
- │    1. resolveDirtyFields()        campos modificados cuyo nombre contiene "fecha" o termina en "_at"
+ │    1. DateFieldDetector::dirtyDateFields()   campos modificados con cast de fecha o, sin cast, cuyo nombre contiene "fecha" (nunca created_at/updated_at)
  │         └─ ninguno → termina (no se evalúa nada)
  │    2. guarda los campos en $dirtyDateFieldsByObject[spl_object_id]
  │    3. DateRuleEvaluator::evaluate($modelo, $campos, fromModelState($modelo->exists))
@@ -216,7 +216,7 @@ No se ejecuta al guardar ni por el scheduler: hay que lanzarlo a mano o programa
 ## 11. Cómo depurar una regla que "no salta"
 
 1. ¿Está `activa` y su `operacion` es `both` o la de la acción?
-2. E2: ¿el modelo está en `observed_models`? ¿cambió un campo cuyo nombre contiene `fecha`? ¿`tabla1` coincide con el **nombre de tabla del modelo** (sin `dbo.`, sin importar mayúsculas)? ¿`campo1` coincide con el nombre del atributo?
+2. E2: ¿el modelo está en `observed_models`? ¿cambió un campo con cast de fecha o cuyo nombre contiene `fecha`? ¿`tabla1` coincide con el **nombre de tabla del modelo** (sin `dbo.`, sin importar mayúsculas)? ¿`campo1` coincide con el nombre del atributo?
 3. ¿Existen ambas fechas? Si falta alguna y la condición necesita dos, se omite en silencio.
 4. ¿`dispara_si_cumple` es el adecuado? (`0` = salta cuando **no** se cumple; `1` = salta cuando **sí** se cumple.)
 5. ¿`fase`/`estado` de la regla coinciden con los del modelo?

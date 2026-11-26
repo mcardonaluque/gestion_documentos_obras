@@ -32,6 +32,44 @@ enum ProrrogaTipo: string
     case DOCUMENTACION = 'documentacion';
 
     /**
+     * Tipos que se tramitan en la fase de aprobación de la obra (plazos de
+     * normativa, proyecto y documentación), es decir, todos salvo ejecución
+     * y justificación.
+     *
+     * @return list<self>
+     */
+    public static function aprobacion(): array
+    {
+        return [
+            self::NORMATIVA,
+            self::PROYECTO,
+            self::PROYECTODC,
+            self::DOCUMENTACION,
+        ];
+    }
+
+    /**
+     * Valores de una lista de tipos, para filtros de consulta.
+     *
+     * @param list<self> $tipos
+     * @return list<string>
+     */
+    public static function valores(array $tipos): array
+    {
+        return array_map(static fn (self $tipo): string => $tipo->value, $tipos);
+    }
+
+    /**
+     * Valores de {@see self::aprobacion()} para filtros de consulta.
+     *
+     * @return list<string>
+     */
+    public static function valoresAprobacion(): array
+    {
+        return array_map(static fn (self $tipo): string => $tipo->value, self::aprobacion());
+    }
+
+    /**
      * Opciones legibles (valor => etiqueta) para selects de Filament.
      *
      * @return array<string, string>

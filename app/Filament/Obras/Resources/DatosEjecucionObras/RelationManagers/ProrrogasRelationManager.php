@@ -24,6 +24,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Relation manager de las prórrogas ('prorrogas') del expediente de
@@ -56,12 +57,12 @@ class ProrrogasRelationManager extends RelationManager
                 Select::make('tipo_prorroga')
                     ->label('Tipo de prórroga')
                     ->required()
-                    ->options(ProrrogaTipo::options())
-                    ->default(ProrrogaTipo::EJECUCION->value),
+                    ->options($this->opcionesTipo())
+                    ->default($this->tipoPorDefecto()->value),
                 Select::make('alcance_prorroga')
                     ->label('Alcance')
                     ->options(ProrrogaAlcance::options())
-                    ->visible(fn (callable $get): bool => $get('tipo_prorroga') === ProrrogaTipo::NORMATIVA->value),
+                    ->visible(fn (callable $get): bool => in_array($get('tipo_prorroga'), $this->tiposConAlcance(), true)),
                 Select::make('origen_prorroga')
                     ->label('Origen')
                     ->required()
@@ -128,6 +129,13 @@ class ProrrogasRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query): Builder {
+                $tipos = $this->tiposPermitidos();
+
+                return $tipos === null
+                    ? $query
+                    : $query->whereIn('tipo_prorroga', array_map(static fn (ProrrogaTipo $tipo): string => $tipo->value, $tipos));
+            })
             ->recordTitleAttribute('NumSec')
             ->defaultSort('NumSec')
             ->columns([
@@ -165,9 +173,9 @@ class ProrrogasRelationManager extends RelationManager
                 CreateAction::make()
                     ->label('Añadir prórroga')
                     ->action(function (array $data): void {
-                        $ejecucion = $this->resolveDatosEjecucion();
+                        $obra = $this->resolveObraPropietaria();
 
-                        if (! $ejecucion instanceof DatosEjecucionObras) {
+                        if ($obra === null) {
                             Notification::make()
                                 ->danger()
                                 ->title('El expediente no tiene datos de ejecución de obra')
@@ -177,7 +185,7 @@ class ProrrogasRelationManager extends RelationManager
                             return;
                         }
 
-                        app(RegistrarProrrogaAction::class)->execute($ejecucion, $data);
+                        app(RegistrarProrrogaAction::class)->execute($obra, $data);
                     }),
             ])
             ->recordActions([
@@ -189,6 +197,57 @@ class ProrrogasRelationManager extends RelationManager
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    /**
+     * Tipos de prórroga que lista y permite dar de alta este relation manager.
+     * null = todos los tipos.
+     *
+     * @return list<ProrrogaTipo>|null
+     */
+    protected function tiposPermitidos(): ?array
+    {
+        return null;
+    }
+
+    /** Tipo preseleccionado en el alta. */
+    protected function tipoPorDefecto(): ProrrogaTipo
+    {
+        return ProrrogaTipo::EJECUCION;
+    }
+
+    /**
+     * Tipos para los que se pide el alcance (fases afectadas).
+     *
+     * @return list<string>
+     */
+    protected function tiposConAlcance(): array
+    {
+        return [ProrrogaTipo::NORMATIVA->value];
+    }
+
+    /**
+     * Obra sobre la que se registra la prórroga (datos de plan, obra y expediente).
+     */
+    protected function resolveObraPropietaria(): DatosEjecucionObras|DatosDeInicioDeObras|null
+    {
+        return $this->resolveDatosEjecucion();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function opcionesTipo(): array
+    {
+        $tipos = $this->tiposPermitidos();
+
+        if ($tipos === null) {
+            return ProrrogaTipo::options();
+        }
+
+        $valores = array_map(static fn (ProrrogaTipo $tipo): string => $tipo->value, $tipos);
+
+        return array_intersect_key(ProrrogaTipo::options(), array_flip($valores));
     }
 
     /**

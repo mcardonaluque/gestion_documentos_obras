@@ -3,7 +3,7 @@
 namespace App\Filament\Obras\Resources\Prorrogas;
 
 use App\Filament\Obras\Resources\Concerns\HasAssignedExpedienteVisibility;
-use App\Filament\Obras\Resources\DatosEjecucionObras\RelationManagers\ProrrogasRelationManager;
+use App\Filament\Obras\Resources\Prorrogas\RelationManagers\ProrrogasEjecucionRelationManager;
 use App\Filament\Obras\Resources\Prorrogas\Pages\EditProrroga;
 use App\Filament\Obras\Resources\Prorrogas\Pages\ListProrrogas;
 use App\Filament\Traits\CommonFilters;
@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Builder;
  * Trabaja sobre el modelo {@see \App\Models\DatosEjecucionObras} con slug
  * 'prorrogas-ejecucion' en el grupo "Ejecucion": lista los expedientes en
  * ejecución y las prórrogas se gestionan desde el relation manager
- * {@see ProrrogasRelationManager}. Usa los traits {@see CommonFilters},
+ * {@see ProrrogasEjecucionRelationManager} (solo prórrogas de tipo ejecución). Usa los traits {@see CommonFilters},
  * {@see MunicipiosFilter} y {@see HasAssignedExpedienteVisibility}.
  */
 class ProrrogaResource extends Resource
@@ -156,7 +156,7 @@ class ProrrogaResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ProrrogasRelationManager::class,
+            ProrrogasEjecucionRelationManager::class,
         ];
     }
 
